@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{18F34BFD-F53F-46B8-BE82-B8F5559F3AEA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HatlessEngine</RootNamespace>
+    <AssemblyName>HatlessEngine</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>DebugBuild\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <WarningLevel>2</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>ReleaseBuild\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <EmbeddedResource Include="Inconsolata.otf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="csfml-audio-2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="csfml-graphics-2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="csfml-window-2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="defaultwindowicon.png" />
+    <Content Include="libsndfile-1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="openal32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SFML\Audio\sfml-audio.csproj" />
+    <Content Include="SFML\Graphics\sfml-graphics.csproj" />
+    <Content Include="SFML\Window\sfml-window.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Button.cs" />
+    <Compile Include="Music.cs" />
+    <Compile Include="ErrorLevel.cs" />
+    <Compile Include="Input.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="Game.cs" />
+    <Compile Include="LogicalObject.cs" />
+    <Compile Include="Misc.cs" />
+    <Compile Include="Side.cs" />
+    <Compile Include="Sound.cs" />
+    <Compile Include="PhysicalObject.cs" />
+    <Compile Include="Resources.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Settings.cs" />
+    <Compile Include="SFML\Audio\Listener.cs" />
+    <Compile Include="SFML\Audio\Music.cs" />
+    <Compile Include="SFML\Audio\Sound.cs" />
+    <Compile Include="SFML\Audio\SoundBuffer.cs" />
+    <Compile Include="SFML\Audio\SoundBufferRecorder.cs" />
+    <Compile Include="SFML\Audio\SoundRecorder.cs" />
+    <Compile Include="SFML\Audio\SoundStream.cs" />
+    <Compile Include="SFML\Audio\Vector3.cs" />
+    <Compile Include="SFML\Graphics\BlendMode.cs" />
+    <Compile Include="SFML\Graphics\CircleShape.cs" />
+    <Compile Include="SFML\Graphics\Color.cs" />
+    <Compile Include="SFML\Graphics\Context.cs" />
+    <Compile Include="SFML\Graphics\ConvexShape.cs" />
+    <Compile Include="SFML\Graphics\Drawable.cs" />
+    <Compile Include="SFML\Graphics\Font.cs" />
+    <Compile Include="SFML\Graphics\Glyph.cs" />
+    <Compile Include="SFML\Graphics\Image.cs" />
+    <Compile Include="SFML\Graphics\PrimitiveType.cs" />
+    <Compile Include="SFML\Graphics\Rect.cs" />
+    <Compile Include="SFML\Graphics\RectangleShape.cs" />
+    <Compile Include="SFML\Graphics\RenderStates.cs" />
+    <Compile Include="SFML\Graphics\RenderTarget.cs" />
+    <Compile Include="SFML\Graphics\RenderTexture.cs" />
+    <Compile Include="SFML\Graphics\RenderWindow.cs" />
+    <Compile Include="SFML\Graphics\Shader.cs" />
+    <Compile Include="SFML\Graphics\Shape.cs" />
+    <Compile Include="SFML\Graphics\Sprite.cs" />
+    <Compile Include="SFML\Graphics\Text.cs" />
+    <Compile Include="SFML\Graphics\Texture.cs" />
+    <Compile Include="SFML\Graphics\Transform.cs" />
+    <Compile Include="SFML\Graphics\Transformable.cs" />
+    <Compile Include="SFML\Graphics\Vertex.cs" />
+    <Compile Include="SFML\Graphics\VertexArray.cs" />
+    <Compile Include="SFML\Graphics\View.cs" />
+    <Compile Include="SFML\Window\ContextSettings.cs" />
+    <Compile Include="SFML\Window\Event.cs" />
+    <Compile Include="SFML\Window\EventArgs.cs" />
+    <Compile Include="SFML\Window\Joystick.cs" />
+    <Compile Include="SFML\Window\Keyboard.cs" />
+    <Compile Include="SFML\Window\LoadingFailedException.cs" />
+    <Compile Include="SFML\Window\Mouse.cs" />
+    <Compile Include="SFML\Window\ObjectBase.cs" />
+    <Compile Include="SFML\Window\StreamAdaptor.cs" />
+    <Compile Include="SFML\Window\Vector2.cs" />
+    <Compile Include="SFML\Window\VideoMode.cs" />
+    <Compile Include="SFML\Window\Window.cs" />
+    <Compile Include="Sprite.cs" />
+    <Compile Include="View.cs" />
+    <Compile Include="Window.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
