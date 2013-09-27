@@ -1,8 +1,7 @@
-HatlessEngine
-=============
+# HatlessEngine
 
-Decription
-----------
+
+## Decription
 HatlessEngine is a simple and easy to use 2D engine for C#.
 I designed it with efficiency and easy of use in mind.
 The reasons for making this engine are that I prefer coding abstract/complicated things over visual masterpieces.
@@ -11,8 +10,9 @@ I've put it on github to have a backup and an easy way to show it to the people 
 
 For suggestions, issues and questions, please refer to the Issues tab, or contact me.
 
-Todo
-----
+## [Documentation](https://github.com/Villermen/HatlessEngine/wiki/Documentation)
+
+## Todo
 (\+) Feature addition, (-) Feature removal, (~) Feature change, (=) Other
 
 \+ Sprite Animations  
@@ -44,8 +44,7 @@ Todo
 
 You can always suggest more features in the issues section!
 
-Known bugs
-----------
+## Known bugs
 ...will be fixed eventually
 
 + If console is enabled, first created window does not get focus
