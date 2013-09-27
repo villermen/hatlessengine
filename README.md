@@ -3,9 +3,13 @@ HatlessEngine
 
 Decription
 ----------
-Coming soon to a theater near you.
+HatlessEngine is a simple and easy to use 2D engine for C#.
+I designed it with efficiency and easy of use in mind.
+The reasons for making this engine are that I prefer coding abstract/complicated things over visual masterpieces.
+There's still a lot to be done, and there will be done.
+I've put it on github to have a backup and an easy way to show it to the people that care =)
 
-add link to documentation?
+For suggestions, issues and questions, please refer to the Issues tab, or contact me.
 
 Todo
 ----
@@ -16,6 +20,7 @@ Todo
 \+ stepProgress to CheckCollision return Tuple  
 \+ Implement collisionchecks against other types  
 \+ Implement collisionchecks between 2 types  
+\+ Add accurate way of checking for collision side
 \+ More draw features (shapes, colors)  
 \+ Levels (ObjectMaps)  
 = Test multiple windows  
