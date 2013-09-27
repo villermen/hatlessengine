@@ -18,7 +18,7 @@ namespace HatlessEngine
         public static Dictionary<string, Music> Musics = new Dictionary<string, Music>();
         public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
 
-        public static Sprite AddSprite(string id, string filename, float width = 0, float height = 0)
+        public static Sprite AddSprite(string id, string filename, uint width = 0)
         {
             if (!File.Exists(RootDirectory + filename))
                 Log.WriteLine("Resources.AddSprite: file '" + RootDirectory + filename + "' does not exist.", ErrorLevel.FATAL);
@@ -26,10 +26,10 @@ namespace HatlessEngine
                 Log.WriteLine("Resources.AddSprite: id '" + id + "' already exists.", ErrorLevel.FATAL);
 
             Sprite sprite;
-            if (height == 0)
+            if (width == 0)
                 sprite = new Sprite(RootDirectory + filename);
             else
-                sprite = new Sprite(RootDirectory + filename, width, height);
+                sprite = new Sprite(RootDirectory + filename, width);
 
             Sprites.Add(id, sprite);
 

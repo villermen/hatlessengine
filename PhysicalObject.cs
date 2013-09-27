@@ -16,7 +16,8 @@ namespace HatlessEngine
         public float BoundBoxWidth = 0;
         public float BoundBoxHeight = 0;
 
-        public Sprite sprite = null;
+        public Sprite BuiltinSprite = null;
+        public AnimatedSprite BuiltinAnimatedSprite = null;
 
         private float direction = 0;
         private float speed = 0;
@@ -76,16 +77,24 @@ namespace HatlessEngine
             BoundBoxY = Y + BoundBoxYOffset;
         }
 
-        internal void UpdatePosition()
+        internal void Afterstep()
         {
+            //move
             X += hSpeed;
             Y += vSpeed;
+
+            //update built-in animated sprite
+            if (BuiltinAnimatedSprite != null)
+                BuiltinAnimatedSprite.Update();
         }
 
-        internal void DrawSprite(float stepProgress)
+        internal void AfterDraw(float stepProgress)
         {
-            if (sprite != null)
-                sprite.Draw(X + hSpeed * stepProgress, Y + vSpeed * stepProgress);
+            //draw built-in sprite and animated sprite
+            if (BuiltinSprite != null)
+                BuiltinSprite.Draw(X + hSpeed * stepProgress, Y + vSpeed * stepProgress);
+            if (BuiltinAnimatedSprite != null)
+                BuiltinAnimatedSprite.Draw(X + hSpeed * stepProgress, Y + vSpeed * stepProgress);
         }
 
         public Tuple<bool, PhysicalObject, float> CheckCollision<T>(Side side = Side.ALL) where T : PhysicalObject

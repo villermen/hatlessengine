@@ -10,7 +10,7 @@ namespace HatlessEngine
     /// </summary>
     public static class Game
     {
-        private static uint Speed = 100;
+        public static uint Speed { get; private set; }
         private static long Stepnumber = 0;
         private static Stopwatch stopwatch = new Stopwatch();
 
@@ -108,7 +108,7 @@ namespace HatlessEngine
                     {
                         foreach (PhysicalObject physicalObject in pair.Value)
                         {
-                            physicalObject.UpdatePosition();
+                            physicalObject.Afterstep();
                         }
                     }
                     
@@ -142,7 +142,7 @@ namespace HatlessEngine
                     {
                         foreach (PhysicalObject physicalObject in pair.Value)
                         {
-                            physicalObject.DrawSprite(stepProgress);
+                            physicalObject.AfterDraw(stepProgress);
                         }
                     }
 

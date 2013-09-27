@@ -111,6 +111,7 @@
     <Content Include="SFML\Window\sfml-window.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnimatedSprite.cs" />
     <Compile Include="Button.cs" />
     <Compile Include="Music.cs" />
     <Compile Include="ErrorLevel.cs" />

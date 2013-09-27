@@ -10,15 +10,13 @@ namespace HatlessEngine
         public bool IsLoaded { get; private set; }
         internal SFML.Graphics.Sprite SFMLSprite;
 
-        private Dictionary<string, uint[]> Animations = new Dictionary<string, uint[]>();
-        private string CurrentAnimation = "";
-        private uint AnimationIndex = 0;
+        internal Dictionary<string, uint[]> Animations = new Dictionary<string, uint[]>();
 
-        private bool AutoSize = false;
+        private bool AutoWidth = false;
 
-        private float width = 0;
-        private float height = 0;
-        public float Width 
+        private uint width = 0;
+        private uint height = 0;
+        public uint Width 
         {
             get
             {
@@ -30,7 +28,7 @@ namespace HatlessEngine
                 width = value;
             }
         }
-        public float Height
+        public uint Height
         {
             get
             {
@@ -43,23 +41,33 @@ namespace HatlessEngine
             }
         }
         
-        public Sprite(string filename) : this(filename, 0, 0)
+        public Sprite(string filename) : this(filename, 0)
         {
-            AutoSize = true;
+            AutoWidth = true;
         }
-        public Sprite(string filename, float width, float height)
+        public Sprite(string filename, uint width)
         {
             Width = width;
-            Height = height;
             Filename = filename;
             IsLoaded = false;
         }
 
-        public void Draw(float x, float y)
+        public void Draw(float x, float y, uint animationIndex = 0)
         {
             Load();
             SFMLSprite.Position = new SFML.Window.Vector2f(x, y);
+            SFMLSprite.TextureRect = new SFML.Graphics.IntRect((int)(animationIndex * width), 0, (int)width, (int)height);
             Game.RenderPlane.Draw(SFMLSprite);
+        }
+        /// <summary>
+        /// Draw using the settings defined in the Animation object.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="animation"></param>
+        public void Draw(float x, float y, AnimatedSprite animationSpecs) 
+        { 
+            Draw(x, y, animationSpecs.CurrentIndex); 
         }
 
         public void Load()
@@ -67,11 +75,10 @@ namespace HatlessEngine
             if (!IsLoaded)
             {
                 SFMLSprite = new SFML.Graphics.Sprite(new SFML.Graphics.Texture(Filename));
-                if (AutoSize)
-                {
-                    width = SFMLSprite.GetLocalBounds().Width;
-                    height = SFMLSprite.GetLocalBounds().Height;
-                }
+                height = (uint)SFMLSprite.GetLocalBounds().Height;
+
+                if (AutoWidth)                   
+                    width = (uint)SFMLSprite.GetLocalBounds().Width;
                     
                 IsLoaded = true;
             }
@@ -85,12 +92,19 @@ namespace HatlessEngine
 
         public void AddAnimation(string id, uint[] animation)
         {
+            //add error catching
+            Animations.Add(id, animation);
         }
         public void AddAnimation(string id, uint startIndex, uint frames)
         {
-        }
-        public void StartAnimation(string id, bool loop)
-        {
+            uint[] animationArray = new uint[frames];
+
+            for (uint i = 0; i < frames; i++)
+            {
+                animationArray[i] = startIndex + i;
+            }
+
+            Animations.Add(id, animationArray);
         }
     }
 }

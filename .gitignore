@@ -215,4 +215,5 @@ pip-log.txt
 .mr.developer.cfg
 
 #Custom
-DebugBuild/
+DebugBuild/*
+!DebugBuild/*.dll
