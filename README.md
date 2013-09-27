@@ -43,14 +43,3 @@ For suggestions, issues and questions, please refer to the Issues tab, or contac
 \+ Full Sprite control
 
 You can always suggest more features in the issues section!
-
-## Known bugs
-...will be fixed eventually
-
-+ If console is enabled, first created window does not get focus
-+ If console is enabled, ExitOnLastWindowClose is ignored for some reason
-+ Console window doesn't get updated if unminimized
-+ Console text gets smoothed
-+ Windows / Console does not get focus if clicked on-screen
-
-Same thing here, issues section.
