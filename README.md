@@ -20,7 +20,7 @@ For suggestions, issues and questions, please refer to the Issues tab, or contac
 \+ stepProgress to CheckCollision return Tuple  
 \+ Implement collisionchecks against other types  
 \+ Implement collisionchecks between 2 types  
-\+ Add accurate way of checking for collision side
+\+ Add accurate way of checking for collision side  
 \+ More draw features (shapes, colors)  
 \+ Levels (ObjectMaps)  
 = Test multiple windows  
@@ -40,6 +40,7 @@ For suggestions, issues and questions, please refer to the Issues tab, or contac
 \+ Add global volume setting  
 ~ Exceptions instead of fatal log messages  
 \+ Full Window control  
-\+ Full Sprite control
+\+ Full Sprite control  
+\+ Embed dependencies in project
 
 You can always suggest more features in the issues section!
