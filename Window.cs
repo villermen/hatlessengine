@@ -40,6 +40,7 @@ namespace HatlessEngine
 
         private void SFMLWindowClosed(object sender, EventArgs e)
         {
+            SFMLWindow.Close();
             Game.RemoveWindows.Add(Id);
         }
     }

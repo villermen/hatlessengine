@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Threading;
 
 namespace HatlessEngine
@@ -51,6 +52,7 @@ namespace HatlessEngine
 
         /// <summary>
         /// Run and create default logical object...
+        /// If console is not enabled
         /// </summary>
         /// <param name="speed">Logical steps per second.</param>
         /// <param name="defaultWindowSetup">Creates a "default" view and window of 800x600</param>
@@ -62,7 +64,6 @@ namespace HatlessEngine
             {
                 Resources.AddWindow("default", 800, 600, "HatlessEngine");
                 Resources.AddView("default", 0, 0, 800, 600, "default", 0, 0, 1, 1);
-                Settings.ExitOnLastWindowClose = true;
             }
 
             IsRunning = true;

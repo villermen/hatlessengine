@@ -15,8 +15,8 @@ namespace HatlessEngine
         /// If this is set to true before a window is created it will immediately exit!
         /// It will be set to true if the game is started with the default window (lazy bum option)
         /// </summary>
-        public static bool ExitOnLastWindowClose = false;
+        public static bool ExitOnLastWindowClose = true;
 
-        public static bool ExitOnConsoleClose = false;
+        public static bool ExitOnConsoleClose = true;
     }
 }
