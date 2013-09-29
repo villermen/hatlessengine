@@ -6,6 +6,8 @@ namespace HatlessEngine
     {
         public float X;
         public float Y;
+        public float Width = 0;
+        public float Height = 0;
 
         private float BoundBoxX;
         private float BoundBoxY;
@@ -17,6 +19,7 @@ namespace HatlessEngine
         public float BoundBoxHeight = 0;
 
         public Sprite BuiltinSprite = null;
+        public uint BuiltinSpriteIndex = 0;
         public AnimatedSprite BuiltinAnimatedSprite = null;
 
         private float direction = 0;
@@ -69,7 +72,7 @@ namespace HatlessEngine
             }
         }
 
-        internal void UpdateBoundBox()
+        internal override void BeforeStep()
         {
             BoundBoxHSpeed = hSpeed;
             BoundBoxVSpeed = vSpeed;
@@ -77,7 +80,7 @@ namespace HatlessEngine
             BoundBoxY = Y + BoundBoxYOffset;
         }
 
-        internal void Afterstep()
+        internal override void AfterStep()
         {
             //move
             X += hSpeed;
@@ -88,11 +91,11 @@ namespace HatlessEngine
                 BuiltinAnimatedSprite.Update();
         }
 
-        internal void AfterDraw(float stepProgress)
+        internal override void AfterDraw(float stepProgress)
         {
             //draw built-in sprite and animated sprite
             if (BuiltinSprite != null)
-                BuiltinSprite.Draw(X + hSpeed * stepProgress, Y + vSpeed * stepProgress);
+                BuiltinSprite.Draw(X + hSpeed * stepProgress, Y + vSpeed * stepProgress, BuiltinSpriteIndex);
             if (BuiltinAnimatedSprite != null)
                 BuiltinAnimatedSprite.Draw(X + hSpeed * stepProgress, Y + vSpeed * stepProgress);
         }

@@ -52,22 +52,12 @@ namespace HatlessEngine
             IsLoaded = false;
         }
 
-        public void Draw(float x, float y, uint animationIndex = 0)
+        public void Draw(float x, float y, uint frameIndex = 0)
         {
             Load();
             SFMLSprite.Position = new SFML.Window.Vector2f(x, y);
-            SFMLSprite.TextureRect = new SFML.Graphics.IntRect((int)(animationIndex * width), 0, (int)width, (int)height);
+            SFMLSprite.TextureRect = new SFML.Graphics.IntRect((int)(frameIndex * width), 0, (int)width, (int)height);
             Game.RenderPlane.Draw(SFMLSprite);
-        }
-        /// <summary>
-        /// Draw using the settings defined in the Animation object.
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="animation"></param>
-        public void Draw(float x, float y, AnimatedSprite animationSpecs) 
-        { 
-            Draw(x, y, animationSpecs.CurrentIndex); 
         }
 
         public void Load()

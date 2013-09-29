@@ -96,21 +96,11 @@ namespace HatlessEngine
                         Exit();
 
                     //objects
-                    foreach (KeyValuePair<Type, List<PhysicalObject>> pair in PhysicalObjectsByType)
-                    {
-                        foreach (PhysicalObject physicalObject in pair.Value)
-                        {
-                            physicalObject.UpdateBoundBox();
-                        }
-                    }
                     foreach (LogicalObject obj in Objects)
-                        obj.Step();
-                    foreach (KeyValuePair<Type, List<PhysicalObject>> pair in PhysicalObjectsByType)
                     {
-                        foreach (PhysicalObject physicalObject in pair.Value)
-                        {
-                            physicalObject.Afterstep();
-                        }
+                        obj.BeforeStep();
+                        obj.Step();
+                        obj.AfterStep();
                     }
                     
                     //LPS calculation
@@ -138,13 +128,10 @@ namespace HatlessEngine
 
                     //draw every objects' draw method
                     foreach (LogicalObject obj in Objects)
-                        obj.Draw(stepProgress);
-                    foreach (KeyValuePair<Type, List<PhysicalObject>> pair in PhysicalObjectsByType)
                     {
-                        foreach (PhysicalObject physicalObject in pair.Value)
-                        {
-                            physicalObject.AfterDraw(stepProgress);
-                        }
+                        obj.BeforeDraw(stepProgress);
+                        obj.Draw(stepProgress);
+                        obj.AfterDraw(stepProgress);
                     }
 
                     //to prevent weird rendertexture bug
@@ -194,9 +181,9 @@ namespace HatlessEngine
             Type type = typeof(T);
 
             LogicalObject obj = (LogicalObject)Activator.CreateInstance(type);
-            
             Objects.Add(obj);
-            obj.OnCreate();
+
+            obj.AfterCreation();
 
             return obj;
         }
@@ -208,12 +195,11 @@ namespace HatlessEngine
             Type type = typeof(T);
 
             PhysicalObject obj = (PhysicalObject)Activator.CreateInstance(type);
-            
             Objects.Add(obj);
 
             obj.X = x;
             obj.Y = y;
-            obj.OnCreate();
+            obj.AfterCreation();
 
             if (!PhysicalObjectsByType.ContainsKey(type))
                 PhysicalObjectsByType[type] = new List<PhysicalObject>();

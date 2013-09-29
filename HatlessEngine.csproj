@@ -113,6 +113,7 @@
   <ItemGroup>
     <Compile Include="AnimatedSprite.cs" />
     <Compile Include="Button.cs" />
+    <Compile Include="ButtonObject.cs" />
     <Compile Include="Music.cs" />
     <Compile Include="ErrorLevel.cs" />
     <Compile Include="Input.cs" />
