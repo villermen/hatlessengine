@@ -33,6 +33,7 @@ namespace HatlessEngine
             SFMLWindow.Closed += new EventHandler(SFMLWindowClosed);
             SFMLWindow.Resized += new EventHandler<SFML.Window.SizeEventArgs>(SFMLWindowResized);
             SFMLWindow.MouseMoved += new EventHandler<SFML.Window.MouseMoveEventArgs>(SFMLWindowMouseMoved);
+            SFMLWindow.MouseButtonPressed += new EventHandler<SFML.Window.MouseButtonEventArgs>(SFMLWindowGainedFocus);
             SFMLWindowGainedFocus(this, EventArgs.Empty);
 
             SFMLWindow.SetIcon(32, 32, DefaultIconPixels);
@@ -59,8 +60,7 @@ namespace HatlessEngine
 
         private void SFMLWindowClosed(object sender, EventArgs e)
         {
-            if (Game.FocusedWindow == this)
-                Game.FocusedWindow = null;
+            SFMLWindowLostFocus(this, EventArgs.Empty);
 
             SFMLWindow.Close();
             Game.RemoveWindows.Add(this);

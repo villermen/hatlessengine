@@ -107,6 +107,8 @@ namespace HatlessEngine
             MouseYGlobal = mouseVector.Y;
 
             //check where mouse is on RenderPlane
+            MouseX = 0;
+            MouseY = 0;
             Window focusedWindow = Game.FocusedWindow;
             if (focusedWindow != null)
             {
@@ -122,11 +124,6 @@ namespace HatlessEngine
                         MouseY = view.Y + (focusedWindow.MouseYOnWindow - view.WindowY) / view.WindowHeight * view.Height;
                     }
                 }
-            }
-            else
-            {
-                MouseX = 0;
-                MouseY = 0;
             }
 
             if (Mouse.IsButtonPressed(Mouse.Button.Left))
