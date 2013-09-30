@@ -31,9 +31,9 @@ namespace HatlessEngine
         private static SFML.Graphics.Sprite RenderSprite;
         private static SFML.Graphics.RectangleShape dirtyRenderFix = new SFML.Graphics.RectangleShape();
 
-        internal static List<string> RemoveWindows = new List<string>();
+        internal static List<Window> RemoveWindows = new List<Window>();
 
-        public static string FocusedWindow { get; internal set; }
+        public static Window FocusedWindow { get; internal set; }
 
         //debug
         private static string SPSDelayed = "";
@@ -43,7 +43,7 @@ namespace HatlessEngine
         {
             IsRunning = false;
             RenderPlane.Smooth = true;
-            FocusedWindow = "";
+            FocusedWindow = null;
             Objects = new List<LogicalObject>();
             PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
 
@@ -62,8 +62,8 @@ namespace HatlessEngine
 
             if (defaultWindowSetup)
             {
-                Resources.AddWindow("default", 800, 600, "HatlessEngine");
-                Resources.AddView("default", 0, 0, 800, 600, "default", 0, 0, 1, 1);
+                Window window = Resources.AddWindow("default", 800, 600, "HatlessEngine");
+                Resources.AddView("default", 0, 0, 800, 600, window, 0, 0, 1, 1);
             }
 
             IsRunning = true;
@@ -81,15 +81,16 @@ namespace HatlessEngine
                 //step
                 if (stopwatch.ElapsedTicks >= (Stepnumber + 1) * Stopwatch.Frequency / (float)Speed)
                 {
+                    //window handling, before Input.UpdateState to have the correct mouse coordinates to work with
+                    foreach (Window window in Resources.Windows)
+                        window.SFMLWindow.DispatchEvents();
+
                     //update input state
                     Input.UpdateState();
 
-                    //window handling
-                    foreach (KeyValuePair<string, Window> pair in Resources.Windows)
-                        pair.Value.SFMLWindow.DispatchEvents();
                     //window cleanup (cant be done during window-eventloop)
-                    foreach (string id in RemoveWindows)
-                        Resources.Windows.Remove(id);
+                    foreach (Window window in RemoveWindows)
+                        Resources.Windows.Remove(window);
                     RemoveWindows.Clear();
 
                     if (Resources.Windows.Count == 0 && Settings.ExitOnLastWindowClose)
@@ -143,16 +144,16 @@ namespace HatlessEngine
                     RenderSprite = new SFML.Graphics.Sprite(RenderPlane.Texture);
 
                     //display the texture on window(s) using view(s)
-                    foreach (KeyValuePair<string, View> pair in Resources.Views)
+                    foreach (Window window in Resources.Windows)
                     {
-                        View view = pair.Value;
-                        Resources.Window(view.TargetWindow).SFMLWindow.SetView(view.SFMLView);
-                        Resources.Window(view.TargetWindow).SFMLWindow.Draw(RenderSprite);
-                    }
+                        foreach (View view in window.ActiveViews)
+                        {
+                            window.SFMLWindow.SetView(view.SFMLView);
+                            window.SFMLWindow.Draw(RenderSprite);
+                        }
 
-                    //display all windows
-                    foreach (KeyValuePair<string, Window> pair in Resources.Windows)
-                        pair.Value.SFMLWindow.Display();
+                        window.SFMLWindow.Display();
+                    }
 
                     //FPS calculation
                     TicksSinceLastDraw = stopwatch.ElapsedTicks - LastDrawTime;
@@ -165,7 +166,6 @@ namespace HatlessEngine
         public static void Run(uint speed = 100, bool defaultWindowSetup = true)
         {
             Run<LogicalObject>(speed, defaultWindowSetup);
-
         }
 
         /// <summary>

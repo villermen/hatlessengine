@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace HatlessEngine 
 {
@@ -7,6 +8,16 @@ namespace HatlessEngine
         public string Id { get; private set; }
         internal SFML.Graphics.RenderWindow SFMLWindow;
         internal static byte[] DefaultIconPixels;
+
+        public int X { get; private set; }
+        public int Y { get; private set; }
+        public uint Width { get; private set; }
+        public uint Height { get; private set; }
+
+        public List<View> ActiveViews = new List<View>();
+
+        internal float MouseXOnWindow = 0;
+        internal float MouseYOnWindow = 0;
 
         static Window()
         {
@@ -20,9 +31,17 @@ namespace HatlessEngine
             SFMLWindow.GainedFocus += new EventHandler(SFMLWindowGainedFocus);
             SFMLWindow.LostFocus += new EventHandler(SFMLWindowLostFocus);
             SFMLWindow.Closed += new EventHandler(SFMLWindowClosed);
+            SFMLWindow.Resized += new EventHandler<SFML.Window.SizeEventArgs>(SFMLWindowResized);
+            SFMLWindow.MouseMoved += new EventHandler<SFML.Window.MouseMoveEventArgs>(SFMLWindowMouseMoved);
             SFMLWindowGainedFocus(this, EventArgs.Empty);
 
             SFMLWindow.SetIcon(32, 32, DefaultIconPixels);
+
+            Width = width;
+            Height = height;
+
+            X = SFMLWindow.Position.X;
+            Y = SFMLWindow.Position.Y;
         }        
 
         /// <summary>
@@ -30,18 +49,35 @@ namespace HatlessEngine
         /// </summary>
         private void SFMLWindowGainedFocus(object sender, EventArgs e)
         {
-            Game.FocusedWindow = Id;
+            Game.FocusedWindow = this;
         }
 
         private void SFMLWindowLostFocus(object sender, EventArgs e)
         {
-            Game.FocusedWindow = "";
+            Game.FocusedWindow = null;
         }
 
         private void SFMLWindowClosed(object sender, EventArgs e)
         {
+            if (Game.FocusedWindow == this)
+                Game.FocusedWindow = null;
+
             SFMLWindow.Close();
-            Game.RemoveWindows.Add(Id);
+            Game.RemoveWindows.Add(this);
+        }
+
+        private void SFMLWindowResized(object sender, SFML.Window.SizeEventArgs e)
+        {
+            Width = e.Width;
+            Height = e.Height;
+            X = SFMLWindow.Position.X;
+            Y = SFMLWindow.Position.Y;
+        }
+
+        private void SFMLWindowMouseMoved(object sender, SFML.Window.MouseMoveEventArgs e)
+        {
+            MouseXOnWindow = (float)e.X / Width;
+            MouseYOnWindow = (float)e.Y / Height;
         }
     }
 }

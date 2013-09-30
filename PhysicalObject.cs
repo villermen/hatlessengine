@@ -2,6 +2,10 @@
 
 namespace HatlessEngine
 {
+    /// <summary>
+    /// Object that has a physical position and size in the game.
+    /// Has built-in support for a sprite, boundbox etc.
+    /// </summary>
     public class PhysicalObject : LogicalObject
     {
         public float X;

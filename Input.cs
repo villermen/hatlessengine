@@ -41,12 +41,12 @@ namespace HatlessEngine
 
         public static int MouseXGlobal { get; private set; }
         public static int MouseYGlobal { get; private set; }
-        public static int MouseX { get; private set; }
-        public static int MouseY { get; private set; }
+        public static float MouseX { get; private set; }
+        public static float MouseY { get; private set; }
 
         public static bool IsPressed(Button button, bool global = false)
         {
-            if (global || Game.FocusedWindow != "")
+            if (global || Game.FocusedWindow != null)
                 return (CurrentState.Contains(button) && !PreviousState.Contains(button));
             else
                 return false;
@@ -59,14 +59,14 @@ namespace HatlessEngine
         /// <returns></returns>
         public static bool IsDown(Button button, bool global = false)
         {
-            if (global || Game.FocusedWindow != "")
+            if (global || Game.FocusedWindow != null)
                 return CurrentState.Contains(button);
             else
                 return false;
         }
         public static bool IsReleased(Button button, bool global = false)
         {
-            if (global || Game.FocusedWindow != "")
+            if (global || Game.FocusedWindow != null)
                 return (!CurrentState.Contains(button) && PreviousState.Contains(button));
             else
                 return false;
@@ -81,7 +81,7 @@ namespace HatlessEngine
         /// <returns>Axis value, 0 if not focused or not significant enough.</returns>
         public static float GetGamePadAxis(uint gamePadNumber, uint axisNumber, bool global = false)
         {
-            if (global || Game.FocusedWindow != "")
+            if (global || Game.FocusedWindow != null)
             {
                 float axis = GamepadAxes[gamePadNumber, axisNumber];
                 if (axis < -gamePadDeadZone || axis > gamePadDeadZone)
@@ -105,6 +105,29 @@ namespace HatlessEngine
             Vector2i mouseVector = Mouse.GetPosition();
             MouseXGlobal = mouseVector.X;
             MouseYGlobal = mouseVector.Y;
+
+            //check where mouse is on RenderPlane
+            Window focusedWindow = Game.FocusedWindow;
+            if (focusedWindow != null)
+            {
+                foreach (View view in focusedWindow.ActiveViews)
+                {
+                    //if mouse is within view
+                    if (focusedWindow.MouseXOnWindow >= view.WindowX &&
+                        focusedWindow.MouseXOnWindow <= view.WindowX + view.WindowHeight &&
+                        focusedWindow.MouseYOnWindow >= view.WindowY &&
+                        focusedWindow.MouseYOnWindow <= view.WindowY + view.WindowHeight)
+                    {
+                        MouseX = view.X + (focusedWindow.MouseXOnWindow - view.WindowX) / view.WindowWidth * view.Width;
+                        MouseY = view.Y + (focusedWindow.MouseYOnWindow - view.WindowY) / view.WindowHeight * view.Height;
+                    }
+                }
+            }
+            else
+            {
+                MouseX = 0;
+                MouseY = 0;
+            }
 
             if (Mouse.IsButtonPressed(Mouse.Button.Left))
                 CurrentState.Add(Button.MOUSE_LEFT);
@@ -188,7 +211,7 @@ namespace HatlessEngine
         {
             string str = "";
 
-            if (global || Game.FocusedWindow != "")
+            if (global || Game.FocusedWindow != null)
             {
                 if (CurrentState.Count > 0)
                 {

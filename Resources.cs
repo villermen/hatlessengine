@@ -13,8 +13,8 @@ namespace HatlessEngine
         private static string RootDirectory = System.Environment.CurrentDirectory + "/res/";
 
         public static Dictionary<string, Sprite> Sprites = new Dictionary<string, Sprite>();
-        public static Dictionary<string, View> Views = new Dictionary<string, View>();
-        public static Dictionary<string, Window> Windows = new Dictionary<string, Window>();
+        public static List<View> Views = new List<View>();
+        public static List<Window> Windows = new List<Window>();
         public static Dictionary<string, Music> Musics = new Dictionary<string, Music>();
         public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
 
@@ -35,23 +35,16 @@ namespace HatlessEngine
 
             return sprite;
         }
-        public static View AddView(string id, float viewX, float viewY, float viewWidth, float viewHeight, string targetWindow = "", float windowXFraction = 0, float windowYFraction = 0, float windowWidthFraction = 1, float windowHeightFraction = 1)
+        public static View AddView(string id, float viewX, float viewY, float viewWidth, float viewHeight, Window targetWindow, float windowXFraction = 0, float windowYFraction = 0, float windowWidthFraction = 1, float windowHeightFraction = 1)
         {
-            if (Views.ContainsKey(id))
-                Log.WriteLine("Resources.AddView: id '" + id + "' already exists.", ErrorLevel.FATAL);
             View view = new View(id, viewX, viewY, viewWidth, viewHeight, targetWindow, windowXFraction, windowYFraction, windowWidthFraction);
-            Views.Add(id, view);
-
+            Views.Add(view);
             return view;
         }
         public static Window AddWindow(string id, uint width, uint height, string title)
         {
-            if (Windows.ContainsKey(id))
-                Log.WriteLine("Resources.AddWindow: id '" + id + "' already exists.", ErrorLevel.FATAL);
-
             Window window = new Window(id, width, height, title);
-            Windows.Add(id, window);
-
+            Windows.Add(window);
             return window;
         }
         public static Music AddMusic(string id, string filename)
@@ -86,7 +79,7 @@ namespace HatlessEngine
 
             return Sprites[id];
         }
-        public static View View(string id)
+        /*public static View View(string id)
         {
             if (!Views.ContainsKey(id))
                 Log.WriteLine("Resources.View: id '" + id + "' does not exist.", ErrorLevel.FATAL);
@@ -99,7 +92,7 @@ namespace HatlessEngine
                 Log.WriteLine("Resources.Window: id '" + id + "' does not exist.", ErrorLevel.FATAL);
 
             return Windows[id];
-        }
+        }*/
         public static Music Music(string id)
         {
             if (!Musics.ContainsKey(id))

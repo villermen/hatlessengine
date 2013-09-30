@@ -48,7 +48,7 @@ namespace HatlessEngine
                 SFMLView.Size = new Vector2f(width / 2, height / 2);
             }
         }
-        public string TargetWindow { get; set; }
+        public Window TargetWindow { get; private set; } //add set code
         public float WindowX 
         {
             get { return windowX; }
@@ -86,7 +86,7 @@ namespace HatlessEngine
             }
         }
 
-        public View(string id, float viewX, float viewY, float viewWidth, float viewHeight, string targetWindow = "", float windowXFraction = 0, float windowYFraction = 0, float windowWidthFraction = 1, float windowHeightFraction = 1)
+        public View(string id, float viewX, float viewY, float viewWidth, float viewHeight, Window targetWindow, float windowXFraction = 0, float windowYFraction = 0, float windowWidthFraction = 1, float windowHeightFraction = 1)
         {
             x = viewX;
             y = viewY;
@@ -100,6 +100,8 @@ namespace HatlessEngine
 
             SFMLView = new SFML.Graphics.View(new SFML.Graphics.FloatRect(x, y, width, height));
             SFMLView.Viewport = new SFML.Graphics.FloatRect(windowX, windowY, windowWidth, windowHeight);
+
+            targetWindow.ActiveViews.Add(this);
         }
     }
 }
