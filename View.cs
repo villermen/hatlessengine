@@ -7,7 +7,7 @@ namespace HatlessEngine
     {
         internal SFML.Graphics.View SFMLView;
 
-        private string Id;
+        public string Id { get; private set; }
         private float x;
         private float y;
         private float width;

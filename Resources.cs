@@ -79,20 +79,28 @@ namespace HatlessEngine
 
             return Sprites[id];
         }
-        /*public static View View(string id)
+        public static View ViewById(string id)
         {
-            if (!Views.ContainsKey(id))
-                Log.WriteLine("Resources.View: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+            foreach (View view in Views)
+            {
+                if (view.Id == id)
+                    return view;
+            }
 
-            return Views[id];
+            Log.WriteLine("Resources.ViewById: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+            return null;
         }
-        public static Window Window(string id)
+        public static Window WindowById(string id)
         {
-            if (!Windows.ContainsKey(id))
-                Log.WriteLine("Resources.Window: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+            foreach (Window window in Windows)
+            {
+                if (window.Id == id)
+                    return window;
+            }
 
-            return Windows[id];
-        }*/
+            Log.WriteLine("Resources.WindowById: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+            return null;
+        }
         public static Music Music(string id)
         {
             if (!Musics.ContainsKey(id))
