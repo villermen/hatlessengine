@@ -90,6 +90,11 @@ namespace HatlessEngine
             X += hSpeed;
             Y += vSpeed;
 
+            BoundBoxHSpeed = hSpeed;
+            BoundBoxVSpeed = vSpeed;
+            BoundBoxX = X + BoundBoxXOffset;
+            BoundBoxY = Y + BoundBoxYOffset;
+
             //update built-in animated sprite
             if (BuiltinAnimatedSprite != null)
                 BuiltinAnimatedSprite.Update();
@@ -104,7 +109,7 @@ namespace HatlessEngine
                 BuiltinAnimatedSprite.Draw(X + hSpeed * stepProgress, Y + vSpeed * stepProgress);
         }
 
-        public Tuple<bool, PhysicalObject, float> CheckCollision<T>(Side side = Side.ALL) where T : PhysicalObject
+        public bool CheckCollision<T>(Side side = Side.ALL, bool correctPosition = false) where T : PhysicalObject
         {
             Type type = typeof(T);
             if (Game.PhysicalObjectsByType.ContainsKey(type))
@@ -116,25 +121,46 @@ namespace HatlessEngine
                     float hSpeedDifference = BoundBoxHSpeed - object2.BoundBoxHSpeed;
                     float vSpeedDifference = BoundBoxVSpeed - object2.BoundBoxVSpeed;
 
-                    //check overlapping, then relative direction for side
-                    if (((BoundBoxX > object2.BoundBoxX && BoundBoxX < object2.BoundBoxX + object2.BoundBoxWidth) ||                                         //this X1 within object2 dX
-                        (BoundBoxX + BoundBoxWidth > object2.BoundBoxX && BoundBoxX + BoundBoxWidth < object2.BoundBoxX + object2.BoundBoxWidth) ||         //this X2 within object2 dX
-                        (object2.BoundBoxX > BoundBoxX && object2.BoundBoxX < BoundBoxX + BoundBoxWidth) ||                                                 //object2 X1 within this dX
-                        (object2.BoundBoxX + object2.BoundBoxWidth > BoundBoxX && object2.BoundBoxX + object2.BoundBoxWidth < BoundBoxX + BoundBoxWidth)) &&  //object2 X2 within this dX
-                       ((BoundBoxY > object2.BoundBoxY && BoundBoxY < object2.BoundBoxY + object2.BoundBoxHeight) ||                                         
-                        (BoundBoxY + BoundBoxHeight > object2.BoundBoxY && BoundBoxY + BoundBoxHeight < object2.BoundBoxY + object2.BoundBoxHeight) ||         
-                        (object2.BoundBoxY > BoundBoxY && object2.BoundBoxY < BoundBoxY + BoundBoxHeight) ||                                               
-                        (object2.BoundBoxY + object2.BoundBoxHeight > BoundBoxY && object2.BoundBoxY + object2.BoundBoxHeight < BoundBoxY + BoundBoxHeight)))
+                    //check if this object's boundbox has passed the other object's boundbox from the top or bottom this step
+                    if (BoundBoxX + BoundBoxWidth >= object2.BoundBoxX && BoundBoxX <= object2.BoundBoxX + object2.BoundBoxWidth)
                     {
-                        return new Tuple<bool, PhysicalObject, float>(true, object2, 0);
+                        if ((side == Side.BOTTOM || side == Side.ALL) && BoundBoxY + BoundBoxHeight >= object2.BoundBoxY && BoundBoxY + BoundBoxHeight - BoundBoxVSpeed <= object2.BoundBoxY)
+                        {
+                            if (correctPosition)
+                                Y = object2.BoundBoxY - BoundBoxHeight - BoundBoxYOffset;
+                            return true;
+                        }
+                        if ((side == Side.TOP || side == Side.ALL) && BoundBoxY <= object2.BoundBoxY + object2.BoundBoxHeight && BoundBoxY - BoundBoxVSpeed >= object2.BoundBoxY + object2.BoundBoxHeight)
+                        {
+                            if (correctPosition)
+                                Y = object2.BoundBoxY + object2.BoundBoxHeight - BoundBoxYOffset;
+                            return true;
+                        }
+                    }
+
+                    //left or right
+                    if (BoundBoxY + BoundBoxHeight >= object2.BoundBoxY && BoundBoxY <= object2.BoundBoxY + object2.BoundBoxHeight)
+                    {
+                        if ((side == Side.RIGHT || side == Side.ALL) && BoundBoxX + BoundBoxWidth >= object2.BoundBoxX && BoundBoxX + BoundBoxWidth - BoundBoxHSpeed <= object2.BoundBoxX)
+                        {
+                            if (correctPosition)
+                                X = object2.BoundBoxX - BoundBoxWidth - BoundBoxXOffset;
+                            return true;
+                        }
+                        if ((side == Side.RIGHT || side == Side.ALL) && BoundBoxX <= object2.BoundBoxX + object2.BoundBoxWidth && BoundBoxX - BoundBoxHSpeed >= object2.BoundBoxX + object2.BoundBoxWidth)
+                        {
+                            if (correctPosition)
+                                X = object2.BoundBoxX + object2.BoundBoxWidth - BoundBoxXOffset;
+                            return true;
+                        }
                     }
                 }
 
                 //no collision with given type
-                return new Tuple<bool, PhysicalObject, float>(false, null, 0);
+                return false;
             }
             else
-                return new Tuple<bool, PhysicalObject, float>(false, null, 0);
+                return false;
         }
     }
 }
