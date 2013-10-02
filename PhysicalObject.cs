@@ -8,6 +8,13 @@ namespace HatlessEngine
     /// </summary>
     public class PhysicalObject : LogicalObject
     {
+        public enum CollisionAction
+        {
+            NONE = 0,
+            BLOCK = 1,
+            //BOUNCE = 2,
+        }
+
         public float X;
         public float Y;
         public float Width = 0;
@@ -78,10 +85,6 @@ namespace HatlessEngine
 
         internal override void BeforeStep()
         {
-            BoundBoxHSpeed = hSpeed;
-            BoundBoxVSpeed = vSpeed;
-            BoundBoxX = X + BoundBoxXOffset;
-            BoundBoxY = Y + BoundBoxYOffset;
         }
 
         internal override void AfterStep()
@@ -90,6 +93,7 @@ namespace HatlessEngine
             X += hSpeed;
             Y += vSpeed;
 
+            //move boundbox
             BoundBoxHSpeed = hSpeed;
             BoundBoxVSpeed = vSpeed;
             BoundBoxX = X + BoundBoxXOffset;
@@ -104,12 +108,12 @@ namespace HatlessEngine
         {
             //draw built-in sprite and animated sprite
             if (BuiltinSprite != null)
-                BuiltinSprite.Draw(X + hSpeed * stepProgress, Y + vSpeed * stepProgress, BuiltinSpriteIndex);
+                BuiltinSprite.Draw(X - hSpeed * (1 - stepProgress), Y - vSpeed * (1 - stepProgress), BuiltinSpriteIndex);
             if (BuiltinAnimatedSprite != null)
-                BuiltinAnimatedSprite.Draw(X + hSpeed * stepProgress, Y + vSpeed * stepProgress);
+                BuiltinAnimatedSprite.Draw(X - hSpeed * (1 - stepProgress), Y - vSpeed * (1 - stepProgress));
         }
 
-        public bool CheckCollision<T>(Side side = Side.ALL, bool correctPosition = false) where T : PhysicalObject
+        public bool Collision<T>(Side side = Side.ALL, CollisionAction action = CollisionAction.NONE) where T : PhysicalObject
         {
             Type type = typeof(T);
             if (Game.PhysicalObjectsByType.ContainsKey(type))
@@ -126,14 +130,20 @@ namespace HatlessEngine
                     {
                         if ((side == Side.BOTTOM || side == Side.ALL) && BoundBoxY + BoundBoxHeight >= object2.BoundBoxY && BoundBoxY + BoundBoxHeight - BoundBoxVSpeed <= object2.BoundBoxY)
                         {
-                            if (correctPosition)
+                            if (action == CollisionAction.BLOCK)
+                            {
                                 Y = object2.BoundBoxY - BoundBoxHeight - BoundBoxYOffset;
+                                VSpeed = Math.Min(0, VSpeed);
+                            }
                             return true;
                         }
                         if ((side == Side.TOP || side == Side.ALL) && BoundBoxY <= object2.BoundBoxY + object2.BoundBoxHeight && BoundBoxY - BoundBoxVSpeed >= object2.BoundBoxY + object2.BoundBoxHeight)
                         {
-                            if (correctPosition)
+                            if (action == CollisionAction.BLOCK)
+                            {
                                 Y = object2.BoundBoxY + object2.BoundBoxHeight - BoundBoxYOffset;
+                                VSpeed = Math.Max(0, VSpeed);
+                            }
                             return true;
                         }
                     }
@@ -143,14 +153,21 @@ namespace HatlessEngine
                     {
                         if ((side == Side.RIGHT || side == Side.ALL) && BoundBoxX + BoundBoxWidth >= object2.BoundBoxX && BoundBoxX + BoundBoxWidth - BoundBoxHSpeed <= object2.BoundBoxX)
                         {
-                            if (correctPosition)
+                            if (action == CollisionAction.BLOCK)
+                            {
                                 X = object2.BoundBoxX - BoundBoxWidth - BoundBoxXOffset;
+                                HSpeed = Math.Min(0, HSpeed);
+                            }
                             return true;
                         }
                         if ((side == Side.RIGHT || side == Side.ALL) && BoundBoxX <= object2.BoundBoxX + object2.BoundBoxWidth && BoundBoxX - BoundBoxHSpeed >= object2.BoundBoxX + object2.BoundBoxWidth)
                         {
-                            if (correctPosition)
+                            if (action == CollisionAction.BLOCK)
+                            {
                                 X = object2.BoundBoxX + object2.BoundBoxWidth - BoundBoxXOffset;
+                                HSpeed = Math.Max(0, HSpeed);
+
+                            }
                             return true;
                         }
                     }
