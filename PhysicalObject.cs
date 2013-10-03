@@ -12,7 +12,7 @@ namespace HatlessEngine
         {
             NONE = 0,
             BLOCK = 1,
-            //BOUNCE = 2,
+            BOUNCE = 2,
         }
 
         public float X;
@@ -135,6 +135,11 @@ namespace HatlessEngine
                                 Y = object2.BoundBoxY - BoundBoxHeight - BoundBoxYOffset;
                                 VSpeed = Math.Min(0, VSpeed);
                             }
+                            if (action == CollisionAction.BOUNCE)
+                            {
+                                Y = 2*object2.BoundBoxY - 2*BoundBoxHeight - BoundBoxY;
+                                VSpeed = -VSpeed;
+                            }
                             return true;
                         }
                         if ((side == Side.TOP || side == Side.ALL) && BoundBoxY <= object2.BoundBoxY + object2.BoundBoxHeight && BoundBoxY - BoundBoxVSpeed >= object2.BoundBoxY + object2.BoundBoxHeight)
@@ -143,6 +148,11 @@ namespace HatlessEngine
                             {
                                 Y = object2.BoundBoxY + object2.BoundBoxHeight - BoundBoxYOffset;
                                 VSpeed = Math.Max(0, VSpeed);
+                            }
+                            if (action == CollisionAction.BOUNCE)
+                            {
+                                Y = 2*object2.BoundBoxY + 2*object2.BoundBoxHeight - BoundBoxY;
+                                VSpeed = -VSpeed;
                             }
                             return true;
                         }
@@ -158,6 +168,11 @@ namespace HatlessEngine
                                 X = object2.BoundBoxX - BoundBoxWidth - BoundBoxXOffset;
                                 HSpeed = Math.Min(0, HSpeed);
                             }
+                            if (action == CollisionAction.BOUNCE)
+                            {
+                                X = 2*object2.BoundBoxX - 2*BoundBoxWidth - BoundBoxX;
+                                HSpeed = -HSpeed;
+                            }
                             return true;
                         }
                         if ((side == Side.RIGHT || side == Side.ALL) && BoundBoxX <= object2.BoundBoxX + object2.BoundBoxWidth && BoundBoxX - BoundBoxHSpeed >= object2.BoundBoxX + object2.BoundBoxWidth)
@@ -166,7 +181,11 @@ namespace HatlessEngine
                             {
                                 X = object2.BoundBoxX + object2.BoundBoxWidth - BoundBoxXOffset;
                                 HSpeed = Math.Max(0, HSpeed);
-
+                            }
+                            if (action == CollisionAction.BOUNCE)
+                            {
+                                X = 2*object2.BoundBoxX + 2*object2.BoundBoxWidth - BoundBoxX;
+                                HSpeed = -HSpeed;
                             }
                             return true;
                         }
