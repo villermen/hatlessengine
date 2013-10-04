@@ -176,7 +176,7 @@ namespace HatlessEngine
         public static LogicalObject CreateLogicalObject<T>() where T : LogicalObject
         {
             if (!IsRunning)
-                Log.WriteLine("CreatePhysicalObject: Cannot create objects before game is started.", ErrorLevel.FATAL);
+                Log.WriteLine("CreateLogicalObject: Cannot create objects before game is started.", ErrorLevel.FATAL);
 
             Type type = typeof(T);
 
@@ -187,23 +187,28 @@ namespace HatlessEngine
 
             return obj;
         }
-        public static PhysicalObject CreatePhysicalObject<T>(float x, float y) where T : PhysicalObject
+        public static PhysicalObject CreatePhysicalObject(Type physicalObjectType, float x, float y)
         {
             if (!IsRunning)
                 Log.WriteLine("CreatePhysicalObject: Cannot create objects before game is started.", ErrorLevel.FATAL);
+            if (!typeof(PhysicalObject).IsAssignableFrom(physicalObjectType))
+                Log.WriteLine(physicalObjectType.ToString() + " does not inherit from PhysicalObject.", ErrorLevel.FATAL);
 
-            Type type = typeof(T);
-
-            PhysicalObject obj = (PhysicalObject)Activator.CreateInstance(type);
+            PhysicalObject obj = (PhysicalObject)Activator.CreateInstance(physicalObjectType);
             Objects.Add(obj);
 
             obj.X = x;
             obj.Y = y;
+            obj.AfterStep();
             obj.AfterCreation();
 
-            if (!PhysicalObjectsByType.ContainsKey(type))
-                PhysicalObjectsByType[type] = new List<PhysicalObject>();
-            PhysicalObjectsByType[type].Add(obj);
+            //add object to PhysicalObjectsByType along with each basetype up till PhysicalObject
+            for (Type currentType = physicalObjectType; currentType != typeof(LogicalObject); currentType = currentType.BaseType)
+            {
+                if (!PhysicalObjectsByType.ContainsKey(currentType))
+                    PhysicalObjectsByType[currentType] = new List<PhysicalObject>();
+                PhysicalObjectsByType[currentType].Add(obj);
+            }
 
             return obj;
         }

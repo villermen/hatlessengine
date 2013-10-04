@@ -114,6 +114,7 @@
     <Compile Include="AnimatedSprite.cs" />
     <Compile Include="Button.cs" />
     <Compile Include="ButtonObject.cs" />
+    <Compile Include="Rectangle.cs" />
     <Compile Include="Music.cs" />
     <Compile Include="ErrorLevel.cs" />
     <Compile Include="Input.cs" />
@@ -121,7 +122,6 @@
     <Compile Include="Game.cs" />
     <Compile Include="LogicalObject.cs" />
     <Compile Include="Misc.cs" />
-    <Compile Include="Side.cs" />
     <Compile Include="Sound.cs" />
     <Compile Include="PhysicalObject.cs" />
     <Compile Include="Resources.cs">
