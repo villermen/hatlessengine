@@ -11,36 +11,3 @@ I've put it on github to have a backup and an easy way to show it to the people 
 For suggestions, issues and questions, please refer to the Issues tab, or contact me.
 
 ## [Documentation](https://github.com/Villermen/HatlessEngine/wiki/Documentation)
-
-## Todo
-(\+) Feature addition, (-) Feature removal, (~) Feature change, (=) Other
-
-\+ Sprite Animations  
-\+ Detailed descriptions to public methods/fields  
-\+ stepProgress to CheckCollision return Tuple  
-\+ Implement collisionchecks against other types  
-\+ Implement collisionchecks between 2 types  
-\+ Add accurate way of checking for collision side  
-\+ More draw features (shapes, colors)  
-\+ Levels (ObjectMaps)  
-= Test multiple windows  
-\+ Only actually draw things that are visible in a view  
-\+ Object templates for easy development  
-\+ Console file output  
-\+ Console Threading?  
-\+ Method for retrieving MouseX and Y relative to RenderPlane  
-\+ Key mapping functionality  
-\+ Mousewheel buttons (using window events)  
-\+ XBox controller stick support (direction + value)  
-\+ PS3 controller mappings (mainly triggers)  
-\+ Way to dynamically change Resources root directory  
-\+ Garbage collect to Resources  
-\+ LoadAll method to Resources  
-~ Maybe create a SoundInstance object for use in accessing currently playing sound (for multiple playing soundness)  
-\+ Add global volume setting  
-~ Exceptions instead of fatal log messages  
-\+ Full Window control  
-\+ Full Sprite control  
-\+ Embed dependencies in project
-
-You can always suggest more features in the issues section!
