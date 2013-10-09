@@ -5,12 +5,13 @@ namespace HatlessEngine
     public class Music
     {
         public string Filename { get; private set; }
-        public string Id { get; internal set; }
+        public string Id { get; private set; }
         public bool IsLoaded { get; private set; }
         internal SFML.Audio.Music SFMLMusic;
 
-        public Music(string filename)
+        public Music(string id, string filename)
         {
+            Id = id;
             Filename = filename;
             IsLoaded = false;
         }
@@ -31,6 +32,7 @@ namespace HatlessEngine
 
         public void Unload()
         {
+            SFMLMusic.Dispose();
             SFMLMusic = null;
             IsLoaded = false;
         }

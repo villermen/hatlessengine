@@ -22,6 +22,8 @@ namespace HatlessEngine
 
         public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
 
+        public static Dictionary<string, Font> Fonts = new Dictionary<string, Font>();
+
         public static List<LogicalObject> Objects = new List<LogicalObject>();
         public static Dictionary<Type, List<PhysicalObject>> PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
 
@@ -34,9 +36,9 @@ namespace HatlessEngine
 
             Sprite sprite;
             if (width == 0)
-                sprite = new Sprite(RootDirectory + filename);
+                sprite = new Sprite(id, RootDirectory + filename);
             else
-                sprite = new Sprite(RootDirectory + filename, width);
+                sprite = new Sprite(id, RootDirectory + filename, width);
 
             Sprites.Add(id, sprite);
 
@@ -61,7 +63,7 @@ namespace HatlessEngine
             if (Musics.ContainsKey(id))
                 Log.WriteLine("Resources.AddMusic: id '" + id + "' already exists.", ErrorLevel.FATAL);
 
-            Music music = new Music(RootDirectory + filename);
+            Music music = new Music(id, RootDirectory + filename);
             Musics.Add(id, music);
 
             return music;
@@ -73,10 +75,22 @@ namespace HatlessEngine
             if (Sounds.ContainsKey(id))
                 Log.WriteLine("Resources.AddSound: id '" + id + "' already exists.", ErrorLevel.FATAL);
 
-            Sound sound = new Sound(RootDirectory + filename);
+            Sound sound = new Sound(id, RootDirectory + filename);
             Sounds.Add(id, sound);
 
             return sound;
+        }
+        public static Font AddFont(string id, string filename)
+        {
+            if (!File.Exists(RootDirectory + filename))
+                Log.WriteLine("Resources.AddFont: file '" + RootDirectory + filename + "' does not exist.", ErrorLevel.FATAL);
+            if (Fonts.ContainsKey(id))
+                Log.WriteLine("Resources.AddFont: id '" + id + "' already exists.", ErrorLevel.FATAL);
+
+            Font font = new Font(id, RootDirectory + filename);
+            Fonts.Add(id, font);
+
+            return font;
         }
 
         public static Sprite Sprite(string id)
@@ -121,6 +135,13 @@ namespace HatlessEngine
                 Log.WriteLine("Resources.Sprite: id '" + id + "' does not exist.", ErrorLevel.FATAL);
 
             return Sounds[id];
+        }
+        public static Font Font(string id)
+        {
+            if (!Fonts.ContainsKey(id))
+                Log.WriteLine("Resources.Font: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+
+            return Fonts[id];
         }
     }
 }

@@ -6,14 +6,15 @@ namespace HatlessEngine
     public class Sound
     {
         public string Filename { get; private set; }
-        public string Id { get; internal set; }
+        public string Id { get; private set; }
         public bool IsLoaded { get; private set; }
         internal SFML.Audio.SoundBuffer SFMLSoundBuffer;
         private Dictionary<byte, SFML.Audio.Sound> SFMLSounds = new Dictionary<byte, SFML.Audio.Sound>(256);
         private byte NextId = 0;
 
-        public Sound(string filename)
+        public Sound(string id, string filename)
         {
+            Id = id;
             Filename = filename;
             IsLoaded = false;
         }
@@ -40,6 +41,7 @@ namespace HatlessEngine
 
         public void Unload()
         {
+            SFMLSoundBuffer.Dispose();
             SFMLSoundBuffer = null;
             IsLoaded = false;
         }

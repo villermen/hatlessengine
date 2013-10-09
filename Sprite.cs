@@ -6,7 +6,7 @@ namespace HatlessEngine
     public class Sprite
     {   
         public string Filename { get; private set; }
-        public string Id { get; internal set; }
+        public string Id { get; private set; }
         public bool IsLoaded { get; private set; }
         internal SFML.Graphics.Sprite SFMLSprite;
 
@@ -28,12 +28,13 @@ namespace HatlessEngine
             }
         }
         
-        public Sprite(string filename) : this(filename, 0)
+        public Sprite(string id, string filename) : this(id, filename, 0)
         {
             AutoWidth = true;
         }
-        public Sprite(string filename, uint width)
+        public Sprite(string id, string filename, uint width)
         {
+            Id = Id;
             Size = new Size((float)width, 0);
             Filename = filename;
             IsLoaded = false;
@@ -68,6 +69,7 @@ namespace HatlessEngine
 
         public void Unload()
         {
+            SFMLSprite.Dispose();
             SFMLSprite = null;
             IsLoaded = false;
         }

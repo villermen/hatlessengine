@@ -12,7 +12,7 @@ namespace HatlessEngine
         public static bool ConsoleEnabled { get; private set; }
         private static RenderWindow ConsoleWindow;
         private static List<Text> ConsoleMessages = new List<Text>(50);
-        private static Font ConsoleFont;
+        private static SFML.Graphics.Font ConsoleFont;
         private static int ConsoleFontLineSpacing;
         private static Color ConsoleTextColor = new Color(192, 192, 192);
 
@@ -20,7 +20,7 @@ namespace HatlessEngine
 
         static Log()
         {
-            ConsoleFont = new Font(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("HatlessEngine.Inconsolata.otf"));
+            ConsoleFont = new SFML.Graphics.Font(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("HatlessEngine.Inconsolata.otf"));
             ConsoleFontLineSpacing = ConsoleFont.GetLineSpacing(14);
             ConsoleEnabled = false;
             FileEnabled = false;
