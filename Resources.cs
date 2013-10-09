@@ -13,10 +13,17 @@ namespace HatlessEngine
         private static string RootDirectory = System.Environment.CurrentDirectory + "/res/";
 
         public static Dictionary<string, Sprite> Sprites = new Dictionary<string, Sprite>();
+
         public static List<View> Views = new List<View>();
+
         public static List<Window> Windows = new List<Window>();
+
         public static Dictionary<string, Music> Musics = new Dictionary<string, Music>();
+
         public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
+
+        public static List<LogicalObject> Objects = new List<LogicalObject>();
+        public static Dictionary<Type, List<PhysicalObject>> PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
 
         public static Sprite AddSprite(string id, string filename, uint width = 0)
         {

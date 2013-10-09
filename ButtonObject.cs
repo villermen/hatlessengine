@@ -24,10 +24,10 @@ namespace HatlessEngine
             private set { _State = value; } 
         }
 
-        internal override void AfterCreation()
+        public ButtonObject(float x, float y, Sprite sprite) : base(x, y)
         {
-            BoundBoxRectangle.Width = BuiltinSprite.Size.Width;
-            BoundBoxRectangle.Height = BuiltinSprite.Size.Height;
+            BuiltinSprite = sprite;
+            BoundBoxRectangle += BuiltinSprite.Size;
         }
 
         public sealed override void Step()

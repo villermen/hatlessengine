@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace HatlessEngine
 {
@@ -32,8 +33,8 @@ namespace HatlessEngine
             //BOUNCEBOTH = 3, or weightedbounce
         }
 
-        public Position Position;
-        public Speed Speed;
+        public Position Position = new Position(0, 0);
+        public Speed Speed = new Speed(0, 0);
 
         public Rectangle BoundBoxRectangle;
         public Speed BoundBoxSpeed;
@@ -43,8 +44,19 @@ namespace HatlessEngine
         public uint BuiltinSpriteIndex = 0;
         public AnimatedSprite BuiltinAnimatedSprite = null;
 
-        internal override void BeforeStep()
+        public PhysicalObject(float x, float y) : base()
         {
+            //set position
+            Position = new Position(x, y);
+            BoundBoxRectangle += Position;
+
+            //add object to PhysicalObjectsByType along with each basetype up till PhysicalObject
+            for (Type currentType = this.GetType(); currentType != typeof(LogicalObject); currentType = currentType.BaseType)
+            {
+                if (!Resources.PhysicalObjectsByType.ContainsKey(currentType))
+                    Resources.PhysicalObjectsByType[currentType] = new List<PhysicalObject>();
+                Resources.PhysicalObjectsByType[currentType].Add(this);
+            }
         }
 
         internal override void AfterStep()
@@ -221,7 +233,7 @@ namespace HatlessEngine
 
             bool result = false;
 
-            foreach (PhysicalObject object2 in Game.PhysicalObjectsByType[checkObjectType])
+            foreach (PhysicalObject object2 in Resources.PhysicalObjectsByType[checkObjectType])
             {
                 if (Collision(object2, side, action))
                     result = true;

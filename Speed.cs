@@ -10,7 +10,13 @@ namespace HatlessEngine
     {
         public float X;
         public float Y;
-        
+
+        public Speed(float x, float y)
+        {
+            X = x;
+            Y = y;
+        }
+
         public float Direction
         {
             get { return (float)(Math.Atan2(X, Y) / Math.PI * 180); }

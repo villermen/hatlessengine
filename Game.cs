@@ -24,9 +24,6 @@ namespace HatlessEngine
         private static long LastDrawTime = 0;
         public static uint FPS = 0;
 
-        public static List<LogicalObject> Objects { get; private set; }
-        public static Dictionary<Type, List<PhysicalObject>> PhysicalObjectsByType { get; private set; }
-
         internal static SFML.Graphics.RenderTexture RenderPlane = new SFML.Graphics.RenderTexture(800, 600);
         private static SFML.Graphics.Sprite RenderSprite;
         private static SFML.Graphics.RectangleShape dirtyRenderFix = new SFML.Graphics.RectangleShape();
@@ -44,8 +41,6 @@ namespace HatlessEngine
             IsRunning = false;
             RenderPlane.Smooth = true;
             FocusedWindow = null;
-            Objects = new List<LogicalObject>();
-            PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
 
             Thread.CurrentThread.Name = "HatlessEngine";
         }
@@ -56,7 +51,7 @@ namespace HatlessEngine
         /// </summary>
         /// <param name="speed">Logical steps per second.</param>
         /// <param name="defaultWindowSetup">Creates a "default" view and window of 800x600</param>
-        public static void Run<T>(uint speed = 100, bool defaultWindowSetup = true) where T : LogicalObject
+        public static void Run(uint speed = 100, bool defaultWindowSetup = true)
         {
             Speed = speed;
 
@@ -67,9 +62,6 @@ namespace HatlessEngine
             }
 
             IsRunning = true;
-
-            if (typeof(T) != typeof(LogicalObject))
-                CreateLogicalObject<T>();
 
             //gameloop
             stopwatch.Start();
@@ -97,9 +89,8 @@ namespace HatlessEngine
                         Exit();
 
                     //objects
-                    foreach (LogicalObject obj in Objects)
+                    foreach (LogicalObject obj in Resources.Objects)
                     {
-                        obj.BeforeStep();
                         obj.Step();
                         obj.AfterStep();
                     }
@@ -123,9 +114,8 @@ namespace HatlessEngine
                     RenderPlane.Clear(new SFML.Graphics.Color(64, 64, 64));
 
                     //draw every objects' draw method
-                    foreach (LogicalObject obj in Objects)
+                    foreach (LogicalObject obj in Resources.Objects)
                     {
-                        obj.BeforeDraw(stepProgress);
                         obj.Draw(stepProgress);
                         obj.AfterDraw(stepProgress);
                     }
@@ -156,56 +146,6 @@ namespace HatlessEngine
                     LastDrawTime = stopwatch.ElapsedTicks;
                 }
             }
-        }
-
-        public static void Run(uint speed = 100, bool defaultWindowSetup = true)
-        {
-            Run<LogicalObject>(speed, defaultWindowSetup);
-        }
-
-        /// <summary>
-        /// Creates Object with the given type.
-        /// </summary>
-        /// <param name="type">Type of the object to create (must be a child of GameObject)</param>
-        /// <returns>The object's id</returns>
-        public static LogicalObject CreateLogicalObject<T>() where T : LogicalObject
-        {
-            if (!IsRunning)
-                Log.WriteLine("CreateLogicalObject: Cannot create objects before game is started.", ErrorLevel.FATAL);
-
-            Type type = typeof(T);
-
-            LogicalObject obj = (LogicalObject)Activator.CreateInstance(type);
-            Objects.Add(obj);
-
-            obj.AfterCreation();
-
-            return obj;
-        }
-        public static PhysicalObject CreatePhysicalObject(Type physicalObjectType, float x, float y)
-        {
-            if (!IsRunning)
-                Log.WriteLine("CreatePhysicalObject: Cannot create objects before game is started.", ErrorLevel.FATAL);
-            if (!typeof(PhysicalObject).IsAssignableFrom(physicalObjectType))
-                Log.WriteLine(physicalObjectType.ToString() + " does not inherit from PhysicalObject.", ErrorLevel.FATAL);
-
-            PhysicalObject obj = (PhysicalObject)Activator.CreateInstance(physicalObjectType);
-            Objects.Add(obj);
-
-            obj.Position.X = x;
-            obj.Position.Y = y;
-            obj.AfterStep();
-            obj.AfterCreation();
-
-            //add object to PhysicalObjectsByType along with each basetype up till PhysicalObject
-            for (Type currentType = physicalObjectType; currentType != typeof(LogicalObject); currentType = currentType.BaseType)
-            {
-                if (!PhysicalObjectsByType.ContainsKey(currentType))
-                    PhysicalObjectsByType[currentType] = new List<PhysicalObject>();
-                PhysicalObjectsByType[currentType].Add(obj);
-            }
-
-            return obj;
         }
 
         public static void Exit()
