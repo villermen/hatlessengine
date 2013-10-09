@@ -26,13 +26,13 @@ namespace HatlessEngine
 
         internal override void AfterCreation()
         {
-            Width = BuiltinSprite.Width;
-            Height = BuiltinSprite.Height;
+            BoundBoxRectangle.Width = BuiltinSprite.Size.Width;
+            BoundBoxRectangle.Height = BuiltinSprite.Size.Height;
         }
 
         public sealed override void Step()
         {
-            if (Input.MouseX >= X && Input.MouseX <= X + Width && Input.MouseY >= Y && Input.MouseY <= Y + Height)
+            if (Input.MouseX >= BoundBoxRectangle.X && Input.MouseX <= BoundBoxRectangle.X2 && Input.MouseY >= BoundBoxRectangle.Y && Input.MouseY <= BoundBoxRectangle.Y2)
             {
                 //mouseover
                 if (State == 0)

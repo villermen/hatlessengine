@@ -114,6 +114,7 @@
     <Compile Include="AnimatedSprite.cs" />
     <Compile Include="Button.cs" />
     <Compile Include="ButtonObject.cs" />
+    <Compile Include="Position.cs" />
     <Compile Include="Rectangle.cs" />
     <Compile Include="Music.cs" />
     <Compile Include="ErrorLevel.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="Game.cs" />
     <Compile Include="LogicalObject.cs" />
     <Compile Include="Misc.cs" />
+    <Compile Include="Size.cs" />
     <Compile Include="Sound.cs" />
     <Compile Include="PhysicalObject.cs" />
     <Compile Include="Resources.cs">
@@ -174,6 +176,7 @@
     <Compile Include="SFML\Window\Vector2.cs" />
     <Compile Include="SFML\Window\VideoMode.cs" />
     <Compile Include="SFML\Window\Window.cs" />
+    <Compile Include="Speed.cs" />
     <Compile Include="Sprite.cs" />
     <Compile Include="View.cs" />
     <Compile Include="Window.cs" />

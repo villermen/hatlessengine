@@ -109,11 +109,6 @@ namespace HatlessEngine
                     SPS = (uint)(Stopwatch.Frequency / TicksSinceLastStep);
                     LastStepTime = stopwatch.ElapsedTicks;
 
-                    /*string str = Input.GetPressedButtons(true);
-                    Log.ClearConsole();
-                    Log.Write("BUTTONTEST");
-                    Log.Write(str);*/
-
                     //temp
                     if (Log.ConsoleEnabled)
                         Log.DispatchConsoleEvents();
@@ -197,8 +192,8 @@ namespace HatlessEngine
             PhysicalObject obj = (PhysicalObject)Activator.CreateInstance(physicalObjectType);
             Objects.Add(obj);
 
-            obj.X = x;
-            obj.Y = y;
+            obj.Position.X = x;
+            obj.Position.Y = y;
             obj.AfterStep();
             obj.AfterCreation();
 

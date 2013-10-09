@@ -14,30 +14,17 @@ namespace HatlessEngine
 
         private bool AutoWidth = false;
 
-        private uint width = 0;
-        private uint height = 0;
-        public uint Width 
+        private Size _Size;
+        public Size Size
         {
             get
             {
                 Load();
-                return width;
+                return _Size;
             }
             private set
             {
-                width = value;
-            }
-        }
-        public uint Height
-        {
-            get
-            {
-                Load();
-                return height;
-            }
-            private set
-            {
-                height = value;
+                _Size = value;
             }
         }
         
@@ -47,7 +34,7 @@ namespace HatlessEngine
         }
         public Sprite(string filename, uint width)
         {
-            Width = width;
+            Size = new Size((float)width, 0);
             Filename = filename;
             IsLoaded = false;
         }
@@ -56,7 +43,7 @@ namespace HatlessEngine
         {
             Load();
             SFMLSprite.Position = new SFML.Window.Vector2f(x, y);
-            SFMLSprite.TextureRect = new SFML.Graphics.IntRect((int)(frameIndex * width), 0, (int)width, (int)height);
+            SFMLSprite.TextureRect = new SFML.Graphics.IntRect((int)(frameIndex * Size.Width), 0, (int)Size.Width, (int)Size.Height);
             Game.RenderPlane.Draw(SFMLSprite);
         }
 
@@ -65,10 +52,15 @@ namespace HatlessEngine
             if (!IsLoaded)
             {
                 SFMLSprite = new SFML.Graphics.Sprite(new SFML.Graphics.Texture(Filename));
-                height = (uint)SFMLSprite.GetLocalBounds().Height;
+                float height = (uint)SFMLSprite.GetLocalBounds().Height;
 
+                float width;
                 if (AutoWidth)                   
                     width = (uint)SFMLSprite.GetLocalBounds().Width;
+                else
+                    width = Size.Width;
+
+                Size = new Size(width, height);
                     
                 IsLoaded = true;
             }

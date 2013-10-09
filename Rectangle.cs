@@ -1,49 +1,24 @@
 ﻿namespace HatlessEngine
 {
-    public class Rectangle
+    /// <summary>
+    /// Defines a position and size.
+    /// You can also access the absolute position of the bottom right corner individually.
+    /// </summary>
+    public struct Rectangle
     {
-
-        private float _Width;
-        private float _Height;
-        private float _X2;
-        private float _Y2;
         public float X;
         public float Y;
-        public float Width
-        {
-            set
-            {
-                _X2 = X + value;
-                _Width = value;
-            }
-            get { return _Width; }
-        }
-        public float Height
-        {
-            set
-            {
-                _Y2 = Y + value;
-                _Height = value;
-            }
-            get { return _Height; }
-        }
+        public float Width;
+        public float Height;
         public float X2
         {
-            set
-            {
-                _Width = value - X;
-                _X2 = value;
-            }
-            get { return _X2; }
+            set { Width = value - X; }
+            get { return X + Width; }
         }
         public float Y2
         {
-            set
-            {
-                _Height = value - Y;
-                _Y2 = value;
-            }
-            get { return _Y2; }
+            set { Height = value - Y; }
+            get { return Y + Height; }
         }
 
         public Rectangle(float x, float y, float width, float height)
@@ -52,6 +27,21 @@
             Y = y;
             Width = width;
             Height = height;
+        }
+
+        /// <summary>
+        /// Replaces this rectangle's position with the given position.
+        /// </summary>
+        static public Rectangle operator +(Rectangle rect, Position pos)
+        {
+            return new Rectangle(pos.X, pos.Y, rect.Width, rect.Height);
+        }
+        /// <summary>
+        /// Replaces this rectangle's size with the given size.
+        /// </summary>
+        static public Rectangle operator +(Rectangle rect, Size size)
+        {
+            return new Rectangle(rect.X, rect.Y, size.Width, size.Height);
         }
     }
 }

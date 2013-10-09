@@ -29,76 +29,19 @@ namespace HatlessEngine
             NONE = 0,
             BLOCK = 1,
             BOUNCE = 2,
-            BOUNCEBOTH = 3,
+            //BOUNCEBOTH = 3, or weightedbounce
         }
 
-        public float X;
-        public float Y;
-        public float Width = 0;
-        public float Height = 0;
+        public Position Position;
+        public Speed Speed;
 
-        private float BoundBoxX;
-        private float BoundBoxY;
-        private float BoundBoxHSpeed;
-        private float BoundBoxVSpeed;
-        public float BoundBoxXOffset = 0;
-        public float BoundBoxYOffset = 0;
-        public float BoundBoxWidth = 0;
-        public float BoundBoxHeight = 0;
+        public Rectangle BoundBoxRectangle;
+        public Speed BoundBoxSpeed;
+        public Position BoundBoxOffset;
 
         public Sprite BuiltinSprite = null;
         public uint BuiltinSpriteIndex = 0;
         public AnimatedSprite BuiltinAnimatedSprite = null;
-
-        private float direction = 0;
-        private float speed = 0;
-        private float hSpeed = 0;
-        private float vSpeed = 0;
-        public float Direction
-        {
-            get { return direction; }
-            set
-            {
-                while (value >= 360)
-                    value = value - 360;
-                while (value < 0)
-                    value = value + 360;
-                direction = value;
-
-                hSpeed = (float)Math.Cos((direction / 180 - 0.5) * Math.PI) * speed;
-                vSpeed = (float)Math.Sin((direction / 180 - 0.5) * Math.PI) * speed;
-            }
-        }
-        public float Speed
-        {
-            get { return speed; }
-            set
-            {
-                speed = value;
-                hSpeed = (float)Math.Cos((direction / 180 - 0.5) * Math.PI) * speed;
-                vSpeed = (float)Math.Sin((direction / 180 - 0.5) * Math.PI) * speed;
-            }
-        }
-        public float HSpeed
-        {
-            get { return hSpeed; }
-            set
-            {
-                hSpeed = value;
-                speed = (float)Math.Sqrt(Math.Pow(hSpeed, 2) / Math.Pow(vSpeed, 2));
-                direction = (float)(Math.Atan2(hSpeed, vSpeed) / Math.PI * 180);
-            }
-        }
-        public float VSpeed
-        {
-            get { return vSpeed; }
-            set
-            {
-                vSpeed = value;
-                speed = (float)Math.Sqrt(Math.Pow(hSpeed, 2) / Math.Pow(vSpeed, 2));
-                direction = (float)(Math.Atan2(hSpeed, vSpeed) / Math.PI * 180);
-            }
-        }
 
         internal override void BeforeStep()
         {
@@ -107,14 +50,12 @@ namespace HatlessEngine
         internal override void AfterStep()
         {
             //move
-            X += hSpeed;
-            Y += vSpeed;
+            Position += Speed;
 
-            //move boundbox
-            BoundBoxHSpeed = hSpeed;
-            BoundBoxVSpeed = vSpeed;
-            BoundBoxX = X + BoundBoxXOffset;
-            BoundBoxY = Y + BoundBoxYOffset;
+            //update boundbox
+            BoundBoxRectangle.X = Position.X + BoundBoxOffset.X;
+            BoundBoxRectangle.Y = Position.Y + BoundBoxOffset.Y;
+            BoundBoxSpeed = Speed;          
 
             //update built-in animated sprite
             if (BuiltinAnimatedSprite != null)
@@ -125,9 +66,9 @@ namespace HatlessEngine
         {
             //draw built-in sprite and animated sprite
             if (BuiltinSprite != null)
-                BuiltinSprite.Draw(X - hSpeed * (1 - stepProgress), Y - vSpeed * (1 - stepProgress), BuiltinSpriteIndex);
+                BuiltinSprite.Draw(Position.X - Speed.X * (1 - stepProgress), Position.Y - Speed.Y * (1 - stepProgress), BuiltinSpriteIndex);
             if (BuiltinAnimatedSprite != null)
-                BuiltinAnimatedSprite.Draw(X - hSpeed * (1 - stepProgress), Y - vSpeed * (1 - stepProgress));
+                BuiltinAnimatedSprite.Draw(Position.X - Speed.X * (1 - stepProgress), Position.Y - Speed.Y * (1 - stepProgress));
         }
 
         public bool Collision(Rectangle rectangle, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
@@ -135,130 +76,130 @@ namespace HatlessEngine
             bool result = false;
 
             //check if this object's boundbox has passed the rectangle from the top or bottom this step
-            if (BoundBoxX + BoundBoxWidth >= rectangle.X && BoundBoxX <= rectangle.X + rectangle.Width)
+            if (BoundBoxRectangle.X2 >= rectangle.X && BoundBoxRectangle.X <= rectangle.X2)
             {
                 if ((side == CollisionSide.BOTTOM || side == CollisionSide.ALLOUTSIDE || side == CollisionSide.ALL)
-                    && BoundBoxY + BoundBoxHeight >= rectangle.Y && BoundBoxY + BoundBoxHeight - BoundBoxVSpeed <= rectangle.Y)
+                    && BoundBoxRectangle.Y2 >= rectangle.Y && BoundBoxRectangle.Y2 - BoundBoxSpeed.Y <= rectangle.Y)
                 {
                     if (action == CollisionAction.BLOCK)
                     {
-                        Y = rectangle.Y - BoundBoxHeight;
-                        VSpeed = Math.Min(0, VSpeed);
+                        Position.Y = rectangle.Y - BoundBoxRectangle.Height;
+                        Speed.Y = Math.Min(0, Speed.Y);
                     }
                     if (action == CollisionAction.BOUNCE)
                     {
-                        Y = 2 * rectangle.Y - 2 * BoundBoxHeight - BoundBoxY;
-                        VSpeed = -VSpeed;
+                        Position.Y = 2 * rectangle.Y - 2 * BoundBoxRectangle.Height - BoundBoxRectangle.Y;
+                        Speed.Y = -Speed.Y;
                     }
                     result = true;
                 }
                 if ((side == CollisionSide.TOP || side == CollisionSide.ALLOUTSIDE || side == CollisionSide.ALL)
-                    && BoundBoxY <= rectangle.Y + rectangle.Height && BoundBoxY - BoundBoxVSpeed >= rectangle.Y + rectangle.Height)
+                    && BoundBoxRectangle.Y <= rectangle.Y2 && BoundBoxRectangle.Y - BoundBoxSpeed.Y >= rectangle.Y2)
                 {
                     if (action == CollisionAction.BLOCK)
                     {
-                        Y = rectangle.Y + rectangle.Height;
-                        VSpeed = Math.Max(0, VSpeed);
+                        Position.Y = rectangle.Y2;
+                        Speed.Y = Math.Max(0, Speed.Y);
                     }
                     if (action == CollisionAction.BOUNCE)
                     {
-                        Y = 2 * rectangle.Y + 2 * rectangle.Height - BoundBoxY;
-                        VSpeed = -VSpeed;
+                        Position.Y = 2 * rectangle.Y2 - BoundBoxRectangle.Y;
+                        Speed.Y = -Speed.Y;
                     }
                     result = true;
                 }
                 if ((side == CollisionSide.BOTTOMINSIDE || side == CollisionSide.ALLINSIDE || side == CollisionSide.ALL) 
-                    && BoundBoxY + BoundBoxHeight >= rectangle.Y + rectangle.Height && BoundBoxY + BoundBoxHeight - BoundBoxVSpeed <= rectangle.Y + rectangle.Height)
+                    && BoundBoxRectangle.Y2 >= rectangle.Y2 && BoundBoxRectangle.Y2 - BoundBoxSpeed.Y <= rectangle.Y2)
                 {
                     if (action == CollisionAction.BLOCK)
                     {
-                        Y = rectangle.Y + rectangle.Height - BoundBoxHeight;
-                        VSpeed = Math.Min(0, VSpeed);
+                        Position.Y = rectangle.Y2 - BoundBoxRectangle.Height;
+                        Speed.Y = Math.Min(0, Speed.Y);
                     }
                     if (action == CollisionAction.BOUNCE)
                     {
-                        Y = 2 * rectangle.Y + 2 * rectangle.Height - 2 * BoundBoxHeight - BoundBoxY;
-                        VSpeed = -VSpeed;
+                        Position.Y = 2 * rectangle.Y2 - 2 * BoundBoxRectangle.Height - BoundBoxRectangle.Y;
+                        Speed.Y = -Speed.Y;
                     }
                     result = true;
                 }
                 if ((side == CollisionSide.TOPINSIDE || side == CollisionSide.ALLINSIDE || side == CollisionSide.ALL)
-                    && BoundBoxY <= rectangle.Y && BoundBoxY - BoundBoxVSpeed >= rectangle.Y)
+                    && BoundBoxRectangle.Y <= rectangle.Y && BoundBoxRectangle.Y - BoundBoxSpeed.Y >= rectangle.Y)
                 {
                     if (action == CollisionAction.BLOCK)
                     {
-                        Y = rectangle.Y;
-                        VSpeed = Math.Max(0, VSpeed);
+                        Position.Y = rectangle.Y;
+                        Speed.Y = Math.Max(0, Speed.Y);
                     }
                     if (action == CollisionAction.BOUNCE)
                     {
-                        Y = rectangle.Y + rectangle.Y - BoundBoxY;
-                        VSpeed = -VSpeed;
+                        Position.Y = 2 * rectangle.Y - BoundBoxRectangle.Y;
+                        Speed.Y = -Speed.Y;
                     }
                     result = true;
                 }
             }
 
             //left or right
-            if (BoundBoxY + BoundBoxHeight >= rectangle.Y && BoundBoxY <= rectangle.Y + rectangle.Height)
+            if (BoundBoxRectangle.Y2 >= rectangle.Y && BoundBoxRectangle.Y <= rectangle.Y2)
             {
                 if ((side == CollisionSide.RIGHT || side == CollisionSide.ALLOUTSIDE || side == CollisionSide.ALL)
-                    && BoundBoxX + BoundBoxWidth >= rectangle.X && BoundBoxX + BoundBoxWidth - BoundBoxHSpeed <= rectangle.X)
+                    && BoundBoxRectangle.X2 >= rectangle.X && BoundBoxRectangle.X2 - BoundBoxSpeed.X <= rectangle.X)
                 {
                     if (action == CollisionAction.BLOCK)
                     {
-                        X = rectangle.X - BoundBoxWidth;
-                        HSpeed = Math.Min(0, HSpeed);
+                        Position.X = rectangle.X - BoundBoxRectangle.Width;
+                        Speed.X = Math.Min(0, Speed.X);
                     }
                     if (action == CollisionAction.BOUNCE)
                     {
-                        X = 2 * rectangle.X - 2 * BoundBoxWidth - BoundBoxX;
-                        HSpeed = -HSpeed;
+                        Position.X = 2 * rectangle.X - 2 * BoundBoxRectangle.Width - BoundBoxRectangle.X;
+                        Speed.X = -Speed.X;
                     }
                     result = true;
                 }
                 if ((side == CollisionSide.LEFT || side == CollisionSide.ALLOUTSIDE || side == CollisionSide.ALL)
-                    && BoundBoxX <= rectangle.X + rectangle.Width && BoundBoxX - BoundBoxHSpeed >= rectangle.X + rectangle.Width)
+                    && BoundBoxRectangle.X <= rectangle.X + rectangle.Width && BoundBoxRectangle.X - BoundBoxSpeed.X >= rectangle.X + rectangle.Width)
                 {
                     if (action == CollisionAction.BLOCK)
                     {
-                        X = rectangle.X + rectangle.Width;
-                        HSpeed = Math.Max(0, HSpeed);
+                        Position.X = rectangle.X2;
+                        Speed.X = Math.Max(0, Speed.X);
                     }
                     if (action == CollisionAction.BOUNCE)
                     {
-                        X = 2 * rectangle.X + 2 * rectangle.Width - BoundBoxX;
-                        HSpeed = -HSpeed;
+                        Position.X = 2 * rectangle.X2 - BoundBoxRectangle.X;
+                        Speed.X = -Speed.X;
                     }
                     result = true;
                 }
                 if ((side == CollisionSide.RIGHTINSIDE || side == CollisionSide.ALLINSIDE || side == CollisionSide.ALL)
-                    && BoundBoxX + BoundBoxWidth >= rectangle.X + rectangle.Width && BoundBoxX + BoundBoxWidth - BoundBoxHSpeed <= rectangle.X + rectangle.Width)
+                    && BoundBoxRectangle.X2 >= rectangle.X2 && BoundBoxRectangle.X2 - BoundBoxSpeed.X <= rectangle.X + rectangle.Width)
                 {
                     if (action == CollisionAction.BLOCK)
                     {
-                        X = rectangle.X + rectangle.Width - BoundBoxWidth;
-                        HSpeed = Math.Min(0, HSpeed);
+                        Position.X = rectangle.X + rectangle.Width - BoundBoxRectangle.Width;
+                        Speed.X = Math.Min(0, Speed.X);
                     }
                     if (action == CollisionAction.BOUNCE)
                     {
-                        X = 2 * rectangle.X + 2 * rectangle.Width - 2 * BoundBoxWidth - BoundBoxX;
-                        HSpeed = -HSpeed;
+                        Position.X = 2 * rectangle.X + 2 * rectangle.Width - 2 * BoundBoxRectangle.Width - BoundBoxRectangle.X;
+                        Speed.X = -Speed.X;
                     }
                     result = true;
                 }
                 if ((side == CollisionSide.LEFTINSIDE || side == CollisionSide.ALLINSIDE || side == CollisionSide.ALL)
-                    && BoundBoxX <= rectangle.X && BoundBoxX - BoundBoxHSpeed >= rectangle.X)
+                    && BoundBoxRectangle.X <= rectangle.X && BoundBoxRectangle.X - BoundBoxSpeed.X >= rectangle.X)
                 {
                     if (action == CollisionAction.BLOCK)
                     {
-                        X = rectangle.X;
-                        HSpeed = Math.Max(0, HSpeed);
+                        Position.X = rectangle.X;
+                        Speed.X = Math.Max(0, Speed.X);
                     }
                     if (action == CollisionAction.BOUNCE)
                     {
-                        X = 2 * rectangle.X - BoundBoxX;
-                        HSpeed = -HSpeed;
+                        Position.X = 2 * rectangle.X - BoundBoxRectangle.X;
+                        Speed.X = -Speed.X;
                     }
                     result = true;
                 }
@@ -270,7 +211,7 @@ namespace HatlessEngine
         public bool Collision(PhysicalObject checkObject, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
         {
             //temp solution, perm solution will account for other object's movement
-            return Collision(new Rectangle(checkObject.BoundBoxX, checkObject.BoundBoxY, checkObject.BoundBoxWidth, checkObject.BoundBoxHeight), side, action);
+            return Collision(checkObject.BoundBoxRectangle, side, action);
         }
 
         public bool Collision(Type checkObjectType, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
