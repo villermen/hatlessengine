@@ -115,6 +115,8 @@
     <Compile Include="Button.cs" />
     <Compile Include="ButtonObject.cs" />
     <Compile Include="Font.cs" />
+    <Compile Include="ObjectBlueprint.cs" />
+    <Compile Include="ObjectMap.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Rectangle.cs" />
     <Compile Include="Music.cs" />

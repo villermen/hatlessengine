@@ -23,6 +23,7 @@ namespace HatlessEngine
         public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
 
         public static Dictionary<string, Font> Fonts = new Dictionary<string, Font>();
+        public static Dictionary<string, ObjectMap> ObjectMaps = new Dictionary<string, ObjectMap>();
 
         public static List<LogicalObject> Objects = new List<LogicalObject>();
         public static Dictionary<Type, List<PhysicalObject>> PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
@@ -101,6 +102,17 @@ namespace HatlessEngine
 
             return font;
         }
+        public static ObjectMap AddObjectMap(string id, params ObjectBlueprint[] objects)
+        {
+            if (ObjectMaps.ContainsKey(id))
+                Log.WriteLine("Resources.AddObjectMap: id '" + id + "' already exists.", ErrorLevel.FATAL);
+
+            ObjectMap objectMap = new ObjectMap(id, objects);
+            ObjectMaps.Add(id, objectMap);
+
+            return objectMap;
+
+        }
 
         public static Sprite Sprite(string id)
         {
@@ -151,6 +163,13 @@ namespace HatlessEngine
                 Log.WriteLine("Resources.Font: id '" + id + "' does not exist.", ErrorLevel.FATAL);
 
             return Fonts[id];
+        }
+        public static ObjectMap ObjectMap(string id)
+        {
+            if (!ObjectMaps.ContainsKey(id))
+                Log.WriteLine("Resources.ObjectMap: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+
+            return ObjectMaps[id];
         }
 
         internal static void Cleanup()
