@@ -28,8 +28,6 @@ namespace HatlessEngine
         private static SFML.Graphics.Sprite RenderSprite;
         private static SFML.Graphics.RectangleShape dirtyRenderFix = new SFML.Graphics.RectangleShape();
 
-        internal static List<Window> RemoveWindows = new List<Window>();
-
         public static Window FocusedWindow { get; internal set; }
 
         //debug
@@ -80,10 +78,10 @@ namespace HatlessEngine
                     //update input state
                     Input.UpdateState();
 
+                    //remove all to-be removed resources
+                    Resources.Cleanup();
+
                     //window cleanup (cant be done during window-eventloop)
-                    foreach (Window window in RemoveWindows)
-                        Resources.Windows.Remove(window);
-                    RemoveWindows.Clear();
 
                     if (Resources.Windows.Count == 0 && Settings.ExitOnLastWindowClose)
                         Exit();

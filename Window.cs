@@ -63,8 +63,8 @@ namespace HatlessEngine
             SFMLWindowLostFocus(this, EventArgs.Empty);
 
             SFMLWindow.Close();
-            //SFMLWindow.Dispose(); DOES NOT WORK CURRENTLY
-            Game.RemoveWindows.Add(this);
+            //SFMLWindow.Dispose(); DOES NOT WORK CURRENTLY TODO
+            Resources.RemoveWindows.Add(this);
         }
 
         private void SFMLWindowResized(object sender, SFML.Window.SizeEventArgs e)

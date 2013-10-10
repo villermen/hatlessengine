@@ -27,6 +27,15 @@ namespace HatlessEngine
         public static List<LogicalObject> Objects = new List<LogicalObject>();
         public static Dictionary<Type, List<PhysicalObject>> PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
 
+        internal static List<Window> RemoveWindows = new List<Window>();
+        internal static List<LogicalObject> RemoveObjects = new List<LogicalObject>();
+
+        static Resources()
+        {
+            //add console font
+            //Fonts.Add ("inconsolata", new Font("inconsolata", System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("HatlessEngine.Inconsolata.otf")));
+        }
+
         public static Sprite AddSprite(string id, string filename, uint width = 0)
         {
             if (!File.Exists(RootDirectory + filename))
@@ -142,6 +151,19 @@ namespace HatlessEngine
                 Log.WriteLine("Resources.Font: id '" + id + "' does not exist.", ErrorLevel.FATAL);
 
             return Fonts[id];
+        }
+
+        internal static void Cleanup()
+        {
+            //window cleanup
+            foreach (Window window in RemoveWindows)
+                Windows.Remove(window);
+            RemoveWindows.Clear();
+
+            //object cleanup
+            foreach (LogicalObject logicalObject in RemoveObjects)
+                Objects.Remove(logicalObject);
+            RemoveWindows.Clear();
         }
     }
 }

@@ -223,6 +223,8 @@ namespace HatlessEngine
         public bool Collision(PhysicalObject checkObject, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
         {
             //temp solution, perm solution will account for other object's movement
+            if (checkObject.Destroyed)
+                return false;
             return Collision(checkObject.BoundBoxRectangle, side, action);
         }
 
@@ -240,6 +242,17 @@ namespace HatlessEngine
             }
 
             return result;
+        }
+
+        public new void Destroy()
+        {
+            base.Destroy();
+
+            //remove from physicalobjectsbytype
+            for (Type currentType = this.GetType(); currentType != typeof(LogicalObject); currentType = currentType.BaseType)
+            {
+                Resources.PhysicalObjectsByType[currentType].Remove(this);
+            }
         }
     }
 }
