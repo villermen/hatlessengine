@@ -19,26 +19,23 @@ namespace HatlessEngine
 
         public float Direction
         {
-            get { return (float)(Math.Atan2(X, Y) / Math.PI * 180); }
-            set
+            get 
             {
-                while (value >= 360)
-                    value = value - 360;
-                while (value < 0)
-                    value = value + 360;
-
-                X = (float)Math.Cos((value / 180 - 0.5) * Math.PI) * Amplitude;
-                Y = (float)Math.Sin((value / 180 - 0.5) * Math.PI) * Amplitude;
+                float result;
+                if (X == 0 && Y == 0)
+                    result = 0;
+                else
+                {
+                    result = (float)(Math.Atan2(X, -Y) * 180 / Math.PI);
+                    if (result < 0)
+                        result = result + 360;
+                }
+                return result;
             }
         }
         public float Amplitude
         {
-            get { return (float)Math.Sqrt(Math.Pow(X, 2) / Math.Pow(Y, 2)); }
-            set
-            {
-                X = (float)Math.Cos((Direction / 180 - 0.5) * Math.PI) * value;
-                Y = (float)Math.Sin((Direction / 180 - 0.5) * Math.PI) * value;
-            }
+            get { return (float)Math.Abs(Math.Sqrt(Math.Pow(X, 2) + Math.Pow(Y, 2))); }
         }
     }
 }

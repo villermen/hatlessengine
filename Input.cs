@@ -1,5 +1,4 @@
-﻿using SFML.Window;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace HatlessEngine
@@ -39,10 +38,8 @@ namespace HatlessEngine
             }
         }
 
-        public static int MouseXGlobal { get; private set; }
-        public static int MouseYGlobal { get; private set; }
-        public static float MouseX { get; private set; }
-        public static float MouseY { get; private set; }
+        public static Position MouseGlobal { get; private set; }
+        public static Position Mouse { get; private set; }
 
         public static bool IsPressed(Button button, bool global = false)
         {
@@ -93,6 +90,9 @@ namespace HatlessEngine
                 return 0;
         }
 
+        public static Speed[] XboxLStick = new Speed[9];
+        public static Speed[] XboxRStick = new Speed[9];
+
         /// <summary>
         /// Updates the input states for pending logic step. (can be called manually)
         /// </summary>
@@ -102,13 +102,11 @@ namespace HatlessEngine
             CurrentState.Clear();
 
             //Mouse
-            Vector2i mouseVector = Mouse.GetPosition();
-            MouseXGlobal = mouseVector.X;
-            MouseYGlobal = mouseVector.Y;
+            SFML.Window.Vector2i mouseVector = SFML.Window.Mouse.GetPosition();
+            MouseGlobal = new Position(mouseVector.X, mouseVector.Y);
 
             //check where mouse is on RenderPlane
-            MouseX = 0;
-            MouseY = 0;
+            Mouse = new Position(0, 0);
             Window focusedWindow = Game.FocusedWindow;
             if (focusedWindow != null)
             {
@@ -120,50 +118,51 @@ namespace HatlessEngine
                         focusedWindow.MouseYOnWindow >= view.WindowY &&
                         focusedWindow.MouseYOnWindow <= view.WindowY + view.WindowHeight)
                     {
-                        MouseX = view.X + (focusedWindow.MouseXOnWindow - view.WindowX) / view.WindowWidth * view.Width;
-                        MouseY = view.Y + (focusedWindow.MouseYOnWindow - view.WindowY) / view.WindowHeight * view.Height;
+                        float mouseX = view.X + (focusedWindow.MouseXOnWindow - view.WindowX) / view.WindowWidth * view.Width;
+                        float mouseY = view.Y + (focusedWindow.MouseYOnWindow - view.WindowY) / view.WindowHeight * view.Height;
+                        Mouse = new Position(mouseX, mouseY);
                     }
                 }
             }
 
-            if (Mouse.IsButtonPressed(Mouse.Button.Left))
+            if (SFML.Window.Mouse.IsButtonPressed(SFML.Window.Mouse.Button.Left))
                 CurrentState.Add(Button.MOUSE_LEFT);
-            if (Mouse.IsButtonPressed(Mouse.Button.Right))
+            if (SFML.Window.Mouse.IsButtonPressed(SFML.Window.Mouse.Button.Right))
                 CurrentState.Add(Button.MOUSE_RIGHT);
-            if (Mouse.IsButtonPressed(Mouse.Button.Middle))
+            if (SFML.Window.Mouse.IsButtonPressed(SFML.Window.Mouse.Button.Middle))
                 CurrentState.Add(Button.MOUSE_MIDDLE);
-            if (Mouse.IsButtonPressed(Mouse.Button.XButton1))
+            if (SFML.Window.Mouse.IsButtonPressed(SFML.Window.Mouse.Button.XButton1))
                 CurrentState.Add(Button.MOUSE_X1);
-            if (Mouse.IsButtonPressed(Mouse.Button.XButton2))
+            if (SFML.Window.Mouse.IsButtonPressed(SFML.Window.Mouse.Button.XButton2))
                 CurrentState.Add(Button.MOUSE_X2);
 
             //Keyboard
-            foreach (Keyboard.Key key in Enum.GetValues(typeof(Keyboard.Key)))
+            foreach (SFML.Window.Keyboard.Key key in Enum.GetValues(typeof(SFML.Window.Keyboard.Key)))
             {
-                if (Keyboard.IsKeyPressed(key))
+                if (SFML.Window.Keyboard.IsKeyPressed(key))
                     CurrentState.Add((Button)((int)key)+2001);
             }
             
             //Gamepads
             if (Settings.GamepadInputEnabled)
             {
-                Joystick.Update();
+                SFML.Window.Joystick.Update();
 
                 for (uint i = 0; i < 8; i++)
                 {
-                    if (Joystick.IsConnected(i))
+                    if (SFML.Window.Joystick.IsConnected(i))
                     {
                         //buttons
                         for (uint j = 0; j < 32; j++)
                         {
-                            if (Joystick.IsButtonPressed(i, j))
+                            if (SFML.Window.Joystick.IsButtonPressed(i, j))
                                 CurrentState.Add((Button)(3001 + i * 32 + j));
                         }
 
                         //axes
                         for (uint k = 0; k < 8; k++)
                         {
-                            GamepadAxes[i + 1, k + 1] = Joystick.GetAxisPosition(i, (Joystick.Axis)k) / 100;
+                            GamepadAxes[i + 1, k + 1] = SFML.Window.Joystick.GetAxisPosition(i, (SFML.Window.Joystick.Axis)k) / 100;
                         }
 
                         //xbox axis to button conversion
@@ -199,6 +198,25 @@ namespace HatlessEngine
                             CurrentState.Add((Button)(4013 + i * 14));
                         if (GamepadAxes[i + 1, 3] < -gamePadDeadZone)
                             CurrentState.Add((Button)(4014 + i * 14));
+
+                        //update xbox stick interface lstick
+                        if (GamepadAxes[i + 1, 1] < -gamePadDeadZone || GamepadAxes[i + 1, 1] > gamePadDeadZone)
+                            XboxLStick[i + 1] = new Speed(GamepadAxes[i + 1, 1], XboxLStick[i + 1].Y);
+                        else
+                            XboxLStick[i + 1] = new Speed(0, XboxLStick[i + 1].Y);
+                        if (GamepadAxes[i + 1, 2] < -gamePadDeadZone || GamepadAxes[i + 1, 2] > gamePadDeadZone)
+                            XboxLStick[i + 1] = new Speed(XboxLStick[i + 1].X, GamepadAxes[i + 1, 2]);
+                        else
+                            XboxLStick[i + 1] = new Speed(XboxLStick[i + 1].X, 0);
+                        //rstick
+                        if (GamepadAxes[i + 1, 5] < -gamePadDeadZone || GamepadAxes[i + 1, 5] > gamePadDeadZone)
+                            XboxRStick[i + 1] = new Speed(GamepadAxes[i + 1, 5], XboxRStick[i + 1].Y);
+                        else
+                            XboxRStick[i + 1] = new Speed(0, XboxRStick[i + 1].Y);
+                        if (GamepadAxes[i + 1, 4] < -gamePadDeadZone || GamepadAxes[i + 1, 4] > gamePadDeadZone)
+                            XboxRStick[i + 1] = new Speed(XboxRStick[i + 1].X, GamepadAxes[i + 1, 4]);
+                        else
+                            XboxRStick[i + 1] = new Speed(XboxRStick[i + 1].X, 0);
                     }
                 }
             }
