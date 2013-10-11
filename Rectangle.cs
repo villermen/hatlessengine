@@ -21,27 +21,31 @@
             get { return Y + Height; }
         }
 
+        public Position Position
+        {
+            get { return new Position(X, Y); }
+            set
+            {
+                X = value.X;
+                Y = value.Y;
+            }
+        }
+        public Size Size
+        {
+            get { return new Size(Width, Height); }
+            set
+            {
+                Width = value.Width;
+                Height = value.Height;
+            }
+        }
+
         public Rectangle(float x, float y, float width, float height)
         {
             X = x;
             Y = y;
             Width = width;
             Height = height;
-        }
-
-        /// <summary>
-        /// Replaces this rectangle's position with the given position.
-        /// </summary>
-        static public Rectangle operator +(Rectangle rect, Position pos)
-        {
-            return new Rectangle(pos.X, pos.Y, rect.Width, rect.Height);
-        }
-        /// <summary>
-        /// Replaces this rectangle's size with the given size.
-        /// </summary>
-        static public Rectangle operator +(Rectangle rect, Size size)
-        {
-            return new Rectangle(rect.X, rect.Y, size.Width, size.Height);
         }
     }
 }

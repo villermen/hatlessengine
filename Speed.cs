@@ -56,5 +56,39 @@ namespace HatlessEngine
                 Y = (float)Math.Sin((direction / 180 - 0.5) * Math.PI) * value;
             }
         }
+
+        public static Speed operator +(Speed speed1, Speed speed2)
+        {
+            return new Speed(speed1.X + speed2.X, speed1.Y + speed2.Y);
+        }
+        public static Speed operator -(Speed speed1, Speed speed2)
+        {
+            return new Speed(speed1.X - speed2.X, speed1.Y - speed2.Y);
+        }
+        public static Speed operator *(Speed speed1, Speed speed2)
+        {
+            return new Speed(speed1.X * speed2.X, speed1.Y * speed2.Y);
+        }
+        public static Speed operator /(Speed speed1, Speed speed2)
+        {
+            return new Speed(speed1.X / speed2.X, speed1.Y / speed2.Y);
+        }
+
+        public static Speed operator +(Speed speed, float value)
+        {
+            return new Speed(speed.X + value, speed.Y + value);
+        }
+        public static Speed operator -(Speed speed, float value)
+        {
+            return new Speed(speed.X - value, speed.Y - value);
+        }
+        public static Speed operator *(Speed speed, float value)
+        {
+            return new Speed(speed.X * value, speed.Y * value);
+        }
+        public static Speed operator /(Speed speed, float value)
+        {
+            return new Speed(speed.X / value, speed.Y / value);
+        }
     }
 }

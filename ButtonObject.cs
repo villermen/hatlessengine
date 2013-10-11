@@ -27,7 +27,7 @@ namespace HatlessEngine
         public ButtonObject(float x, float y, Sprite sprite) : base(x, y)
         {
             BuiltinSprite = sprite;
-            BoundBoxRectangle += BuiltinSprite.Size;
+            BoundBoxRectangle.Size = BuiltinSprite.Size;
         }
 
         public sealed override void Step()

@@ -48,7 +48,7 @@ namespace HatlessEngine
         {
             //set position
             Position = new Position(x, y);
-            BoundBoxRectangle += Position;
+            BoundBoxRectangle.Position = Position;
 
             //add object to PhysicalObjectsByType along with each basetype up till PhysicalObject
             for (Type currentType = this.GetType(); currentType != typeof(LogicalObject); currentType = currentType.BaseType)

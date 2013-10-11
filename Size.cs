@@ -15,5 +15,39 @@ namespace HatlessEngine
             Width = width;
             Height = height;
         }
+
+        public static Size operator +(Size size1, Size size2)
+        {
+            return new Size(size1.Width + size2.Width, size1.Height + size2.Height);
+        }
+        public static Size operator -(Size size1, Size size2)
+        {
+            return new Size(size1.Width - size2.Width, size1.Height - size2.Height);
+        }
+        public static Size operator *(Size size1, Size size2)
+        {
+            return new Size(size1.Width * size2.Width, size1.Height * size2.Height);
+        }
+        public static Size operator /(Size size1, Size size2)
+        {
+            return new Size(size1.Width / size2.Width, size1.Height / size2.Height);
+        }
+
+        public static Size operator +(Size size, float value)
+        {
+            return new Size(size.Width + value, size.Height + value);
+        }
+        public static Size operator -(Size size, float value)
+        {
+            return new Size(size.Width - value, size.Height - value);
+        }
+        public static Size operator *(Size size, float value)
+        {
+            return new Size(size.Width * value, size.Height * value);
+        }
+        public static Size operator /(Size size, float value)
+        {
+            return new Size(size.Width / value, size.Height / value);
+        }
     }
 }
