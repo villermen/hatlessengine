@@ -16,7 +16,7 @@ namespace HatlessEngine
             set
             {
                 if (!TargetSprite.Animations.ContainsKey(value))
-                    Log.WriteLine("AnimatedSprite: Sprite '" + TargetSprite.ToString() + "' does not have an animation with id '" + value + "'", ErrorLevel.FATAL);
+                    Log.Message("AnimatedSprite: Sprite '" + TargetSprite.ToString() + "' does not have an animation with id '" + value + "'", ErrorLevel.FATAL);
                 animationId = value;
                 Stepnumber = 0;
                 IndexIncrements = 0;

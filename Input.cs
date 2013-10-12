@@ -25,12 +25,12 @@ namespace HatlessEngine
             {
                 if (value > 1)
                 {
-                    Log.WriteLine("Input.GamePadDeadZone set to maximum of 1 (" + value.ToString() + ") given", ErrorLevel.WARNING);
+                    Log.Message("Input.GamePadDeadZone set to maximum of 1 (" + value.ToString() + ") given", ErrorLevel.WARNING);
                     gamePadDeadZone = 1;
                 }
                 else if (value < 0)
                 {
-                    Log.WriteLine("Input.GamePadDeadZone set to minimum of 0 (" + value.ToString() + ") given", ErrorLevel.WARNING);
+                    Log.Message("Input.GamePadDeadZone set to minimum of 0 (" + value.ToString() + ") given", ErrorLevel.WARNING);
                     gamePadDeadZone = 0;
                 }
                 else

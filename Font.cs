@@ -8,7 +8,7 @@ namespace HatlessEngine
         public string Id { get; private set; }
         public bool IsLoaded { get; private set; }
 
-        internal SFML.Graphics.Font SFMLFont;
+        internal SFML.Graphics.Text SFMLText;
 
         public Font(string id, string filename)
         {
@@ -16,28 +16,28 @@ namespace HatlessEngine
             Filename = filename;
         }
 
-        public void Draw(float x, float y, string str, uint size)
+        internal void Draw(string str, Position pos, uint size)
         {
             Load();
-            SFML.Graphics.Text text = new SFML.Graphics.Text(str, SFMLFont, size);
-            text.Position = new SFML.Window.Vector2f(x, y);
-            text.Color = SFML.Graphics.Color.Black;
-            Game.RenderPlane.Draw(text);
+            SFMLText.DisplayedString = str;
+            SFMLText.Position = new SFML.Window.Vector2f(pos.X, pos.Y);
+            SFMLText.CharacterSize = size;
+            Game.RenderPlane.Draw(SFMLText);
         }
 
         public void Load()
         {
             if (!IsLoaded)
             {
-                SFMLFont = new SFML.Graphics.Font(Filename);
+                SFMLText = new SFML.Graphics.Text("", new SFML.Graphics.Font(Filename));
                 IsLoaded = true;
             }
         }
 
         public void Unload()
         {
-            SFMLFont.Dispose();
-            SFMLFont = null;
+            SFMLText.Dispose();
+            SFMLText = null;
             IsLoaded = false;
         }
     }

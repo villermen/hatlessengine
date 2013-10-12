@@ -14,7 +14,7 @@ namespace HatlessEngine
         public LogicalObject()
         {
             //add object to Resource's objectlist
-            Resources.Objects.Add(this);
+            Resources.AddObjects.Add(this);
         }
 
         public virtual void Step() { }

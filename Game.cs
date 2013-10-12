@@ -78,20 +78,19 @@ namespace HatlessEngine
                     //update input state
                     Input.UpdateState();
 
-                    //remove all to-be removed resources
-                    Resources.Cleanup();
-
-                    //window cleanup (cant be done during window-eventloop)
-
-                    if (Resources.Windows.Count == 0 && Settings.ExitOnLastWindowClose)
-                        Exit();
-
                     //objects
                     foreach (LogicalObject obj in Resources.Objects)
                     {
                         obj.Step();
                         obj.AfterStep();
                     }
+
+                    //add and remove all objects & windows that have to be added or removed
+                    Resources.AdditionAndRemoval();
+
+                    //window cleanup (cant be done during window-eventloop)
+                    if (Resources.Windows.Count == 0 && Settings.ExitOnLastWindowClose)
+                        Exit();
                     
                     //LPS calculation
                     TicksSinceLastStep = stopwatch.ElapsedTicks - LastStepTime;

@@ -26,7 +26,7 @@ namespace HatlessEngine
             FileEnabled = false;
         }
 
-        public static void WriteLine(string message, ErrorLevel errorLevel = ErrorLevel.DEBUG)
+        public static void Message(string message, ErrorLevel errorLevel = ErrorLevel.DEBUG)
         {
             if (errorLevel != ErrorLevel.NONE)
             {

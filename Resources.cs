@@ -17,6 +17,7 @@ namespace HatlessEngine
         public static List<View> Views = new List<View>();
 
         public static List<Window> Windows = new List<Window>();
+        internal static List<Window> RemoveWindows = new List<Window>();
 
         public static Dictionary<string, Music> Musics = new Dictionary<string, Music>();
 
@@ -27,8 +28,7 @@ namespace HatlessEngine
 
         public static List<LogicalObject> Objects = new List<LogicalObject>();
         public static Dictionary<Type, List<PhysicalObject>> PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
-
-        internal static List<Window> RemoveWindows = new List<Window>();
+        internal static List<LogicalObject> AddObjects = new List<LogicalObject>();
         internal static List<LogicalObject> RemoveObjects = new List<LogicalObject>();
 
         static Resources()
@@ -40,9 +40,9 @@ namespace HatlessEngine
         public static Sprite AddSprite(string id, string filename, uint width = 0)
         {
             if (!File.Exists(RootDirectory + filename))
-                Log.WriteLine("Resources.AddSprite: file '" + RootDirectory + filename + "' does not exist.", ErrorLevel.FATAL);
+                Log.Message("Resources.AddSprite: file '" + RootDirectory + filename + "' does not exist.", ErrorLevel.FATAL);
             if (Sprites.ContainsKey(id))
-                Log.WriteLine("Resources.AddSprite: id '" + id + "' already exists.", ErrorLevel.FATAL);
+                Log.Message("Resources.AddSprite: id '" + id + "' already exists.", ErrorLevel.FATAL);
 
             Sprite sprite;
             if (width == 0)
@@ -69,9 +69,9 @@ namespace HatlessEngine
         public static Music AddMusic(string id, string filename)
         {
             if (!File.Exists(RootDirectory + filename))
-                Log.WriteLine("Resources.AddMusic: file '" + RootDirectory + filename + "' does not exist.", ErrorLevel.FATAL);
+                Log.Message("Resources.AddMusic: file '" + RootDirectory + filename + "' does not exist.", ErrorLevel.FATAL);
             if (Musics.ContainsKey(id))
-                Log.WriteLine("Resources.AddMusic: id '" + id + "' already exists.", ErrorLevel.FATAL);
+                Log.Message("Resources.AddMusic: id '" + id + "' already exists.", ErrorLevel.FATAL);
 
             Music music = new Music(id, RootDirectory + filename);
             Musics.Add(id, music);
@@ -81,9 +81,9 @@ namespace HatlessEngine
         public static Sound AddSound(string id, string filename)
         {
             if (!File.Exists(RootDirectory + filename))
-                Log.WriteLine("Resources.AddSound: file '" + RootDirectory + filename + "' does not exist.", ErrorLevel.FATAL);
+                Log.Message("Resources.AddSound: file '" + RootDirectory + filename + "' does not exist.", ErrorLevel.FATAL);
             if (Sounds.ContainsKey(id))
-                Log.WriteLine("Resources.AddSound: id '" + id + "' already exists.", ErrorLevel.FATAL);
+                Log.Message("Resources.AddSound: id '" + id + "' already exists.", ErrorLevel.FATAL);
 
             Sound sound = new Sound(id, RootDirectory + filename);
             Sounds.Add(id, sound);
@@ -93,9 +93,9 @@ namespace HatlessEngine
         public static Font AddFont(string id, string filename)
         {
             if (!File.Exists(RootDirectory + filename))
-                Log.WriteLine("Resources.AddFont: file '" + RootDirectory + filename + "' does not exist.", ErrorLevel.FATAL);
+                Log.Message("Resources.AddFont: file '" + RootDirectory + filename + "' does not exist.", ErrorLevel.FATAL);
             if (Fonts.ContainsKey(id))
-                Log.WriteLine("Resources.AddFont: id '" + id + "' already exists.", ErrorLevel.FATAL);
+                Log.Message("Resources.AddFont: id '" + id + "' already exists.", ErrorLevel.FATAL);
 
             Font font = new Font(id, RootDirectory + filename);
             Fonts.Add(id, font);
@@ -105,7 +105,7 @@ namespace HatlessEngine
         public static ObjectMap AddObjectMap(string id, params ObjectBlueprint[] objects)
         {
             if (ObjectMaps.ContainsKey(id))
-                Log.WriteLine("Resources.AddObjectMap: id '" + id + "' already exists.", ErrorLevel.FATAL);
+                Log.Message("Resources.AddObjectMap: id '" + id + "' already exists.", ErrorLevel.FATAL);
 
             ObjectMap objectMap = new ObjectMap(id, objects);
             ObjectMaps.Add(id, objectMap);
@@ -117,7 +117,7 @@ namespace HatlessEngine
         public static Sprite Sprite(string id)
         {
             if (!Sprites.ContainsKey(id))
-                Log.WriteLine("Resources.Sprite: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+                Log.Message("Resources.Sprite: id '" + id + "' does not exist.", ErrorLevel.FATAL);
 
             return Sprites[id];
         }
@@ -129,7 +129,7 @@ namespace HatlessEngine
                     return view;
             }
 
-            Log.WriteLine("Resources.ViewById: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+            Log.Message("Resources.ViewById: id '" + id + "' does not exist.", ErrorLevel.FATAL);
             return null;
         }
         public static Window WindowById(string id)
@@ -140,48 +140,52 @@ namespace HatlessEngine
                     return window;
             }
 
-            Log.WriteLine("Resources.WindowById: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+            Log.Message("Resources.WindowById: id '" + id + "' does not exist.", ErrorLevel.FATAL);
             return null;
         }
         public static Music Music(string id)
         {
             if (!Musics.ContainsKey(id))
-                Log.WriteLine("Resources.Sprite: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+                Log.Message("Resources.Sprite: id '" + id + "' does not exist.", ErrorLevel.FATAL);
 
             return Musics[id];
         }
         public static Sound Sound(string id)
         {
             if (!Sounds.ContainsKey(id))
-                Log.WriteLine("Resources.Sprite: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+                Log.Message("Resources.Sprite: id '" + id + "' does not exist.", ErrorLevel.FATAL);
 
             return Sounds[id];
         }
         public static Font Font(string id)
         {
             if (!Fonts.ContainsKey(id))
-                Log.WriteLine("Resources.Font: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+                Log.Message("Resources.Font: id '" + id + "' does not exist.", ErrorLevel.FATAL);
 
             return Fonts[id];
         }
         public static ObjectMap ObjectMap(string id)
         {
             if (!ObjectMaps.ContainsKey(id))
-                Log.WriteLine("Resources.ObjectMap: id '" + id + "' does not exist.", ErrorLevel.FATAL);
+                Log.Message("Resources.ObjectMap: id '" + id + "' does not exist.", ErrorLevel.FATAL);
 
             return ObjectMaps[id];
         }
 
-        internal static void Cleanup()
+        internal static void AdditionAndRemoval()
         {
-            //window cleanup
-            foreach (Window window in RemoveWindows)
-                Windows.Remove(window);
-            RemoveWindows.Clear();
+            //object addition
+            Objects.AddRange(AddObjects);
+            AddObjects.Clear();
 
-            //object cleanup
+            //object removal
             foreach (LogicalObject logicalObject in RemoveObjects)
                 Objects.Remove(logicalObject);
+            RemoveObjects.Clear();
+
+            //window removal
+            foreach (Window window in RemoveWindows)
+                Windows.Remove(window);
             RemoveWindows.Clear();
         }
     }
