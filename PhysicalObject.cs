@@ -44,10 +44,10 @@ namespace HatlessEngine
         public uint BuiltinSpriteIndex = 0;
         public AnimatedSprite BuiltinAnimatedSprite = null;
 
-        public PhysicalObject(float x, float y) : base()
+        public PhysicalObject(Position position) : base()
         {
             //set position
-            Position = new Position(x, y);
+            Position = position;
             BoundBoxRectangle.Position = Position;
 
             //add object to PhysicalObjectsByType along with each basetype up till PhysicalObject

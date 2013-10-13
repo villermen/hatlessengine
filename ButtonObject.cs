@@ -24,7 +24,7 @@ namespace HatlessEngine
             private set { _State = value; } 
         }
 
-        public ButtonObject(float x, float y, Sprite sprite) : base(x, y)
+        public ButtonObject(Position position, Sprite sprite) : base(position)
         {
             BuiltinSprite = sprite;
             BoundBoxRectangle.Size = BuiltinSprite.Size;
