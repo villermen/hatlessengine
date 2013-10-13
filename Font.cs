@@ -16,12 +16,13 @@ namespace HatlessEngine
             Filename = filename;
         }
 
-        public void Draw(string str, Position pos, uint size)
+        public void Draw(string str, Position pos, uint size, Color color)
         {
             Load();
             SFMLText.DisplayedString = str;
             SFMLText.Position = new SFML.Window.Vector2f(pos.X, pos.Y);
             SFMLText.CharacterSize = size;
+            SFMLText.Color = color;
             Game.RenderPlane.Draw(SFMLText);
         }
 
