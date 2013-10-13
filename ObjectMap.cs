@@ -20,13 +20,16 @@ namespace HatlessEngine
             Blueprints = new List<ObjectBlueprint>(objects);
         }
 
-        public void CreateObjects()
+        public List<LogicalObject> CreateObjects()
         {
+            List<LogicalObject> returnList = new List<LogicalObject>();
             foreach (ObjectBlueprint blueprint in Blueprints)
             {
                 LogicalObject logicalObject = (LogicalObject)Activator.CreateInstance(blueprint.Type, blueprint.Arguments.ToArray());
                 ActiveObjects.Add(logicalObject);
-            }  
+                returnList.Add(logicalObject);
+            }
+            return returnList;
         }
 
         public void DestroyObjects()
