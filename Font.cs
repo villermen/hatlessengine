@@ -16,7 +16,7 @@ namespace HatlessEngine
             Filename = filename;
         }
 
-        internal void Draw(string str, Position pos, uint size)
+        public void Draw(string str, Position pos, uint size)
         {
             Load();
             SFMLText.DisplayedString = str;

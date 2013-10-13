@@ -13,6 +13,13 @@ namespace HatlessEngine
             font.Draw(str, pos, fontSize);
         }
 
-        //shapes
+        public static void Rectangle(Rectangle rect) //color
+        {
+            SFML.Graphics.RectangleShape sfmlRect = new SFML.Graphics.RectangleShape(new SFML.Window.Vector2f(rect.Width, rect.Height));
+            sfmlRect.Position = new SFML.Window.Vector2f(rect.X, rect.Y);
+            Game.RenderPlane.Draw(sfmlRect);
+        }
+
+        //circles, polygons
     }
 }
