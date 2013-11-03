@@ -8,9 +8,9 @@ namespace HatlessEngine
     /// </summary>
     public static class DrawX
     {
-        public static void Text(string str, Font font, Position pos, Color color, uint fontSize = 12)
+        public static void Text(string str, string fontId, Position pos, Color color, uint fontSize = 12)
         {
-            font.Draw(str, pos, fontSize, color);
+            Resources.Font(fontId).Draw(str, pos, fontSize, color);
         }
 
         public static void Rectangle(Rectangle rect, Color color)

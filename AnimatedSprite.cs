@@ -29,11 +29,11 @@ namespace HatlessEngine
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="targetSprite">Sprite object from Resources to use.</param>
+        /// <param name="targetSprite">Sprite object id from Resources to use.</param>
         /// <param name="animationId">The sprite's animation id string, can be changed using AnimationId after this.</param>
-        public AnimatedSprite(Sprite targetSprite, string animationId)
+        public AnimatedSprite(string targetSpriteId, string animationId)
         {
-            TargetSprite = targetSprite;
+            TargetSprite = Resources.Sprite(targetSpriteId);
             AnimationId = animationId;
         }
 
