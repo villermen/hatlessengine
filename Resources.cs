@@ -37,7 +37,7 @@ namespace HatlessEngine
             //Fonts.Add ("inconsolata", new Font("inconsolata", System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("HatlessEngine.Inconsolata.otf")));
         }
 
-        public static Sprite AddSprite(string id, string filename, uint width = 0)
+        public static Sprite AddSprite(string id, string filename, Size size)
         {
             if (!File.Exists(RootDirectory + filename))
                 Log.Message("Resources.AddSprite: file '" + RootDirectory + filename + "' does not exist.", ErrorLevel.FATAL);
@@ -45,14 +45,18 @@ namespace HatlessEngine
                 Log.Message("Resources.AddSprite: id '" + id + "' already exists.", ErrorLevel.FATAL);
 
             Sprite sprite;
-            if (width == 0)
+            if (size.Width == 0 && size.Height == 0)
                 sprite = new Sprite(id, RootDirectory + filename);
             else
-                sprite = new Sprite(id, RootDirectory + filename, width);
+                sprite = new Sprite(id, RootDirectory + filename, size);
 
             Sprites.Add(id, sprite);
 
             return sprite;
+        }
+        public static Sprite AddSprite(string id, string filename)
+        {
+            return AddSprite(id, filename, new Size(0, 0));
         }
         public static View AddView(string id, float viewX, float viewY, float viewWidth, float viewHeight, Window targetWindow, float windowXFraction = 0, float windowYFraction = 0, float windowWidthFraction = 1, float windowHeightFraction = 1)
         {

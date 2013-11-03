@@ -65,6 +65,6 @@ namespace HatlessEngine
         public static Position operator /(Position position, float value)
         {
             return new Position(position.X / value, position.Y / value);
-        }   
+        }
     }
 }

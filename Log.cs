@@ -8,7 +8,6 @@ namespace HatlessEngine
 {
     public static class Log
     {
-
         public static bool ConsoleEnabled { get; private set; }
         private static RenderWindow ConsoleWindow;
         private static List<Text> ConsoleMessages = new List<Text>(50);
@@ -20,7 +19,7 @@ namespace HatlessEngine
 
         static Log()
         {
-            ConsoleFont = new SFML.Graphics.Font(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("HatlessEngine.Inconsolata.otf"));
+            ConsoleFont = new SFML.Graphics.Font(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("HatlessEngine.Inconsolata.otf"));            
             ConsoleFontLineSpacing = ConsoleFont.GetLineSpacing(14);
             ConsoleEnabled = false;
             FileEnabled = false;

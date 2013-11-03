@@ -12,39 +12,44 @@ namespace HatlessEngine
 
         internal Dictionary<string, uint[]> Animations = new Dictionary<string, uint[]>();
 
-        private bool AutoWidth = false;
+        private bool AutoSize = false;
+        private uint FrameWidth;
+        private uint FrameHeight;
+        public uint IndexWidth { get; private set; }
+        public uint IndexHeight { get; private set; }
+        public uint IndexLength { get; private set; }
 
-        private Size _Size;
-        public Size Size
+        public Size Size 
         {
-            get
+            get { return new Size(FrameWidth, FrameHeight); }
+            set
             {
-                Load();
-                return _Size;
-            }
-            private set
-            {
-                _Size = value;
+                FrameWidth = (uint)value.Width;
+                FrameHeight = (uint)value.Height;
             }
         }
         
-        public Sprite(string id, string filename) : this(id, filename, 0)
+        public Sprite(string id, string filename) : this(id, filename, new Size(0, 0))
         {
-            AutoWidth = true;
+            AutoSize = true;
         }
-        public Sprite(string id, string filename, uint width)
+        public Sprite(string id, string filename, Size size)
         {
-            Id = Id;
-            Size = new Size((float)width, 0);
+            Id = id;
+            Size = size;
             Filename = filename;
             IsLoaded = false;
+            IndexWidth = 1;
+            IndexHeight = 1;
+            IndexLength = 1;
         }
 
         public void Draw(float x, float y, uint frameIndex = 0)
         {
             Load();
             SFMLSprite.Position = new SFML.Window.Vector2f(x, y);
-            SFMLSprite.TextureRect = new SFML.Graphics.IntRect((int)(frameIndex * Size.Width), 0, (int)Size.Width, (int)Size.Height);
+
+            SFMLSprite.TextureRect = new SFML.Graphics.IntRect((int)(frameIndex % IndexWidth * FrameWidth), (int)(frameIndex / IndexWidth * FrameHeight), (int)FrameWidth, (int)FrameHeight);
             Game.RenderPlane.Draw(SFMLSprite);
         }
 
@@ -53,15 +58,21 @@ namespace HatlessEngine
             if (!IsLoaded)
             {
                 SFMLSprite = new SFML.Graphics.Sprite(new SFML.Graphics.Texture(Filename));
-                float height = (uint)SFMLSprite.GetLocalBounds().Height;
 
-                float width;
-                if (AutoWidth)                   
-                    width = (uint)SFMLSprite.GetLocalBounds().Width;
+                if (AutoSize)
+                {
+                    FrameWidth = (uint)SFMLSprite.GetLocalBounds().Width;
+                    FrameHeight = (uint)SFMLSprite.GetLocalBounds().Height;
+                    IndexWidth = 1;
+                    IndexHeight = 1;
+                    IndexLength = 1;
+                }
                 else
-                    width = Size.Width;
-
-                Size = new Size(width, height);
+                {
+                    IndexWidth = (uint)(SFMLSprite.GetLocalBounds().Width / FrameWidth);
+                    IndexHeight = (uint)(SFMLSprite.GetLocalBounds().Height / FrameHeight);
+                    IndexLength = IndexWidth * IndexHeight;
+                }
                     
                 IsLoaded = true;
             }

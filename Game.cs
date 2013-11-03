@@ -30,10 +30,6 @@ namespace HatlessEngine
 
         public static Window FocusedWindow { get; internal set; }
 
-        //debug
-        private static string SPSDelayed = "";
-        private static string FPSDelayed = "";
-
         static Game()
         {
             IsRunning = false;
