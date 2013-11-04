@@ -44,10 +44,10 @@ namespace HatlessEngine
             IndexLength = 1;
         }
 
-        public void Draw(float x, float y, uint frameIndex = 0)
+        public void Draw(Position pos, uint frameIndex = 0)
         {
             Load();
-            SFMLSprite.Position = new SFML.Window.Vector2f(x, y);
+            SFMLSprite.Position = new SFML.Window.Vector2f(pos.X, pos.Y);
 
             SFMLSprite.TextureRect = new SFML.Graphics.IntRect((int)(frameIndex % IndexWidth * FrameWidth), (int)(frameIndex / IndexWidth * FrameHeight), (int)FrameWidth, (int)FrameHeight);
             Game.RenderPlane.Draw(SFMLSprite);

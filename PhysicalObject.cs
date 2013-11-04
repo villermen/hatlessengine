@@ -78,9 +78,9 @@ namespace HatlessEngine
         {
             //draw built-in sprite and animated sprite
             if (BuiltinSprite != null)
-                BuiltinSprite.Draw(Position.X - Speed.X * (1 - stepProgress), Position.Y - Speed.Y * (1 - stepProgress), BuiltinSpriteIndex);
+                BuiltinSprite.Draw(new Position(Position.X - Speed.X * (1 - stepProgress), Position.Y - Speed.Y * (1 - stepProgress)), BuiltinSpriteIndex);
             if (BuiltinAnimatedSprite != null)
-                BuiltinAnimatedSprite.Draw(Position.X - Speed.X * (1 - stepProgress), Position.Y - Speed.Y * (1 - stepProgress));
+                BuiltinAnimatedSprite.Draw(new Position(Position.X - Speed.X * (1 - stepProgress), Position.Y - Speed.Y * (1 - stepProgress)));
         }
 
         public bool Collision(Rectangle rectangle, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)

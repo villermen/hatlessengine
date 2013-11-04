@@ -37,9 +37,9 @@ namespace HatlessEngine
             AnimationId = animationId;
         }
 
-        public void Draw(float x, float y)
+        public void Draw(Position pos)
         {
-            TargetSprite.Draw(x, y, CurrentIndex);
+            TargetSprite.Draw(pos, CurrentIndex);
         }
 
         /// <summary>
