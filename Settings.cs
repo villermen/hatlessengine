@@ -16,7 +16,5 @@ namespace HatlessEngine
         /// It will be set to true if the game is started with the default window (lazy bum option)
         /// </summary>
         public static bool ExitOnLastWindowClose = true;
-
-        public static bool ExitOnConsoleClose = true;
     }
 }

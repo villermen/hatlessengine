@@ -93,10 +93,6 @@ namespace HatlessEngine
                     SPS = (uint)(Stopwatch.Frequency / TicksSinceLastStep);
                     LastStepTime = stopwatch.ElapsedTicks;
 
-                    //temp
-                    if (Log.ConsoleEnabled)
-                        Log.DispatchConsoleEvents();
-
                     Stepnumber++;
                 }
 

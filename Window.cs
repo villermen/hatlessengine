@@ -21,7 +21,7 @@ namespace HatlessEngine
 
         static Window()
         {
-            DefaultIconPixels = new SFML.Graphics.Image(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("HatlessEngine.defaultwindowicon.png")).Pixels;
+            DefaultIconPixels = new SFML.Graphics.Image(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("HatlessEngine.windowicon.png")).Pixels;
         }
 
         public Window(string id, uint width, uint height, string title)
