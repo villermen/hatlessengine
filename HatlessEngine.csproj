@@ -73,6 +73,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnimatedSprite.cs" />
@@ -146,6 +147,7 @@
     <Compile Include="Sound.cs" />
     <Compile Include="Speed.cs" />
     <Compile Include="Sprite.cs" />
+    <Compile Include="SpriteMap.cs" />
     <Compile Include="View.cs" />
     <Compile Include="Window.cs" />
   </ItemGroup>

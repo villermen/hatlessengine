@@ -139,7 +139,9 @@ namespace HatlessEngine
 
         public static void Exit()
         {
-            stopwatch.Stop();
+            //close open logfile
+            Log.DisableFile();
+            Environment.Exit(0);
         }
     }
 }
