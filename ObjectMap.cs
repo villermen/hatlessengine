@@ -7,23 +7,23 @@ namespace HatlessEngine
     /// Stores a list of objects, that can be mass-created and removed.
     /// Convenient way of creating levels or maps in general.
     /// </summary>
-    public class ObjectMap
+    public class Objectmap
     {
         public string Id { get; private set; }
 
-        private List<ObjectMapBlueprint> Blueprints;
+        private List<ObjectmapBlueprint> Blueprints;
         public List<LogicalObject> ActiveObjects = new List<LogicalObject>();
 
-        public ObjectMap(string id, params ObjectMapBlueprint[] objects)
+        public Objectmap(string id, params ObjectmapBlueprint[] objects)
         {
             Id = id;
-            Blueprints = new List<ObjectMapBlueprint>(objects);
+            Blueprints = new List<ObjectmapBlueprint>(objects);
         }
 
         public List<LogicalObject> CreateObjects()
         {
             List<LogicalObject> returnList = new List<LogicalObject>();
-            foreach (ObjectMapBlueprint blueprint in Blueprints)
+            foreach (ObjectmapBlueprint blueprint in Blueprints)
             {
                 LogicalObject logicalObject = (LogicalObject)Activator.CreateInstance(blueprint.Type, blueprint.Arguments.ToArray());
                 ActiveObjects.Add(logicalObject);

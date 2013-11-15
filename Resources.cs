@@ -21,8 +21,8 @@ namespace HatlessEngine
         public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
 
         //collections
-        public static Dictionary<string, ObjectMap> ObjectMaps = new Dictionary<string, ObjectMap>();
-        public static Dictionary<string, SpriteMap> SpriteMaps = new Dictionary<string, SpriteMap>();
+        public static Dictionary<string, Objectmap> Objectmaps = new Dictionary<string, Objectmap>();
+        public static Dictionary<string, Spritemap> Spritemaps = new Dictionary<string, Spritemap>();
         //public static Dictionary<string, CombinedMap> CombinedMaps = new Dictionary<string, CombinedMap>();
 
         //objects
@@ -102,10 +102,10 @@ namespace HatlessEngine
             Sounds.Add(id, sound);
             return sound;
         }
-        public static ObjectMap AddObjectMap(string id, params ObjectMapBlueprint[] objects)
+        public static Objectmap AddObjectmap(string id, params ObjectmapBlueprint[] objects)
         {
-            ObjectMap objectMap = new ObjectMap(id, objects);
-            ObjectMaps.Add(id, objectMap);
+            Objectmap objectMap = new Objectmap(id, objects);
+            Objectmaps.Add(id, objectMap);
             return objectMap;
         }
 

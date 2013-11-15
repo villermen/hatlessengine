@@ -90,8 +90,8 @@
     <Compile Include="LogicalObject.cs" />
     <Compile Include="Misc.cs" />
     <Compile Include="Music.cs" />
-    <Compile Include="ObjectMapBlueprint.cs" />
-    <Compile Include="ObjectMap.cs" />
+    <Compile Include="ObjectmapBlueprint.cs" />
+    <Compile Include="Objectmap.cs" />
     <Compile Include="PhysicalObject.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -148,7 +148,7 @@
     <Compile Include="Sound.cs" />
     <Compile Include="Speed.cs" />
     <Compile Include="Sprite.cs" />
-    <Compile Include="SpriteMap.cs" />
+    <Compile Include="Spritemap.cs" />
     <Compile Include="View.cs" />
     <Compile Include="Window.cs" />
   </ItemGroup>
