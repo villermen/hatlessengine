@@ -71,7 +71,7 @@ namespace HatlessEngine
 
             //update built-in animated sprite
             if (BuiltinAnimatedSprite != null)
-                BuiltinAnimatedSprite.Update();
+                BuiltinAnimatedSprite.Step();
         }
 
         internal override void AfterDraw(float stepProgress)

@@ -22,7 +22,7 @@ namespace HatlessEngine
 
         //collections
         public static Dictionary<string, ObjectMap> ObjectMaps = new Dictionary<string, ObjectMap>();
-        public static Dictionary<string, GraphicMap> GraphicMaps = new Dictionary<string, GraphicMap>();
+        public static Dictionary<string, SpriteMap> SpriteMaps = new Dictionary<string, SpriteMap>();
         //public static Dictionary<string, CombinedMap> CombinedMaps = new Dictionary<string, CombinedMap>();
 
         //objects
@@ -102,7 +102,7 @@ namespace HatlessEngine
             Sounds.Add(id, sound);
             return sound;
         }
-        public static ObjectMap AddObjectMap(string id, params ObjectBlueprint[] objects)
+        public static ObjectMap AddObjectMap(string id, params ObjectMapBlueprint[] objects)
         {
             ObjectMap objectMap = new ObjectMap(id, objects);
             ObjectMaps.Add(id, objectMap);

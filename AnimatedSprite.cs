@@ -4,6 +4,7 @@ namespace HatlessEngine
 {
     /// <summary>
     /// Can be used to draw animations of a sprite without having to manage pointers yourself.
+    /// Must be initialized per animation, unlike external resources.
     /// </summary>
     public class AnimatedSprite
     {
@@ -20,6 +21,9 @@ namespace HatlessEngine
                 IndexIncrements = 0;
             }
         }
+        /// <summary>
+        /// Frames per step, use SetFramesPerSecond if you don't like maths.
+        /// </summary>
         public float Speed = 0;
         private long Stepnumber = 0;
         private long IndexIncrements = 0;
@@ -44,7 +48,7 @@ namespace HatlessEngine
         /// Makes the animation actually work, call this on every step.
         /// (BuiltinAnimation will have this done automagically)
         /// </summary>
-        public void Update()
+        public void Step()
         {
             if (IndexIncrements + 1 <= Stepnumber * Speed)
             {

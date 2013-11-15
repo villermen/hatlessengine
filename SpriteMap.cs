@@ -2,7 +2,7 @@
 
 namespace HatlessEngine
 {
-    public class GraphicMap
+    public class SpriteMap
     {
         //to be continued...
     }

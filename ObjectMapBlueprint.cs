@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 namespace HatlessEngine
 {
-    public class ObjectBlueprint
+    public class ObjectMapBlueprint
     {
         public Type Type;
         public List<object> Arguments;
 
-        public ObjectBlueprint(Type type, params object[] arguments)
+        public ObjectMapBlueprint(Type type, params object[] arguments)
         {
             Type = type;
             Arguments = new List<object>(arguments);
         }
 
-        public ObjectBlueprint(Type type) : this(type, new object[0]) { }
+        public ObjectMapBlueprint(Type type) : this(type, new object[0]) { }
     }
 }
