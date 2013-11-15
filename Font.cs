@@ -2,7 +2,7 @@
 
 namespace HatlessEngine
 {
-    public class Font
+    public class Font : IExternalResource
     {
         public string Filename { get; private set; }
         public string Id { get; private set; }
@@ -23,7 +23,7 @@ namespace HatlessEngine
             SFMLText.Position = new SFML.Window.Vector2f(pos.X, pos.Y);
             SFMLText.CharacterSize = size;
             SFMLText.Color = color;
-            Game.RenderPlane.Draw(SFMLText);
+            Resources.RenderPlane.Draw(SFMLText);
         }
 
         public void Load()

@@ -230,8 +230,8 @@ namespace HatlessEngine
 
         public bool Collision(Type checkObjectType, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
         {
-            if (!typeof(PhysicalObject).IsAssignableFrom(checkObjectType))
-                Log.Message(checkObjectType.ToString() + " does not inherit from PhysicalObject.", ErrorLevel.FATAL);
+            /*if (!typeof(PhysicalObject).IsAssignableFrom(checkObjectType))
+                Log.Message(checkObjectType.ToString() + " does not inherit from PhysicalObject.", ErrorLevel.FATAL);*/
 
             bool result = false;
 

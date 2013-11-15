@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HatlessEngine
 {
-    public class Sprite
+    public class Sprite : IExternalResource
     {   
         public string Filename { get; private set; }
         public string Id { get; private set; }
@@ -50,7 +50,7 @@ namespace HatlessEngine
             SFMLSprite.Position = new SFML.Window.Vector2f(pos.X, pos.Y);
 
             SFMLSprite.TextureRect = new SFML.Graphics.IntRect((int)(frameIndex % IndexWidth * FrameWidth), (int)(frameIndex / IndexWidth * FrameHeight), (int)FrameWidth, (int)FrameHeight);
-            Game.RenderPlane.Draw(SFMLSprite);
+            Resources.RenderPlane.Draw(SFMLSprite);
         }
 
         public void Load()

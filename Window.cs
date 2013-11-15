@@ -50,12 +50,12 @@ namespace HatlessEngine
         /// </summary>
         private void SFMLWindowGainedFocus(object sender, EventArgs e)
         {
-            Game.FocusedWindow = this;
+            Resources.FocusedWindow = this;
         }
 
         private void SFMLWindowLostFocus(object sender, EventArgs e)
         {
-            Game.FocusedWindow = null;
+            Resources.FocusedWindow = null;
         }
 
         private void SFMLWindowClosed(object sender, EventArgs e)

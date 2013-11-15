@@ -15,8 +15,6 @@ namespace HatlessEngine
             get { return animationId; }
             set
             {
-                if (!TargetSprite.Animations.ContainsKey(value))
-                    Log.Message("AnimatedSprite: Sprite '" + TargetSprite.ToString() + "' does not have an animation with id '" + value + "'", ErrorLevel.FATAL);
                 animationId = value;
                 Stepnumber = 0;
                 IndexIncrements = 0;
@@ -33,7 +31,7 @@ namespace HatlessEngine
         /// <param name="animationId">The sprite's animation id string, can be changed using AnimationId after this.</param>
         public AnimatedSprite(string targetSpriteId, string animationId)
         {
-            TargetSprite = Resources.Sprite(targetSpriteId);
+            TargetSprite = Resources.Sprites[targetSpriteId];
             AnimationId = animationId;
         }
 

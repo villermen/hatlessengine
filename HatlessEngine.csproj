@@ -85,6 +85,7 @@
     <Compile Include="Font.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Input.cs" />
+    <Compile Include="IExternalResource.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="LogicalObject.cs" />
     <Compile Include="Misc.cs" />
@@ -147,7 +148,7 @@
     <Compile Include="Sound.cs" />
     <Compile Include="Speed.cs" />
     <Compile Include="Sprite.cs" />
-    <Compile Include="SpriteMap.cs" />
+    <Compile Include="GraphicMap.cs" />
     <Compile Include="View.cs" />
     <Compile Include="Window.cs" />
   </ItemGroup>

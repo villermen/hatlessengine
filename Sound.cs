@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HatlessEngine
 {
-    public class Sound
+    public class Sound : IExternalResource
     {
         public string Filename { get; private set; }
         public string Id { get; private set; }

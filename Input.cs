@@ -43,7 +43,7 @@ namespace HatlessEngine
 
         public static bool IsPressed(Button button, bool global = false)
         {
-            if (global || Game.FocusedWindow != null)
+            if (global || Resources.FocusedWindow != null)
                 return (CurrentState.Contains(button) && !PreviousState.Contains(button));
             else
                 return false;
@@ -56,14 +56,14 @@ namespace HatlessEngine
         /// <returns></returns>
         public static bool IsDown(Button button, bool global = false)
         {
-            if (global || Game.FocusedWindow != null)
+            if (global || Resources.FocusedWindow != null)
                 return CurrentState.Contains(button);
             else
                 return false;
         }
         public static bool IsReleased(Button button, bool global = false)
         {
-            if (global || Game.FocusedWindow != null)
+            if (global || Resources.FocusedWindow != null)
                 return (!CurrentState.Contains(button) && PreviousState.Contains(button));
             else
                 return false;
@@ -78,7 +78,7 @@ namespace HatlessEngine
         /// <returns>Axis value, 0 if not focused or not significant enough.</returns>
         public static float GetGamePadAxis(uint gamePadNumber, uint axisNumber, bool global = false)
         {
-            if (global || Game.FocusedWindow != null)
+            if (global || Resources.FocusedWindow != null)
             {
                 float axis = GamepadAxes[gamePadNumber, axisNumber];
                 if (axis < -gamePadDeadZone || axis > gamePadDeadZone)
@@ -107,7 +107,7 @@ namespace HatlessEngine
 
             //check where mouse is on RenderPlane
             Mouse = new Position(0, 0);
-            Window focusedWindow = Game.FocusedWindow;
+            Window focusedWindow = Resources.FocusedWindow;
             if (focusedWindow != null)
             {
                 foreach (View view in focusedWindow.ActiveViews)
@@ -226,7 +226,7 @@ namespace HatlessEngine
         {
             string str = "";
 
-            if (global || Game.FocusedWindow != null)
+            if (global || Resources.FocusedWindow != null)
             {
                 if (CurrentState.Count > 0)
                 {

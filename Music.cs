@@ -2,7 +2,7 @@
 
 namespace HatlessEngine
 {
-    public class Music
+    public class Music : IExternalResource
     {
         public string Filename { get; private set; }
         public string Id { get; private set; }

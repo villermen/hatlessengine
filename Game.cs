@@ -24,18 +24,9 @@ namespace HatlessEngine
         private static long LastDrawTime = 0;
         public static uint FPS = 0;
 
-        internal static SFML.Graphics.RenderTexture RenderPlane = new SFML.Graphics.RenderTexture(800, 600);
-        private static SFML.Graphics.Sprite RenderSprite;
-        private static SFML.Graphics.RectangleShape dirtyRenderFix = new SFML.Graphics.RectangleShape();
-
-        public static Window FocusedWindow { get; internal set; }
-
         static Game()
         {
             IsRunning = false;
-            RenderPlane.Smooth = true;
-            FocusedWindow = null;
-
             Thread.CurrentThread.Name = "HatlessEngine";
         }
 
@@ -67,22 +58,13 @@ namespace HatlessEngine
                 //step
                 if (stopwatch.ElapsedTicks >= (Stepnumber + 1) * Stopwatch.Frequency / (float)Speed)
                 {
-                    //window handling, before Input.UpdateState to have the correct mouse coordinates to work with
-                    foreach (Window window in Resources.Windows)
-                        window.SFMLWindow.DispatchEvents();
+                    //handle window events before input (updates mouse position on windows and such)
+                    Resources.WindowEvents();
 
                     //update input state
                     Input.UpdateState();
 
-                    //objects
-                    foreach (LogicalObject obj in Resources.Objects)
-                    {
-                        obj.Step();
-                        obj.AfterStep();
-                    }
-
-                    //add and remove all objects & windows that have to be added or removed
-                    Resources.AdditionAndRemoval();
+                    Resources.Step();
 
                     //window cleanup (cant be done during window-eventloop)
                     if (Resources.Windows.Count == 0 && Settings.ExitOnLastWindowClose)
@@ -97,43 +79,12 @@ namespace HatlessEngine
                 }
 
                 //draw
-                if (Resources.Windows.Count > 0)
-                {
-                    //create texture to display
-                    RenderPlane.Clear(new SFML.Graphics.Color(64, 64, 64));
-
-                    //draw every objects' draw method
-                    foreach (LogicalObject obj in Resources.Objects)
-                    {
-                        obj.Draw(stepProgress);
-                        obj.AfterDraw(stepProgress);
-                    }
-
-                    //to prevent weird rendertexture bug
-                    dirtyRenderFix.Size = new SFML.Window.Vector2f(RenderPlane.Size.X, RenderPlane.Size.Y);
-                    dirtyRenderFix.FillColor = SFML.Graphics.Color.Transparent;
-                    RenderPlane.Draw(dirtyRenderFix);
-
-                    RenderPlane.Display();
-                    RenderSprite = new SFML.Graphics.Sprite(RenderPlane.Texture);
-
-                    //display the texture on window(s) using view(s)
-                    foreach (Window window in Resources.Windows)
-                    {
-                        foreach (View view in window.ActiveViews)
-                        {
-                            window.SFMLWindow.SetView(view.SFMLView);
-                            window.SFMLWindow.Draw(RenderSprite);
-                        }
-
-                        window.SFMLWindow.Display();
-                    }
-
-                    //FPS calculation
-                    TicksSinceLastDraw = stopwatch.ElapsedTicks - LastDrawTime;
-                    FPS = (uint)(Stopwatch.Frequency / TicksSinceLastDraw);
-                    LastDrawTime = stopwatch.ElapsedTicks;
-                }
+                Resources.Draw(stepProgress);
+                
+                //FPS calculation
+                TicksSinceLastDraw = stopwatch.ElapsedTicks - LastDrawTime;
+                FPS = (uint)(Stopwatch.Frequency / TicksSinceLastDraw);
+                LastDrawTime = stopwatch.ElapsedTicks;
             }
         }
 
