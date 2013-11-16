@@ -24,7 +24,7 @@ namespace HatlessEngine
         /// <summary>
         /// Frames per step, use SetFramesPerSecond if you don't like maths.
         /// </summary>
-        public float Speed = 0;
+        public float Speed = 1;
         private long Stepnumber = 0;
         private long IndexIncrements = 0;
 

@@ -47,5 +47,6 @@
             Width = width;
             Height = height;
         }
+        public Rectangle(Position pos, Size size) : this(pos.X, pos.Y, size.Width, size.Height) { }
     }
 }

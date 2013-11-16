@@ -14,10 +14,10 @@ namespace HatlessEngine
         private List<ObjectmapBlueprint> Blueprints;
         public List<LogicalObject> ActiveObjects = new List<LogicalObject>();
 
-        public Objectmap(string id, params ObjectmapBlueprint[] objects)
+        public Objectmap(string id, params ObjectmapBlueprint[] blueprints)
         {
             Id = id;
-            Blueprints = new List<ObjectmapBlueprint>(objects);
+            Blueprints = new List<ObjectmapBlueprint>(blueprints);
         }
 
         public List<LogicalObject> CreateObjects()

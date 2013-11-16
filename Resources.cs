@@ -63,13 +63,6 @@ namespace HatlessEngine
         }
         public static Sprite AddSprite(string id, string filename, Size size)
         {
-            /* old system
-             * if (!File.Exists(RootDirectory + filename))
-             *    Log.Message("Resources.AddSprite: file '" + RootDirectory + filename + "' does not exist.", ErrorLevel.FATAL);
-             * if (Sprites.ContainsKey(id))
-             *   Log.Message("Resources.AddSprite: id '" + id + "' already exists.", ErrorLevel.FATAL);
-             */
-
             Sprite sprite;
             if (size.Width == 0 && size.Height == 0)
                 sprite = new Sprite(id, RootDirectory + filename);
@@ -102,11 +95,17 @@ namespace HatlessEngine
             Sounds.Add(id, sound);
             return sound;
         }
-        public static Objectmap AddObjectmap(string id, params ObjectmapBlueprint[] objects)
+        public static Objectmap AddObjectmap(string id, params ObjectmapBlueprint[] objectmapBlueprints)
         {
-            Objectmap objectMap = new Objectmap(id, objects);
-            Objectmaps.Add(id, objectMap);
-            return objectMap;
+            Objectmap objectmap = new Objectmap(id, objectmapBlueprints);
+            Objectmaps.Add(id, objectmap);
+            return objectmap;
+        }
+        public static Spritemap AddSpritemap(string id, params SpritemapBlueprint[] spritemapBlueprints)
+        {
+            Spritemap spritemap = new Spritemap(id, spritemapBlueprints);
+            Spritemaps.Add(id, spritemap);
+            return spritemap;
         }
 
         /// <summary>

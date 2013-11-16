@@ -149,6 +149,7 @@
     <Compile Include="Speed.cs" />
     <Compile Include="Sprite.cs" />
     <Compile Include="Spritemap.cs" />
+    <Compile Include="SpritemapBlueprint.cs" />
     <Compile Include="View.cs" />
     <Compile Include="Window.cs" />
   </ItemGroup>
