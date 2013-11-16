@@ -219,7 +219,6 @@ namespace HatlessEngine
 
             return result;
         }
-
         public bool Collision(PhysicalObject checkObject, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
         {
             //temp solution, perm solution will account for other object's movement
@@ -227,20 +226,43 @@ namespace HatlessEngine
                 return false;
             return Collision(checkObject.BoundBoxRectangle, side, action);
         }
-
         public bool Collision(Type checkObjectType, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
         {
-            /*if (!typeof(PhysicalObject).IsAssignableFrom(checkObjectType))
-                Log.Message(checkObjectType.ToString() + " does not inherit from PhysicalObject.", ErrorLevel.FATAL);*/
-
             bool result = false;
-
             foreach (PhysicalObject object2 in Resources.PhysicalObjectsByType[checkObjectType])
             {
                 if (Collision(object2, side, action))
                     result = true;
             }
-
+            return result;
+        }
+        /// <summary>
+        /// Checks collision against every sprite in a spritemap with position pos.
+        /// </summary>
+        public bool Collision(string spritemapId, Position pos, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
+        {
+            bool result = false;
+            foreach (SpritemapBlueprint blueprint in Resources.Spritemaps[spritemapId].Blueprints)
+            {
+                if (Collision(blueprint.Rectangle + pos, side, action))
+                    result = true;
+            }
+            return result;
+        }
+        /// <summary>
+        /// Checks collision against a certain sprite in a spritemap with position pos.
+        /// </summary>
+        public bool Collision(string spritemapId, Position pos, string spriteId, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
+        {
+            bool result = false;
+            foreach (SpritemapBlueprint blueprint in Resources.Spritemaps[spritemapId].Blueprints)
+            {
+                if (blueprint.Sprite.Id == spriteId)
+                {
+                    if (Collision(blueprint.Rectangle + pos, side, action))
+                        result = true;
+                }
+            }
             return result;
         }
 

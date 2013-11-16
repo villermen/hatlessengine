@@ -48,5 +48,14 @@
             Height = height;
         }
         public Rectangle(Position pos, Size size) : this(pos.X, pos.Y, size.Width, size.Height) { }
+
+        public static Rectangle operator +(Rectangle rect, Position pos)
+        {
+            return new Rectangle(rect.X + pos.X, rect.Y + pos.Y, rect.Width, rect.Height);
+        }
+        public static Rectangle operator -(Rectangle rect, Position pos)
+        {
+            return new Rectangle(rect.X - pos.X, rect.Y - pos.Y, rect.Width, rect.Height);
+        }
     }
 }
