@@ -77,6 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnimatedSprite.cs" />
+    <Compile Include="BoolAndData.cs" />
     <Compile Include="Button.cs" />
     <Compile Include="ButtonObject.cs" />
     <Compile Include="Color.cs" />
