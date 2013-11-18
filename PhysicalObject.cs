@@ -226,44 +226,59 @@ namespace HatlessEngine
                 return false;
             return Collision(checkObject.BoundBoxRectangle, side, action);
         }
-        public bool Collision(Type checkObjectType, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
+        public BoolAndData<List<PhysicalObject>> Collision(Type checkObjectType, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
         {
-            bool result = false;
+            List<PhysicalObject> resultObjects = new List<PhysicalObject>();
+
             foreach (PhysicalObject object2 in Resources.PhysicalObjectsByType[checkObjectType])
             {
                 if (Collision(object2, side, action))
-                    result = true;
+                    resultObjects.Add(object2);
             }
-            return result;
+
+            if (resultObjects.Count > 0)
+                return new BoolAndData<List<PhysicalObject>>(true, resultObjects);
+            else
+                return new BoolAndData<List<PhysicalObject>>(false, null);
         }
         /// <summary>
         /// Checks collision against every sprite in a spritemap with position pos.
         /// </summary>
-        public bool Collision(string spritemapId, Position pos, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
+        public BoolAndData<List<SpritemapBlueprint>> Collision(string spritemapId, Position pos, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
         {
-            bool result = false;
+            List<SpritemapBlueprint> resultSprites = new List<SpritemapBlueprint>();
+
             foreach (SpritemapBlueprint blueprint in Resources.Spritemaps[spritemapId].Blueprints)
             {
                 if (Collision(blueprint.Rectangle + pos, side, action))
-                    result = true;
+                    resultSprites.Add(blueprint);
             }
-            return result;
+
+            if (resultSprites.Count > 0)
+                return new BoolAndData<List<SpritemapBlueprint>>(true, resultSprites);
+            else
+                return new BoolAndData<List<SpritemapBlueprint>>(false, null);
         }
         /// <summary>
         /// Checks collision against a certain sprite in a spritemap with position pos.
         /// </summary>
-        public bool Collision(string spritemapId, Position pos, string spriteId, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
+        public BoolAndData<List<SpritemapBlueprint>> Collision(string spritemapId, Position pos, string spriteId, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
         {
-            bool result = false;
+            List<SpritemapBlueprint> resultSprites = new List<SpritemapBlueprint>();
+
             foreach (SpritemapBlueprint blueprint in Resources.Spritemaps[spritemapId].Blueprints)
             {
                 if (blueprint.Sprite.Id == spriteId)
                 {
                     if (Collision(blueprint.Rectangle + pos, side, action))
-                        result = true;
+                        resultSprites.Add(blueprint);
                 }
             }
-            return result;
+
+            if (resultSprites.Count > 0)
+                return new BoolAndData<List<SpritemapBlueprint>>(true, resultSprites);
+            else
+                return new BoolAndData<List<SpritemapBlueprint>>(false, null);
         }
 
         public new void Destroy()
