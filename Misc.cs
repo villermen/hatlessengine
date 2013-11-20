@@ -17,28 +17,5 @@ namespace HatlessEngine
             else
                 return false;
         }
-
-        /// <summary>
-        /// Checks whether a type inherits from another type.
-        /// </summary>
-        /// <param name="type">Type (child).</param>
-        /// <param name="inheritedType">Type to check for (parent).</param>
-        /// <returns>Whether given type inherits from checkType.</returns>
-        public static bool CheckInheritance(Type type, Type inheritedType)
-        {
-            if (type == inheritedType)
-                return true;            
-
-            Type currentBase = type.BaseType;
-            while (currentBase != null)
-            {
-                if (currentBase == inheritedType)
-                    return true;
-
-                currentBase = currentBase.BaseType;
-            }
-
-            return false;
-        }
     }
 }

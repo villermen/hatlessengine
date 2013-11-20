@@ -23,11 +23,12 @@ namespace HatlessEngine
             get { return _State; }
             private set { _State = value; } 
         }
+        private Sprite Sprite;
 
         public ButtonObject(Position position, Sprite sprite) : base(position)
         {
-            BuiltinSprite = sprite;
-            BoundBoxRectangle.Size = BuiltinSprite.Size;
+            Sprite = sprite;
+            BoundBoxRectangle.Size = Sprite.Size;
         }
 
         public sealed override void Step()
@@ -51,11 +52,12 @@ namespace HatlessEngine
             }
             else
                 State = 0;
-
-            BuiltinSpriteIndex = State;
         }
 
-        public sealed override void Draw(float stepProgress) { }
+        public sealed override void Draw(float stepProgress)
+        {
+            Sprite.Draw(Position, State);
+        }
 
         /// <summary>
         /// Triggers once when the mouse is released after being pressed on the button and never having left it.

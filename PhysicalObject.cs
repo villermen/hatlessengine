@@ -40,10 +40,6 @@ namespace HatlessEngine
         public Speed BoundBoxSpeed;
         public Position BoundBoxOffset;
 
-        public Sprite BuiltinSprite = null;
-        public uint BuiltinSpriteIndex = 0;
-        public AnimatedSprite BuiltinAnimatedSprite = null;
-
         public PhysicalObject(Position position) : base()
         {
             //set position
@@ -68,19 +64,6 @@ namespace HatlessEngine
             BoundBoxRectangle.X = Position.X + BoundBoxOffset.X;
             BoundBoxRectangle.Y = Position.Y + BoundBoxOffset.Y;
             BoundBoxSpeed = Speed;          
-
-            //update built-in animated sprite
-            if (BuiltinAnimatedSprite != null)
-                BuiltinAnimatedSprite.Step();
-        }
-
-        internal override void AfterDraw(float stepProgress)
-        {
-            //draw built-in sprite and animated sprite
-            if (BuiltinSprite != null)
-                BuiltinSprite.Draw(new Position(Position.X - Speed.X * (1 - stepProgress), Position.Y - Speed.Y * (1 - stepProgress)), BuiltinSpriteIndex);
-            if (BuiltinAnimatedSprite != null)
-                BuiltinAnimatedSprite.Draw(new Position(Position.X - Speed.X * (1 - stepProgress), Position.Y - Speed.Y * (1 - stepProgress)));
         }
 
         public bool Collision(Rectangle rectangle, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)

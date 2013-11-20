@@ -150,7 +150,6 @@ namespace HatlessEngine
                 foreach (LogicalObject obj in Objects)
                 {
                     obj.Draw(stepProgress);
-                    obj.AfterDraw(stepProgress);
                 }
 
                 //to prevent weird rendertexture bug
