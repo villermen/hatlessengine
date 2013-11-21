@@ -8,6 +8,13 @@ namespace HatlessEngine
     {
         private static List<Button> PreviousState = new List<Button>();
         private static List<Button> CurrentState = new List<Button>();
+
+        /// <summary>
+        /// Buttons mapped to other buttons.
+        /// Use this to manage maps.
+        /// E.g. Add(Button.KB_UP, Button.KB_W) will simulate W and UP pressed when you press UP afterwards.
+        /// </summary>
+        public static Dictionary<Button, Button> ButtonMaps = new Dictionary<Button, Button>();
         
         /// <summary>
         /// For getting axis state without regarding the deadzone
@@ -218,6 +225,12 @@ namespace HatlessEngine
                         else
                             XboxRStick[i + 1] = new Speed(XboxRStick[i + 1].X, 0);
                     }
+                }
+
+                foreach (KeyValuePair<Button, Button> buttonPair in ButtonMaps)
+                {
+                    if (CurrentState.Contains(buttonPair.Key))
+                        CurrentState.Add(buttonPair.Value);
                 }
             }
         }
