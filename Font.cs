@@ -10,7 +10,7 @@ namespace HatlessEngine
 
         internal SFML.Graphics.Text SFMLText;
 
-        public Font(string id, string filename)
+        internal Font(string id, string filename)
         {
             Id = id;
             Filename = filename;

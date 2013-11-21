@@ -113,13 +113,13 @@ namespace HatlessEngine
                 foreach (View view in focusedWindow.ActiveViews)
                 {
                     //if mouse is within view
-                    if (focusedWindow.MouseXOnWindow >= view.WindowX &&
-                        focusedWindow.MouseXOnWindow <= view.WindowX + view.WindowHeight &&
-                        focusedWindow.MouseYOnWindow >= view.WindowY &&
-                        focusedWindow.MouseYOnWindow <= view.WindowY + view.WindowHeight)
+                    if (focusedWindow.MouseXOnWindow >= view.Viewport.X &&
+                        focusedWindow.MouseXOnWindow <= view.Viewport.X2 &&
+                        focusedWindow.MouseYOnWindow >= view.Viewport.Y &&
+                        focusedWindow.MouseYOnWindow <= view.Viewport.Y2)
                     {
-                        float mouseX = view.X + (focusedWindow.MouseXOnWindow - view.WindowX) / view.WindowWidth * view.Width;
-                        float mouseY = view.Y + (focusedWindow.MouseYOnWindow - view.WindowY) / view.WindowHeight * view.Height;
+                        float mouseX = view.Area.X + (focusedWindow.MouseXOnWindow - view.Viewport.X) / view.Viewport.Width * view.Area.Width;
+                        float mouseY = view.Area.Y + (focusedWindow.MouseYOnWindow - view.Viewport.Y) / view.Viewport.Height * view.Area.Height;
                         Mouse = new Position(mouseX, mouseY);
                     }
                 }

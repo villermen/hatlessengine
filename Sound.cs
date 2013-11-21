@@ -12,7 +12,7 @@ namespace HatlessEngine
         private Dictionary<byte, SFML.Audio.Sound> SFMLSounds = new Dictionary<byte, SFML.Audio.Sound>(256);
         private byte NextId = 0;
 
-        public Sound(string id, string filename)
+        internal Sound(string id, string filename)
         {
             Id = id;
             Filename = filename;

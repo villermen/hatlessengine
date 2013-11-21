@@ -29,11 +29,11 @@ namespace HatlessEngine
             }
         }
         
-        public Sprite(string id, string filename) : this(id, filename, new Size(0, 0))
+        internal Sprite(string id, string filename) : this(id, filename, new Size(0, 0))
         {
             AutoSize = true;
         }
-        public Sprite(string id, string filename, Size size)
+        internal Sprite(string id, string filename, Size size)
         {
             Id = id;
             Size = size;

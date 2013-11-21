@@ -12,7 +12,7 @@ namespace HatlessEngine
 
         public List<SpritemapBlueprint> Blueprints;
 
-        public Spritemap(string id, params SpritemapBlueprint[] blueprints)
+        internal Spritemap(string id, params SpritemapBlueprint[] blueprints)
         {
             Id = id;
             Blueprints = new List<SpritemapBlueprint>(blueprints);

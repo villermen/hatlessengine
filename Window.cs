@@ -24,7 +24,7 @@ namespace HatlessEngine
             DefaultIconPixels = new SFML.Graphics.Image(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("HatlessEngine.windowicon.png")).Pixels;
         }
 
-        public Window(string id, uint width, uint height, string title)
+        internal Window(string id, uint width, uint height, string title)
         {
             Id = id;
             SFMLWindow = new SFML.Graphics.RenderWindow(new SFML.Window.VideoMode(width, height), title);

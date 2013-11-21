@@ -57,5 +57,10 @@
         {
             return new Rectangle(rect.X - pos.X, rect.Y - pos.Y, rect.Width, rect.Height);
         }
+
+        public static implicit operator SFML.Graphics.FloatRect(Rectangle rect)
+        {
+            return new SFML.Graphics.FloatRect(rect.X, rect.Y, rect.Width, rect.Height);
+        }
     }
 }

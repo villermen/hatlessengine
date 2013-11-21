@@ -55,11 +55,15 @@ namespace HatlessEngine
             Windows.Add(id, window);
             return window;
         }
-        public static View AddView(string id, float viewX, float viewY, float viewWidth, float viewHeight, Window targetWindow, float windowXFraction = 0, float windowYFraction = 0, float windowWidthFraction = 1, float windowHeightFraction = 1)
+        public static View AddView(string id, Rectangle area, string targetWindow, Rectangle viewport)
         {
-            View view = new View(id, viewX, viewY, viewWidth, viewHeight, targetWindow, windowXFraction, windowYFraction, windowWidthFraction);
+            View view = new View(id, area, targetWindow, viewport);
             Views.Add(id, view);
             return view;
+        }
+        public static View AddView(string id, Rectangle area, string targetWindow)
+        {
+            return AddView(id, area, targetWindow, new Rectangle(0, 0, 1, 1));
         }
         public static Sprite AddSprite(string id, string filename, Size size)
         {
@@ -166,6 +170,7 @@ namespace HatlessEngine
                     Window window = pair.Value;
                     foreach (View view in window.ActiveViews)
                     {
+                        view.UpdateSFMLView();
                         window.SFMLWindow.SetView(view.SFMLView);
                         window.SFMLWindow.Draw(RenderSprite);
                     }

@@ -9,7 +9,7 @@ namespace HatlessEngine
         public bool IsLoaded { get; private set; }
         internal SFML.Audio.Music SFMLMusic;
 
-        public Music(string id, string filename)
+        internal Music(string id, string filename)
         {
             Id = id;
             Filename = filename;

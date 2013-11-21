@@ -43,7 +43,7 @@ namespace HatlessEngine
             if (defaultWindowSetup)
             {
                 Window window = Resources.AddWindow("default", 800, 600, "HatlessEngine");
-                Resources.AddView("default", 0, 0, 800, 600, window, 0, 0, 1, 1);
+                Resources.AddView("default", new Rectangle(0, 0, 800, 600), "default");
             }
 
             IsRunning = true;
