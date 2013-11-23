@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace HatlessEngine
 {
@@ -18,6 +19,31 @@ namespace HatlessEngine
             Blueprints = new List<SpritemapBlueprint>(blueprints);
         }
 
+        internal Spritemap(string id, string filename)
+        {
+            Id = id;
+            Blueprints = new List<SpritemapBlueprint>();
+
+            BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read));
+            ushort protocolVersion = reader.ReadUInt16();
+            switch (protocolVersion)
+            {
+                case 1:
+                    ushort uniqueSprites = reader.ReadUInt16();
+                    for (ushort i = 1; i <= uniqueSprites; i++)
+                    {
+                        Sprite currentSprite = Resources.Sprites[reader.ReadString()];
+                        ushort spriteOccurrences = reader.ReadUInt16();
+                        for (ushort j = 1; j <= spriteOccurrences; j++)
+                        { 
+                            Blueprints.Add(new SpritemapBlueprint(currentSprite, new Position(reader.ReadSingle(), reader.ReadSingle()), reader.ReadUInt32()));
+                        }
+                    }
+                    break;
+            }
+            reader.Close();
+        }
+
         /// <summary>
         /// Draw the entire Spritemap to a position.
         /// </summary>
@@ -28,6 +54,42 @@ namespace HatlessEngine
             {
                 blueprint.Sprite.Draw(pos + blueprint.Rectangle.Position, blueprint.Frame);
             }
+        }
+
+        public void WriteToFile(string filename)
+        {
+            //prepare data for writing
+            Dictionary<string, List<Tuple<float, float, uint>>> data = new Dictionary<string, List<Tuple<float, float, uint>>>();
+            foreach (SpritemapBlueprint blueprint in Blueprints)
+            {
+                Tuple<float, float, uint> tuple = new Tuple<float, float, uint>(blueprint.Rectangle.Position.X, blueprint.Rectangle.Position.Y, blueprint.Frame);
+
+                if (!data.ContainsKey(blueprint.Sprite.Id))
+                {
+                    List<Tuple<float, float, uint>> list = new List<Tuple<float, float, uint>>();
+                    list.Add(tuple);
+                    data.Add(blueprint.Sprite.Id, list);
+                }
+                else
+                    data[blueprint.Sprite.Id].Add(tuple);
+            }
+
+            //actually write
+            BinaryWriter writer = new BinaryWriter(new FileStream(filename, FileMode.Create, FileAccess.Write));
+            writer.Write((ushort)1); //protocol version
+            writer.Write((ushort)data.Count);
+            foreach (KeyValuePair<string, List<Tuple<float, float, uint>>> uniqueSprite in data)
+            {
+                writer.Write(uniqueSprite.Key);
+                writer.Write((ushort)uniqueSprite.Value.Count);
+                foreach (Tuple<float, float, uint> tuple in uniqueSprite.Value)
+                {
+                    writer.Write(tuple.Item1);
+                    writer.Write(tuple.Item2);
+                    writer.Write(tuple.Item3);
+                }
+            }
+            writer.Close();
         }
     }
 }

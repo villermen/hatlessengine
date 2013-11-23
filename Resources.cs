@@ -111,6 +111,12 @@ namespace HatlessEngine
             Spritemaps.Add(id, spritemap);
             return spritemap;
         }
+        public static Spritemap AddSpritemap(string id, string filename)
+        {
+            Spritemap spritemap = new Spritemap(id, filename);
+            Spritemaps.Add(id, spritemap);
+            return spritemap;
+        }
 
         /// <summary>
         /// Performs step event for all resources that need it.
