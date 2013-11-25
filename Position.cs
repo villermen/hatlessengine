@@ -66,5 +66,10 @@ namespace HatlessEngine
         {
             return new Position(position.X / value, position.Y / value);
         }
+
+        public static implicit operator SFML.Window.Vector2f(Position pos)
+        {
+            return new SFML.Window.Vector2f(pos.X, pos.Y);
+        }
     }
 }

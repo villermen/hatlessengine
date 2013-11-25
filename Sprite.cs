@@ -44,13 +44,38 @@ namespace HatlessEngine
             IndexLength = 1;
         }
 
-        public void Draw(Position pos, uint frameIndex = 0)
+        public void Draw(Position pos, uint frameIndex = 0, params DrawTransformation[] transformations)
         {
             Load();
-            SFMLSprite.Position = new SFML.Window.Vector2f(pos.X, pos.Y);
-
             SFMLSprite.TextureRect = new SFML.Graphics.IntRect((int)(frameIndex % IndexWidth * FrameWidth), (int)(frameIndex / IndexWidth * FrameHeight), (int)FrameWidth, (int)FrameHeight);
+
+            //apply transformations
+
+            foreach(DrawTransformation transformation in transformations)
+            {
+                switch (transformation.Type)
+                {
+                    case DrawTransformation.TransformationType.ScaleAll:
+                        SFMLSprite.Scale = new Position((float)transformation.Argument1, (float)transformation.Argument1);
+                        break;
+                    case DrawTransformation.TransformationType.ScaleAxes:
+                        SFMLSprite.Scale = new Position((float)transformation.Argument1, (float)transformation.Argument2);
+                        break;
+                    case DrawTransformation.TransformationType.Rotate:
+                        SFMLSprite.Origin = (Position)transformation.Argument1;
+                        SFMLSprite.Rotation = (float)transformation.Argument2;
+                        break;
+                }
+            }
+            
+            //draw
+            SFMLSprite.Position = new SFML.Window.Vector2f(pos.X + SFMLSprite.Origin.X, pos.Y + SFMLSprite.Origin.Y);
             Resources.RenderPlane.Draw(SFMLSprite);
+
+            //clear transformations
+            SFMLSprite.Origin = new Position(0, 0);
+            SFMLSprite.Scale = new Position(1, 1);
+            SFMLSprite.Rotation = 0;
         }
 
         public void Load()

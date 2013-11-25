@@ -81,6 +81,7 @@
     <Compile Include="Button.cs" />
     <Compile Include="ButtonObject.cs" />
     <Compile Include="Color.cs" />
+    <Compile Include="DrawTransformation.cs" />
     <Compile Include="DrawX.cs" />
     <Compile Include="ErrorLevel.cs" />
     <Compile Include="Font.cs" />
