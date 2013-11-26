@@ -33,7 +33,7 @@ namespace HatlessEngine
 
         public sealed override void Step()
         {
-            if (Input.Mouse.X >= BoundBoxRectangle.X && Input.Mouse.X <= BoundBoxRectangle.X2 && Input.Mouse.Y >= BoundBoxRectangle.Y && Input.Mouse.Y <= BoundBoxRectangle.Y2)
+            if (Input.MousePosition.X >= BoundBoxRectangle.X && Input.MousePosition.X <= BoundBoxRectangle.X2 && Input.MousePosition.Y >= BoundBoxRectangle.Y && Input.MousePosition.Y <= BoundBoxRectangle.Y2)
             {
                 //mouseover
                 if (State == 0)

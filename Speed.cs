@@ -34,12 +34,7 @@ namespace HatlessEngine
             }
             set
             {
-                while (value >= 360)
-                    value = value - 360;
-                while (value < 0)
-                    value = value + 360;
-
-                _Direction = value;
+                _Direction = (value % 360 + 360) % 360;
 
                 float amplitude = Amplitude;
                 X = (float)Math.Cos((value / 180 - 0.5) * Math.PI) * amplitude;

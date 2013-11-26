@@ -76,6 +76,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Angle.cs" />
     <Compile Include="AnimatedSprite.cs" />
     <Compile Include="BoolAndData.cs" />
     <Compile Include="Button.cs" />

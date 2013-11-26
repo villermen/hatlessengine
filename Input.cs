@@ -45,8 +45,8 @@ namespace HatlessEngine
             }
         }
 
-        public static Position MouseGlobal { get; private set; }
-        public static Position Mouse { get; private set; }
+        public static Position MousePositionGlobal { get; private set; }
+        public static Position MousePosition { get; private set; }
 
         public static bool IsPressed(Button button, bool global = false)
         {
@@ -110,10 +110,10 @@ namespace HatlessEngine
 
             //Mouse
             SFML.Window.Vector2i mouseVector = SFML.Window.Mouse.GetPosition();
-            MouseGlobal = new Position(mouseVector.X, mouseVector.Y);
+            MousePositionGlobal = new Position(mouseVector.X, mouseVector.Y);
 
             //check where mouse is on RenderPlane
-            Mouse = new Position(0, 0);
+            MousePosition = new Position(0, 0);
             Window focusedWindow = Resources.FocusedWindow;
             if (focusedWindow != null)
             {
@@ -127,7 +127,7 @@ namespace HatlessEngine
                     {
                         float mouseX = view.Area.X + (focusedWindow.MouseXOnWindow - view.Viewport.X) / view.Viewport.Width * view.Area.Width;
                         float mouseY = view.Area.Y + (focusedWindow.MouseYOnWindow - view.Viewport.Y) / view.Viewport.Height * view.Area.Height;
-                        Mouse = new Position(mouseX, mouseY);
+                        MousePosition = new Position(mouseX, mouseY);
                     }
                 }
             }

@@ -16,6 +16,15 @@ namespace HatlessEngine
             Y = y;
         }
 
+        public float DistanceToPosition(Position pos)
+        {
+            return (float)Math.Sqrt(Math.Pow(pos.X - X, 2) + Math.Pow(pos.Y - Y, 2));  
+        }
+        public Angle AngleToPosition(Position pos)
+        {
+            return new Angle((float)Math.Atan2(pos.X - X, Y - pos.Y), true);
+        }
+
         public static Position operator +(Position position1, Position position2)
         {
             return new Position(position1.X + position2.X, position1.Y + position2.Y);

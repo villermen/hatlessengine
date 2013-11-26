@@ -49,5 +49,10 @@ namespace HatlessEngine
         {
             return new Size(size.Width / value, size.Height / value);
         }
+
+        public static implicit operator SFML.Window.Vector2f(Size size)
+        {
+            return new SFML.Window.Vector2f(size.Width, size.Height);
+        }
     }
 }
