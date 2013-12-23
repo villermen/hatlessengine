@@ -1,185 +1,82 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3F12BA75-9692-436D-B97C-AB053405E549}</ProjectGuid>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{FC352E78-4A87-4DBD-9A98-C20D1A790230}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HatlessEngine</RootNamespace>
     <AssemblyName>HatlessEngine</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>DebugBuild</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>ReleaseBuild</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>DebugBuild\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <ConsolePause>false</ConsolePause>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>
-    </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System.Drawing" />
     <Reference Include="System" />
-    <Reference Include="System.Windows.Forms" />
+    <Reference Include="OpenTK">
+      <HintPath>..\..\OpenTK\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="NVorbis">
+      <HintPath>..\..\NVorbis\NVorbis.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickFont">
+      <HintPath>..\..\QuickFont\QuickFont\bin\Debug\QuickFont.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Angle.cs" />
-    <Compile Include="AnimatedSprite.cs" />
-    <Compile Include="BoolAndData.cs" />
-    <Compile Include="Button.cs" />
-    <Compile Include="ButtonObject.cs" />
-    <Compile Include="Color.cs" />
-    <Compile Include="DrawTransformation.cs" />
-    <Compile Include="DrawX.cs" />
-    <Compile Include="ErrorLevel.cs" />
-    <Compile Include="Font.cs" />
-    <Compile Include="Game.cs" />
-    <Compile Include="Input.cs" />
-    <Compile Include="IExternalResource.cs" />
-    <Compile Include="Log.cs" />
-    <Compile Include="LogicalObject.cs" />
-    <Compile Include="Misc.cs" />
-    <Compile Include="Music.cs" />
-    <Compile Include="ObjectmapBlueprint.cs" />
-    <Compile Include="Objectmap.cs" />
-    <Compile Include="PhysicalObject.cs" />
-    <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rectangle.cs" />
+    <Compile Include="Game.cs" />
+    <Compile Include="View.cs" />
     <Compile Include="Resources.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="SFML\Audio\Listener.cs" />
-    <Compile Include="SFML\Audio\Music.cs" />
-    <Compile Include="SFML\Audio\Sound.cs" />
-    <Compile Include="SFML\Audio\SoundBuffer.cs" />
-    <Compile Include="SFML\Audio\SoundBufferRecorder.cs" />
-    <Compile Include="SFML\Audio\SoundRecorder.cs" />
-    <Compile Include="SFML\Audio\SoundStream.cs" />
-    <Compile Include="SFML\Audio\Vector3.cs" />
-    <Compile Include="SFML\Graphics\BlendMode.cs" />
-    <Compile Include="SFML\Graphics\CircleShape.cs" />
-    <Compile Include="SFML\Graphics\Color.cs" />
-    <Compile Include="SFML\Graphics\Context.cs" />
-    <Compile Include="SFML\Graphics\ConvexShape.cs" />
-    <Compile Include="SFML\Graphics\Drawable.cs" />
-    <Compile Include="SFML\Graphics\Font.cs" />
-    <Compile Include="SFML\Graphics\Glyph.cs" />
-    <Compile Include="SFML\Graphics\Image.cs" />
-    <Compile Include="SFML\Graphics\PrimitiveType.cs" />
-    <Compile Include="SFML\Graphics\Rect.cs" />
-    <Compile Include="SFML\Graphics\RectangleShape.cs" />
-    <Compile Include="SFML\Graphics\RenderStates.cs" />
-    <Compile Include="SFML\Graphics\RenderTarget.cs" />
-    <Compile Include="SFML\Graphics\RenderTexture.cs" />
-    <Compile Include="SFML\Graphics\RenderWindow.cs" />
-    <Compile Include="SFML\Graphics\Shader.cs" />
-    <Compile Include="SFML\Graphics\Shape.cs" />
-    <Compile Include="SFML\Graphics\Sprite.cs" />
-    <Compile Include="SFML\Graphics\Text.cs" />
-    <Compile Include="SFML\Graphics\Texture.cs" />
-    <Compile Include="SFML\Graphics\Transform.cs" />
-    <Compile Include="SFML\Graphics\Transformable.cs" />
-    <Compile Include="SFML\Graphics\Vertex.cs" />
-    <Compile Include="SFML\Graphics\VertexArray.cs" />
-    <Compile Include="SFML\Graphics\View.cs" />
-    <Compile Include="SFML\Window\ContextSettings.cs" />
-    <Compile Include="SFML\Window\Event.cs" />
-    <Compile Include="SFML\Window\EventArgs.cs" />
-    <Compile Include="SFML\Window\Joystick.cs" />
-    <Compile Include="SFML\Window\Keyboard.cs" />
-    <Compile Include="SFML\Window\LoadingFailedException.cs" />
-    <Compile Include="SFML\Window\Mouse.cs" />
-    <Compile Include="SFML\Window\ObjectBase.cs" />
-    <Compile Include="SFML\Window\StreamAdaptor.cs" />
-    <Compile Include="SFML\Window\Vector2.cs" />
-    <Compile Include="SFML\Window\VideoMode.cs" />
-    <Compile Include="SFML\Window\Window.cs" />
-    <Compile Include="Size.cs" />
-    <Compile Include="Sound.cs" />
+    <Compile Include="LogicalObject.cs" />
+    <Compile Include="PhysicalObject.cs" />
     <Compile Include="Speed.cs" />
+    <Compile Include="DrawX.cs" />
     <Compile Include="Sprite.cs" />
+    <Compile Include="Input.cs" />
+    <Compile Include="Button.cs" />
     <Compile Include="Spritemap.cs" />
     <Compile Include="SpritemapBlueprint.cs" />
-    <Compile Include="View.cs" />
-    <Compile Include="Window.cs" />
+    <Compile Include="Music.cs" />
+    <Compile Include="AnimatedSprite.cs" />
+    <Compile Include="Objectmap.cs" />
+    <Compile Include="ObjectMapBlueprint.cs" />
+    <Compile Include="Misc.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="Sound.cs" />
+    <Compile Include="LogLevel.cs" />
+    <Compile Include="SoundControl.cs" />
+    <Compile Include="AudioControl.cs" />
+    <Compile Include="Exceptions\AlreadyPlayingException.cs" />
+    <Compile Include="Exceptions\NotLoadedException.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="ExternalResource.cs" />
+    <Compile Include="WaveReader.cs" />
+    <Compile Include="Font.cs" />
+    <Compile Include="ButtonObject.cs" />
   </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Content Include="csfml-audio-2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="csfml-graphics-2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="csfml-window-2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libsndfile-1.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="openal32.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <EmbeddedResource Include="windowicon.png" />
+    <Folder Include="Exceptions\" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Drawing;
 
 namespace HatlessEngine
 {
@@ -36,7 +37,7 @@ namespace HatlessEngine
                         ushort spriteOccurrences = reader.ReadUInt16();
                         for (ushort j = 1; j <= spriteOccurrences; j++)
                         { 
-                            Blueprints.Add(new SpritemapBlueprint(currentSprite, new Position(reader.ReadSingle(), reader.ReadSingle()), reader.ReadUInt32()));
+						Blueprints.Add(new SpritemapBlueprint(currentSprite, new PointF(reader.ReadSingle(), reader.ReadSingle()), reader.ReadUInt32()));
                         }
                     }
                     break;
@@ -48,11 +49,11 @@ namespace HatlessEngine
         /// Draw the entire Spritemap to a position.
         /// </summary>
         /// <param name="pos">Dnno, figure it out for yourself.</param>
-        public void Draw(Position pos)
+		public void Draw(PointF pos)
         {
             foreach (SpritemapBlueprint blueprint in Blueprints)
             {
-                blueprint.Sprite.Draw(pos + blueprint.Rectangle.Position, blueprint.Frame);
+				blueprint.Sprite.Draw(new PointF(pos.X + blueprint.Rectangle.X, pos.Y + blueprint.Rectangle.Y), blueprint.Frame);
             }
         }
 
@@ -62,7 +63,7 @@ namespace HatlessEngine
             Dictionary<string, List<Tuple<float, float, uint>>> data = new Dictionary<string, List<Tuple<float, float, uint>>>();
             foreach (SpritemapBlueprint blueprint in Blueprints)
             {
-                Tuple<float, float, uint> tuple = new Tuple<float, float, uint>(blueprint.Rectangle.Position.X, blueprint.Rectangle.Position.Y, blueprint.Frame);
+				Tuple<float, float, uint> tuple = new Tuple<float, float, uint>(blueprint.Rectangle.Location.X, blueprint.Rectangle.Location.Y, blueprint.Frame);
 
                 if (!data.ContainsKey(blueprint.Sprite.Id))
                 {

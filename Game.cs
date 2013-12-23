@@ -1,98 +1,122 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using System.Threading;
+using System;
+using System.Drawing;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
+using OpenTK.Audio;
+using OpenTK.Audio.OpenAL;
+
+//OpenTK 1.1.1420.5205
+//NVorbis 0.7.4 for decoding ogg sound
+//QuickFont 1.0.2 modified and built upon OpenTK 1.1.1420.5205
 
 namespace HatlessEngine
 {
-    /// <summary>
-    /// Provides gameloop, object/window handling
-    /// </summary>
-    public static class Game
-    {
-        public static uint Speed { get; private set; }
-        private static long Stepnumber = 0;
-        private static Stopwatch stopwatch = new Stopwatch();
+	public static class Game
+	{
+		internal static GameWindow Window;
+		internal static AudioContext Audio;
 
-        public static bool IsRunning { get; private set; }
+		public static float Speed
+		{ 
+			get { return (float)Window.TargetUpdateFrequency; }
+			set { Window.TargetUpdateFrequency = value; }
+		}
+		public static float LPS
+		{
+			get { return (float)Window.UpdateFrequency; }
+		}
+		public static float FPS
+		{
+			get { return (float)Window.RenderFrequency; }
+		}
 
-        private static long TicksSinceLastStep = 0;
-        private static long LastStepTime = 0;
-        public static uint SPS = 0;
-        private static long TicksSinceLastDraw = 0;
-        private static long LastDrawTime = 0;
-        public static uint FPS = 0;
+		public static void Run(Size windowSize, float speed = 100)
+		{
+			Window = new GameWindow(windowSize.Width, windowSize.Height);
 
-        static Game()
-        {
-            IsRunning = false;
-            Thread.CurrentThread.Name = "HatlessEngine";
-        }
+			//OpenGL initialization
+			GL.Enable(EnableCap.Texture2D);
+			GL.Enable(EnableCap.Blend);
+			GL.ClearColor(Color.Gray);
 
-        /// <summary>
-        /// Run and create default logical object...
-        /// If console is not enabled
-        /// </summary>
-        /// <param name="speed">Logical steps per second.</param>
-        /// <param name="defaultWindowSetup">Creates a "default" view and window of 800x600</param>
-        public static void Run(uint speed = 100, bool defaultWindowSetup = true)
-        {
-            Speed = speed;
+			GL.Enable(EnableCap.DepthTest);
+			GL.DepthMask(true);
+			GL.DepthFunc(DepthFunction.Greater);
+			GL.ClearDepth(-1);
 
-            if (defaultWindowSetup)
-            {
-                Window window = Resources.AddWindow("default", 800, 600, "HatlessEngine");
-                Resources.AddView("default", new Rectangle(0, 0, 800, 600), "default");
-            }
+			Resources.AddView(new RectangleF(new PointF(0, 0), windowSize), new RectangleF(0, 0, 1, 1));
 
-            IsRunning = true;
+			Window.UpdateFrame += Step;
+			Window.RenderFrame += Draw;
 
-            //gameloop
-            stopwatch.Start();
-            while (stopwatch.IsRunning)
-            {
-                //progress towards next step from 0-1 used in twining operations (must be before step increment possibility)
-                float stepProgress = Math.Max(Math.Min((stopwatch.ElapsedTicks - (Stepnumber * Stopwatch.Frequency / (float)Speed)) / (Stopwatch.Frequency / (float)Speed),1),0);
+			//input
+			Window.Mouse.Move += Input.MouseMove;
+			Window.Mouse.ButtonDown += Input.MouseButtonChange;
+			Window.Mouse.ButtonUp += Input.MouseButtonChange;
+			Window.Mouse.WheelChanged += Input.MouseWheelChange;
+			Window.Keyboard.KeyDown += Input.KeyboardKeyDown;
+			Window.Keyboard.KeyUp += Input.KeyboardKeyUp;
 
-                //step
-                if (stopwatch.ElapsedTicks >= (Stepnumber + 1) * Stopwatch.Frequency / (float)Speed)
-                {
-                    //handle window events before input (updates mouse position on windows and such)
-                    Resources.WindowEvents();
+			//clear all buttons when window loses focus
+			Window.FocusedChanged += delegate
+			{
+				if (!Window.Focused)
+					Input.CurrentState.Clear();
+			};
 
-                    //update input state
-                    Input.UpdateState();
+			//OpenAL initialization
+			Audio = new AudioContext();
 
-                    Resources.Step();
+			if (Started != null)
+				Started(null, EventArgs.Empty);
 
-                    //window cleanup (cant be done during window-eventloop)
-                    if (Resources.Windows.Count == 0 && Settings.ExitOnLastWindowClose)
-                        Exit();
-                    
-                    //LPS calculation
-                    TicksSinceLastStep = stopwatch.ElapsedTicks - LastStepTime;
-                    SPS = (uint)(Stopwatch.Frequency / TicksSinceLastStep);
-                    LastStepTime = stopwatch.ElapsedTicks;
+			Window.Run(speed);
+		}
 
-                    Stepnumber++;
-                }
+		private static void Step(object sender, FrameEventArgs e)
+		{
+			foreach (LogicalObject obj in Resources.Objects)
+			{
+				obj.Step();
+				obj.AfterStep();
+			}
 
-                //draw
-                Resources.Draw(stepProgress);
-                
-                //FPS calculation
-                TicksSinceLastDraw = stopwatch.ElapsedTicks - LastDrawTime;
-                FPS = (uint)(Stopwatch.Frequency / TicksSinceLastDraw);
-                LastDrawTime = stopwatch.ElapsedTicks;
-            }
-        }
+			Resources.SourceRemoval();
+			Resources.ObjectAdditionAndRemoval();
 
-        public static void Exit()
-        {
-            //close open logfile
-            Log.DisableFile();
-            Environment.Exit(0);
-        }
-    }
+			//update input state (push buttonlist) for update before next step
+			Input.UpdateState();
+		}
+
+		private static void Draw(object sender, FrameEventArgs e)
+		{
+			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+			//reset depth to be consistent over multiple frames
+			DrawX.Depth = 0;
+
+			foreach(View view in Resources.Views)
+			{
+				GL.LoadIdentity();
+				GL.Viewport((int)view.Viewport.Left * Window.Width, (int)view.Viewport.Top * Window.Height, (int)view.Viewport.Right * Window.Width, (int)view.Viewport.Bottom * Window.Height);
+				GL.Ortho(view.Area.Left, view.Area.Right, view.Area.Bottom, view.Area.Top, -1, 1);
+
+				//drawing
+				foreach (LogicalObject obj in Resources.Objects)
+				{
+					obj.Draw();
+				}
+			}
+
+			GL.Flush();
+			Window.Context.SwapBuffers();
+		}
+		public static void Exit()
+		{
+			Window.Close();
+		}
+
+		public static event EventHandler Started;
+	}
 }
+

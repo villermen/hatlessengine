@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿﻿using System;
+using System.Drawing;
 
 namespace HatlessEngine
 {
     /// <summary>
     /// Class using PhysicalObject to easily define buttons.
-    /// Define BuiltinSprite to a Sprite with 3 frames in the constructor.
     /// Frame 1: nothing, 2: mouseover, 3: mousedown
     /// </summary>
     public class ButtonObject : PhysicalObject
@@ -25,15 +21,15 @@ namespace HatlessEngine
         }
         private Sprite Sprite;
 
-        public ButtonObject(Position position, Sprite sprite) : base(position)
+		public ButtonObject(PointF position, Sprite sprite) : base(position)
         {
             Sprite = sprite;
-            BoundBoxRectangle.Size = Sprite.Size;
+			BoundBox.Size = sprite.FrameSize;
         }
 
         public sealed override void Step()
         {
-            if (Input.MousePosition.X >= BoundBoxRectangle.X && Input.MousePosition.X <= BoundBoxRectangle.X2 && Input.MousePosition.Y >= BoundBoxRectangle.Y && Input.MousePosition.Y <= BoundBoxRectangle.Y2)
+			if (BoundBox.Contains(Input.MousePosition))
             {
                 //mouseover
                 if (State == 0)
@@ -54,7 +50,7 @@ namespace HatlessEngine
                 State = 0;
         }
 
-        public sealed override void Draw(float stepProgress)
+		public sealed override void Draw()
         {
             Sprite.Draw(Position, State);
         }

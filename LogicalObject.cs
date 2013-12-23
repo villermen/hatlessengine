@@ -20,15 +20,15 @@ namespace HatlessEngine
         public virtual void Step() { }
         internal virtual void AfterStep() { }
 
-        public virtual void Draw(float stepProgress) { }
-        internal virtual void AfterDraw(float stepProgress) { }
+        public virtual void Draw() { }
+        internal virtual void AfterDraw() { }
 
         public void Destroy()
         {
+			OnDestroy();
             //add for removal from Resources.Objects (cant be done now because of iteration)
             Resources.RemoveObjects.Add(this);
             Destroyed = true;
-            OnDestroy();
         }
         public virtual void OnDestroy() { }
     }

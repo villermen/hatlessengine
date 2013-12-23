@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace HatlessEngine
 {
@@ -39,7 +40,7 @@ namespace HatlessEngine
             AnimationId = animationId;
         }
 
-        public void Draw(Position pos)
+		public void Draw(PointF pos)
         {
             TargetSprite.Draw(pos, CurrentIndex);
         }

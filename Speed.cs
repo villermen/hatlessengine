@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace HatlessEngine
 {
@@ -85,5 +86,15 @@ namespace HatlessEngine
         {
             return new Speed(speed.X / value, speed.Y / value);
         }
+
+		public static PointF operator +(PointF point, Speed speed)
+		{
+			return new PointF(point.X + speed.X, point.Y + speed.Y);
+		}
+
+		public static RectangleF operator +(RectangleF rect, Speed speed)
+		{
+			return new RectangleF(rect.X + speed.X, rect.Y + speed.Y, rect.Width, rect.Height);
+		}
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace HatlessEngine
 {
@@ -9,7 +10,7 @@ namespace HatlessEngine
     {
         public Sprite Sprite;
         public uint Frame;
-        public Rectangle Rectangle;
+		public RectangleF Rectangle;
 
         /// <summary>
         /// Define the sprite by spriteId, skipping the need for Resources.Sprites[]
@@ -17,7 +18,7 @@ namespace HatlessEngine
         /// <param name="spriteId">Id of the sprite</param>
         /// <param name="pos">Position to display the sprite at (relative to Spritemap's draw position)</param>
         /// <param name="frame">Frame of the sprite to display.</param>
-        public SpritemapBlueprint(string spriteId, Position pos, uint frame = 0)
+		public SpritemapBlueprint(string spriteId, PointF pos, uint frame = 0)
             : this(Resources.Sprites[spriteId], pos, frame) { }
 
         /// <summary>
@@ -26,11 +27,11 @@ namespace HatlessEngine
         /// <param name="sprite">The sprite</param>
         /// <param name="pos">Position to display the sprite at (relative to Spritemap's draw position)</param>
         /// <param name="frame">Frame of the sprite to display.</param>
-        public SpritemapBlueprint(Sprite sprite, Position pos, uint frame = 0)
+		public SpritemapBlueprint(Sprite sprite, PointF pos, uint frame = 0)
         {
             Sprite = sprite;
             Frame = frame;
-            Rectangle = new Rectangle(pos, Sprite.Size);
+			Rectangle = new RectangleF(pos, Sprite.FrameSize);
         }
     }
 }

@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Drawing;
 using System.Collections.Generic;
+using OpenTK.Input;
 
 namespace HatlessEngine
 {
-
     public static class Input
     {
         private static List<Button> PreviousState = new List<Button>();
-        private static List<Button> CurrentState = new List<Button>();
+		internal static List<Button> CurrentState = new List<Button>();
 
         /// <summary>
         /// Buttons mapped to other buttons.
@@ -16,7 +17,7 @@ namespace HatlessEngine
         /// </summary>
         public static Dictionary<Button, Button> ButtonMaps = new Dictionary<Button, Button>();
         
-        /// <summary>
+		/*/// <summary>
         /// For getting axis state without regarding the deadzone
         /// </summary>
         public static float[,] GamepadAxes = new float[9,9];
@@ -27,6 +28,8 @@ namespace HatlessEngine
         /// </summary>
         public static float GamePadDeadZone
         {
+
+
             get { return gamePadDeadZone; }
             set
             {
@@ -43,39 +46,26 @@ namespace HatlessEngine
                 else
                     gamePadDeadZone = value;
             }
-        }
+        }*/
+		
+		public static PointF MousePosition { get; private set; }
 
-        public static Position MousePositionGlobal { get; private set; }
-        public static Position MousePosition { get; private set; }
+		//to trigger multiple mousewheel presses
+		private static int MouseWheelDelta = 0;
 
-        public static bool IsPressed(Button button, bool global = false)
+        public static bool IsPressed(Button button)
         {
-            if (global || Resources.FocusedWindow != null)
-                return (CurrentState.Contains(button) && !PreviousState.Contains(button));
-            else
-                return false;
+        	return (CurrentState.Contains(button) && !PreviousState.Contains(button));
         }
-        /// <summary>
-        /// Returns whether the given button is currently being pushed.
-        /// </summary>
-        /// <param name="button">Button</param>
-        /// <param name="global">Whether to return even if none of the windows has focus.</param>
-        /// <returns></returns>
-        public static bool IsDown(Button button, bool global = false)
+        public static bool IsDown(Button button)
         {
-            if (global || Resources.FocusedWindow != null)
-                return CurrentState.Contains(button);
-            else
-                return false;
+			return CurrentState.Contains(button);
         }
         public static bool IsReleased(Button button, bool global = false)
         {
-            if (global || Resources.FocusedWindow != null)
-                return (!CurrentState.Contains(button) && PreviousState.Contains(button));
-            else
-                return false;
+            return (!CurrentState.Contains(button) && PreviousState.Contains(button));
         }
-
+		/*
         /// <summary>
         /// Returns given gamepad axis value with respect to deadzone and window focus
         /// </summary>
@@ -99,57 +89,29 @@ namespace HatlessEngine
 
         public static Speed[] XboxLStick = new Speed[9];
         public static Speed[] XboxRStick = new Speed[9];
+		*/
+		internal static void UpdateState()
+		{
+			//remove mousewheel from both states to prevent Released from occuring (pressed has already been detected)
+			CurrentState.Remove(Button.MOUSE_WHEELDOWN);
+			CurrentState.Remove(Button.MOUSE_WHEELUP);
 
-        /// <summary>
-        /// Updates the input states for pending logic step. (can be called manually)
-        /// </summary>
-        public static void UpdateState()
-        {
-            PreviousState = new List<Button>(CurrentState);
-            CurrentState.Clear();
+			//actually push the state
+			PreviousState = new List<Button>(CurrentState);
 
-            //Mouse
-            SFML.Window.Vector2i mouseVector = SFML.Window.Mouse.GetPosition();
-            MousePositionGlobal = new Position(mouseVector.X, mouseVector.Y);
-
-            //check where mouse is on RenderPlane
-            MousePosition = new Position(0, 0);
-            Window focusedWindow = Resources.FocusedWindow;
-            if (focusedWindow != null)
-            {
-                foreach (View view in focusedWindow.ActiveViews)
-                {
-                    //if mouse is within view
-                    if (focusedWindow.MouseXOnWindow >= view.Viewport.X &&
-                        focusedWindow.MouseXOnWindow <= view.Viewport.X2 &&
-                        focusedWindow.MouseYOnWindow >= view.Viewport.Y &&
-                        focusedWindow.MouseYOnWindow <= view.Viewport.Y2)
-                    {
-                        float mouseX = view.Area.X + (focusedWindow.MouseXOnWindow - view.Viewport.X) / view.Viewport.Width * view.Area.Width;
-                        float mouseY = view.Area.Y + (focusedWindow.MouseYOnWindow - view.Viewport.Y) / view.Viewport.Height * view.Area.Height;
-                        MousePosition = new Position(mouseX, mouseY);
-                    }
-                }
-            }
-
-            if (SFML.Window.Mouse.IsButtonPressed(SFML.Window.Mouse.Button.Left))
-                CurrentState.Add(Button.MOUSE_LEFT);
-            if (SFML.Window.Mouse.IsButtonPressed(SFML.Window.Mouse.Button.Right))
-                CurrentState.Add(Button.MOUSE_RIGHT);
-            if (SFML.Window.Mouse.IsButtonPressed(SFML.Window.Mouse.Button.Middle))
-                CurrentState.Add(Button.MOUSE_MIDDLE);
-            if (SFML.Window.Mouse.IsButtonPressed(SFML.Window.Mouse.Button.XButton1))
-                CurrentState.Add(Button.MOUSE_X1);
-            if (SFML.Window.Mouse.IsButtonPressed(SFML.Window.Mouse.Button.XButton2))
-                CurrentState.Add(Button.MOUSE_X2);
-
-            //Keyboard
-            foreach (SFML.Window.Keyboard.Key key in Enum.GetValues(typeof(SFML.Window.Keyboard.Key)))
-            {
-                if (SFML.Window.Keyboard.IsKeyPressed(key))
-                    CurrentState.Add((Button)((int)key)+2001);
-            }
-            
+			//mousewheel buttons should be pressed multiple steps even though it might've actually been performed in one (delta > 1 or < -1)
+			if (MouseWheelDelta >= 1)
+			{
+				CurrentState.Add(Button.MOUSE_WHEELUP);
+				MouseWheelDelta--;
+			}
+			if (MouseWheelDelta <= -1)
+			{
+				CurrentState.Add(Button.MOUSE_WHEELDOWN);
+				MouseWheelDelta++;
+			}
+		}
+		/*
             //Gamepads
             if (Settings.GamepadInputEnabled)
             {
@@ -233,25 +195,82 @@ namespace HatlessEngine
                         CurrentState.Add(buttonPair.Value);
                 }
             }
-        }
+		*/
 
-        public static string GetPressedButtons(bool global = false)
+        public static string GetPressedButtons()
         {
             string str = "";
-
-            if (global || Resources.FocusedWindow != null)
+            if (CurrentState.Count > 0)
             {
-                if (CurrentState.Count > 0)
+                foreach (Button button in CurrentState)
                 {
-                    foreach (Button button in CurrentState)
-                    {
-                        str += button.ToString() + ", ";
-                    }
-
-                    str = str.Substring(0, str.Length - 2);
+                    str += button.ToString() + ", ";
                 }
-            }
+
+                str = str.Substring(0, str.Length - 2);
+		}				
             return str;
-        }
+		}
+
+		//OpenTK event integration
+		internal static void MouseMove(object sender, MouseMoveEventArgs e)
+		{
+			PointF positionOnWindow = new PointF((float)e.X / Game.Window.Width, (float)e.Y / Game.Window.Height);
+
+			//decide on which viewport the mouse currently is
+			foreach (View view in Resources.Views)
+			{
+				if (view.Viewport.Contains(positionOnWindow))
+				{
+					//calculate position on virtual gamespace
+					float x = view.Area.X + (positionOnWindow.X - view.Viewport.X) / view.Viewport.Width * view.Area.Width;
+					float y = view.Area.Y + (positionOnWindow.Y - view.Viewport.Y) / view.Viewport.Height * view.Area.Height;
+
+					MousePosition = new PointF(x, y);
+
+					break;
+				}
+			}
+		}
+		internal static void MouseButtonChange(object sender, MouseButtonEventArgs e)
+		{
+			Button HEButton = (Button)(1001 + (int)e.Button);
+
+			if (e.IsPressed)
+			{
+				if (!CurrentState.Contains(HEButton))
+					CurrentState.Add(HEButton);
+			}
+			else
+				CurrentState.Remove(HEButton);
+		}
+		internal static void MouseWheelChange(object sender, MouseWheelEventArgs e)
+		{
+			if (e.Delta >= 1)
+			{
+				if (!CurrentState.Contains(Button.MOUSE_WHEELUP))
+					CurrentState.Add(Button.MOUSE_WHEELUP);
+
+				//will simulate wheelups every remaining step
+				MouseWheelDelta += e.Delta - 1;
+			}
+			else if (e.Delta <= -1)
+			{
+				if (!CurrentState.Contains(Button.MOUSE_WHEELDOWN))
+					CurrentState.Add(Button.MOUSE_WHEELDOWN);
+				MouseWheelDelta += e.Delta + 1;
+			}
+		}
+		internal static void KeyboardKeyDown(object sender, KeyboardKeyEventArgs e)
+		{
+			Button HEButton = (Button)(2001 + (int)e.Key);
+			if (!CurrentState.Contains(HEButton))
+				CurrentState.Add(HEButton);
+		}
+		internal static void KeyboardKeyUp(object sender, KeyboardKeyEventArgs e)
+		{
+			Button HEButton = (Button)(2001 + (int)e.Key);
+			CurrentState.Remove(HEButton);
+		}
     }
 }

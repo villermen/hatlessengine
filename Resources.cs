@@ -1,6 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Drawing;
+using OpenTK.Audio.OpenAL;
+using System.Threading;
 
 namespace HatlessEngine
 {
@@ -10,68 +13,47 @@ namespace HatlessEngine
     /// </summary>
     public static class Resources
     {
-        private static string RootDirectory = System.Environment.CurrentDirectory + "/res/";
+		//private static string RootDirectory = System.Environment.CurrentDirectory + "/res/";
 
         //resources
-        public static Dictionary<string, Window> Windows = new Dictionary<string, Window>();
-        public static Dictionary<string, View> Views = new Dictionary<string, View>();
-        public static Dictionary<string, Sprite> Sprites = new Dictionary<string, Sprite>();
+		public static List<View> Views = new List<View>();
+		public static Dictionary<string, Sprite> Sprites = new Dictionary<string, Sprite>();
         public static Dictionary<string, Font> Fonts = new Dictionary<string, Font>();
-        public static Dictionary<string, Music> Music = new Dictionary<string, Music>();
-        public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
+		public static Dictionary<string, Music> Music = new Dictionary<string, Music>();
+		public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
 
         //collections
-        public static Dictionary<string, Objectmap> Objectmaps = new Dictionary<string, Objectmap>();
-        public static Dictionary<string, Spritemap> Spritemaps = new Dictionary<string, Spritemap>();
+		public static Dictionary<string, Objectmap> Objectmaps = new Dictionary<string, Objectmap>();
+		public static Dictionary<string, Spritemap> Spritemaps = new Dictionary<string, Spritemap>();
         //public static Dictionary<string, CombinedMap> CombinedMaps = new Dictionary<string, CombinedMap>();
 
         //objects
-        public static List<LogicalObject> Objects = new List<LogicalObject>();
-        public static Dictionary<Type, List<PhysicalObject>> PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
+		public static List<LogicalObject> Objects = new List<LogicalObject>();
+		public static Dictionary<Type, List<PhysicalObject>> PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
+
+		internal static List<int> AudioSources = new List<int>();
+		internal static Dictionary<int, AudioControl> AudioControls = new Dictionary<int, AudioControl>();
 
         //addition/removal (has to be done after looping)
-        internal static List<Window> RemoveWindows = new List<Window>();
-        internal static List<LogicalObject> AddObjects = new List<LogicalObject>();
-        internal static List<LogicalObject> RemoveObjects = new List<LogicalObject>();
+		internal static List<LogicalObject> AddObjects = new List<LogicalObject>();
+		internal static List<LogicalObject> RemoveObjects = new List<LogicalObject>();
 
-        //window
-        internal static SFML.Graphics.RenderTexture RenderPlane = new SFML.Graphics.RenderTexture(800, 600);
-        private static SFML.Graphics.Sprite RenderSprite;
-        private static SFML.Graphics.RectangleShape dirtyRenderFix = new SFML.Graphics.RectangleShape();
-        public static Window FocusedWindow { get; internal set; }
-
-        static Resources()
+		internal static bool MusicStreamerActive = false;
+		internal static Thread MusicStreamerThread;
+		
+		public static View AddView(RectangleF area, RectangleF viewport)
         {
-            RenderPlane.Smooth = true;
-            FocusedWindow = null;
-
-            //add console font (implement stream loading)
-            //Fonts.Add ("inconsolata", new Font("inconsolata", System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("HatlessEngine.Inconsolata.otf")));
-        }
-
-        public static Window AddWindow(string id, uint width, uint height, string title)
-        {
-            Window window = new Window(id, width, height, title);
-            Windows.Add(id, window);
-            return window;
-        }
-        public static View AddView(string id, Rectangle area, string targetWindow, Rectangle viewport)
-        {
-            View view = new View(id, area, targetWindow, viewport);
-            Views.Add(id, view);
+			View view = new View(area, viewport);
+            Views.Add(view);
             return view;
         }
-        public static View AddView(string id, Rectangle area, string targetWindow)
-        {
-            return AddView(id, area, targetWindow, new Rectangle(0, 0, 1, 1));
-        }
-        public static Sprite AddSprite(string id, string filename, Size size)
+		public static Sprite AddSprite(string id, string filename, Size size)
         {
             Sprite sprite;
-            if (size.Width == 0 && size.Height == 0)
-                sprite = new Sprite(id, RootDirectory + filename);
+			if (size == Size.Empty)
+				sprite = new Sprite(id, filename);
             else
-                sprite = new Sprite(id, RootDirectory + filename, size);
+                sprite = new Sprite(id, filename, size);
 
             Sprites.Add(id, sprite);
 
@@ -79,26 +61,26 @@ namespace HatlessEngine
         }
         public static Sprite AddSprite(string id, string filename)
         {
-            return AddSprite(id, filename, new Size(0, 0));
-        }
+			return AddSprite(id, filename, Size.Empty);
+		}
         public static Font AddFont(string id, string filename)
         {
-            Font font = new Font(id, RootDirectory + filename);
+			Font font = new Font(id, filename);
             Fonts.Add(id, font);
             return font;
         }
-        public static Music AddMusic(string id, string filename)
+		public static Music AddMusic(string id, string filename)
         {
-            Music music = new Music(id, RootDirectory + filename);
+			Music music = new Music(id, filename);
             Music.Add(id, music);
             return music;
         }
         public static Sound AddSound(string id, string filename)
         {
-            Sound sound = new Sound(id, RootDirectory + filename);
+			Sound sound = new Sound(id, filename);
             Sounds.Add(id, sound);
             return sound;
-        }
+		}
         public static Objectmap AddObjectmap(string id, params ObjectmapBlueprint[] objectmapBlueprints)
         {
             Objectmap objectmap = new Objectmap(id, objectmapBlueprints);
@@ -112,86 +94,146 @@ namespace HatlessEngine
             return spritemap;
         }
         public static Spritemap AddSpritemap(string id, string filename)
-        {
-            Spritemap spritemap = new Spritemap(id, filename);
-            Spritemaps.Add(id, spritemap);
-            return spritemap;
-        }
+		{
+			Spritemap spritemap = new Spritemap(id, filename);
+			Spritemaps.Add(id, spritemap);
+			return spritemap;
+		}
 
-        /// <summary>
-        /// Performs step event for all resources that need it.
-        /// Also handles addition and removal of resources after doing the previous.
-        /// </summary>
-        internal static void Step()
-        {
-            //step
-            foreach (LogicalObject obj in Objects)
-            {
-                obj.Step();
-                obj.AfterStep();
-            }
+		public static void LoadAllExternalResources()
+		{
+			foreach(KeyValuePair<string, Sprite> pair in Sprites)
+				pair.Value.Load();
+			foreach(KeyValuePair<string, Font> pair in Fonts)
+				pair.Value.Load();
+			foreach(KeyValuePair<string, Sound> pair in Sounds)
+				pair.Value.Load();
+			foreach(KeyValuePair<string, Music> pair in Music)
+				pair.Value.Load();
+		}
 
-            //object addition
-            Objects.AddRange(AddObjects);
-            AddObjects.Clear();
+		internal static void ObjectAdditionAndRemoval()
+		{
+			//object addition
+			Objects.AddRange(AddObjects);
+			AddObjects.Clear();
 
-            //object removal
-            foreach (LogicalObject logicalObject in RemoveObjects)
-                Objects.Remove(logicalObject);
-            RemoveObjects.Clear();
+			//object removal
+			foreach (LogicalObject logicalObject in RemoveObjects)
+				Objects.Remove(logicalObject);
+			RemoveObjects.Clear();
+		}
 
-            //window removal
-            foreach (Window window in RemoveWindows)
-                Windows.Remove(window.Id);
-            RemoveWindows.Clear();
-        }
+		/// <summary>
+		/// Gets an OpenAL source identifier.
+		/// Source will be managed by HatlessEngine to prevent not playing of sound after all device channels are occupied.
+		/// </summary>
+		internal static int GetSource()
+		{
+			int source = AL.GenSource();
+			AudioSources.Add(source);
+			return source;
+		}
 
-        /// <summary>
-        /// Draws frame for every resource (so pretty much all drawing).
-        /// </summary>
-        public static void Draw(float stepProgress)
-        {
-            if (Resources.Windows.Count > 0)
-            {
-                //create texture to display
-                RenderPlane.Clear(new SFML.Graphics.Color(64, 64, 64));
+		/// <summary>
+		/// Removes all stopped sources.
+		/// </summary>
+		internal static void SourceRemoval()
+		{
+			List<int> removeSources = new List<int>();
+			foreach(int source in AudioSources)
+			{
+				if (AL.GetSourceState(source) == ALSourceState.Stopped)
+				{
+					AL.DeleteSource(source);
+					removeSources.Add(source);
+				}
+			}
 
-                //draw every objects' draw method
-                foreach (LogicalObject obj in Objects)
-                {
-                    obj.Draw(stepProgress);
-                }
+			foreach(int source in removeSources)
+			{
+				AudioSources.Remove(source);
+				AudioControls[source].PerformStopped();
+				AudioControls.Remove(source);
+			}
+		}
 
-                //to prevent weird rendertexture bug
-                dirtyRenderFix.Size = new SFML.Window.Vector2f(RenderPlane.Size.X, RenderPlane.Size.Y);
-                dirtyRenderFix.FillColor = SFML.Graphics.Color.Transparent;
-                RenderPlane.Draw(dirtyRenderFix);
+		internal static void LaunchMusicStreamerThread()
+		{
+			if (!Resources.MusicStreamerActive)
+			{
+				MusicStreamerThread = new Thread(new ThreadStart(Resources.MusicStreamer));
+				MusicStreamerThread.Name = "HatlessEngine MusicStreamer";
+				MusicStreamerThread.IsBackground = true;
+				MusicStreamerThread.Start();
+			}
+		}
 
-                RenderPlane.Display();
-                RenderSprite = new SFML.Graphics.Sprite(RenderPlane.Texture);
+		internal static void MusicStreamer()
+		{
+			MusicStreamerActive = true;
 
-                //display the texture on window(s) using view(s)
-                foreach (KeyValuePair<string, Window> pair in Windows)
-                {
-                    Window window = pair.Value;
-                    foreach (View view in window.ActiveViews)
-                    {
-                        view.UpdateSFMLView();
-                        window.SFMLWindow.SetView(view.SFMLView);
-                        window.SFMLWindow.Draw(RenderSprite);
-                    }
-                    window.SFMLWindow.Display();
-                }
-            }
-        }
+			//decides whether the thread should stay alive
+			bool workNeedsDoing = true;
 
-        internal static void WindowEvents()
-        {
-            //window handling, before Input.UpdateState to have the correct mouse coordinates to work with
-            foreach (KeyValuePair<string, Window> pair in Resources.Windows)
-            {
-                pair.Value.SFMLWindow.DispatchEvents();
-            }
-        }
+			while (workNeedsDoing)
+			{
+				workNeedsDoing = false;
+
+				//work when there's workin' to do
+				foreach(KeyValuePair<string, Music> pair in Music)
+				{
+					Music music = pair.Value;
+
+					if (music.Streaming)
+					{
+						workNeedsDoing = true;
+
+						int buffersProcessed;
+						AL.GetSource(music.SourceId, ALGetSourcei.BuffersProcessed, out buffersProcessed);
+
+						if (music.JustStartedPlaying)
+						{
+							//will force filling the 2 still empty buffers and make sure the activebuffer is right afterwards
+							buffersProcessed = 2;
+							music.ActiveBufferId = 1;
+							music.JustStartedPlaying = false;
+						}
+
+						//if the music's done with a buffer, fill it again and append it
+						while (buffersProcessed > 0)
+						{
+							AL.SourceUnqueueBuffer(music.SourceId);
+
+							//fill the just released buffer
+							int requestedSamples = music.WaveReader.SampleRate / 2 * music.WaveReader.Channels;
+							int readSamples;
+							short[] waveData = music.WaveReader.ReadSamples(requestedSamples, out readSamples);
+							AL.BufferData(music.BufferIds[music.ActiveBufferId], music.WaveReader.ALFormat, waveData, readSamples * 2, music.WaveReader.SampleRate);
+					
+							AL.SourceQueueBuffer(music.SourceId, music.BufferIds[music.ActiveBufferId]);
+
+							if (++music.ActiveBufferId == 3)
+								music.ActiveBufferId = 0;
+
+							//this was the last buffer, stop loading will ya
+							if (readSamples != requestedSamples)
+							{
+								if (music.Looping)
+								{
+									music.WaveReader.Rewind();
+								}
+								else
+									music.Streaming = false; //reached end
+							}
+
+							buffersProcessed--;
+						}
+					}
+				}
+				Thread.Sleep(100); //cya in a tenth of a second!
+			}
+			MusicStreamerActive = false;
+		}
     }
 }

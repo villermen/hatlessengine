@@ -1,113 +1,122 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using OpenTK.Graphics.OpenGL;
 
 namespace HatlessEngine
 {
-    public class Sprite : IExternalResource
+    public class Sprite : ExternalResource
     {   
         public string Filename { get; private set; }
         public string Id { get; private set; }
-        public bool IsLoaded { get; private set; }
-        internal SFML.Graphics.Sprite SFMLSprite;
+        public bool Loaded { get; private set; }
+
+		private int OpenGLTextureId;
 
         internal Dictionary<string, uint[]> Animations = new Dictionary<string, uint[]>();
 
         private bool AutoSize = false;
-        private uint FrameWidth;
-        private uint FrameHeight;
-        public uint IndexWidth { get; private set; }
-        public uint IndexHeight { get; private set; }
-        public uint IndexLength { get; private set; }
-
-        public Size Size 
-        {
-            get { return new Size(FrameWidth, FrameHeight); }
-            set
-            {
-                FrameWidth = (uint)value.Width;
-                FrameHeight = (uint)value.Height;
-            }
-        }
+		public Size FrameSize { get; private set; }
+		public Size IndexSize { get; private set; }
         
-        internal Sprite(string id, string filename) : this(id, filename, new Size(0, 0))
+		internal Sprite(string id, string filename) : this(id, filename, Size.Empty)
         {
             AutoSize = true;
         }
-        internal Sprite(string id, string filename, Size size)
+		internal Sprite(string id, string filename, Size frameSize)
         {
             Id = id;
-            Size = size;
             Filename = filename;
-            IsLoaded = false;
-            IndexWidth = 1;
-            IndexHeight = 1;
-            IndexLength = 1;
+            Loaded = false;
+
+			FrameSize = frameSize;
+			IndexSize = Size.Empty;
         }
 
-        public void Draw(Position pos, uint frameIndex = 0, params DrawTransformation[] transformations)
+		public void Draw(PointF pos, uint frameIndex, SizeF scale)
         {
-            Load();
-            SFMLSprite.TextureRect = new SFML.Graphics.IntRect((int)(frameIndex % IndexWidth * FrameWidth), (int)(frameIndex / IndexWidth * FrameHeight), (int)FrameWidth, (int)FrameHeight);
+			if (!Loaded)
+			{
+				if (Settings.JustInTimeResourceLoading)
+					Load();
+				else
+					throw new NotLoadedException();
+			}
 
-            //apply transformations
+			float x1 = 1f / IndexSize.Width * (frameIndex % IndexSize.Height);
+			float x2 = 1f / IndexSize.Width * (frameIndex % IndexSize.Height + 1);
+			float y1 = 1f / IndexSize.Height * (frameIndex / IndexSize.Height);
+			float y2 = 1f / IndexSize.Height * (frameIndex / IndexSize.Height + 1);
 
-            foreach(DrawTransformation transformation in transformations)
-            {
-                switch (transformation.Type)
-                {
-                    case DrawTransformation.TransformationType.ScaleAll:
-                        SFMLSprite.Scale = new Position((float)transformation.Argument1, (float)transformation.Argument1);
-                        break;
-                    case DrawTransformation.TransformationType.ScaleAxes:
-                        SFMLSprite.Scale = new Position((float)transformation.Argument1, (float)transformation.Argument2);
-                        break;
-                    case DrawTransformation.TransformationType.Rotate:
-                        SFMLSprite.Origin = (Position)transformation.Argument1;
-                        SFMLSprite.Rotation = (float)transformation.Argument2;
-                        break;
-                }
-            }
-            
-            //draw
-            SFMLSprite.Position = new SFML.Window.Vector2f(pos.X + SFMLSprite.Origin.X, pos.Y + SFMLSprite.Origin.Y);
-            Resources.RenderPlane.Draw(SFMLSprite);
+			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+			GL.BindTexture(TextureTarget.Texture2D, OpenGLTextureId);
+			GL.Color3(Color.White);
 
-            //clear transformations
-            SFMLSprite.Origin = new Position(0, 0);
-            SFMLSprite.Scale = new Position(1, 1);
-            SFMLSprite.Rotation = 0;
+			GL.Begin(PrimitiveType.Quads);
+
+			GL.TexCoord2(x1, y1);
+			GL.Vertex3(pos.X, pos.Y, DrawX.GLDepth);
+			GL.TexCoord2(x2, y1);
+			GL.Vertex3(pos.X + FrameSize.Width * scale.Width, pos.Y, DrawX.GLDepth);
+			GL.TexCoord2(x2, y2);
+			GL.Vertex3(pos.X + FrameSize.Width * scale.Width, pos.Y + FrameSize.Height * scale.Height, DrawX.GLDepth);
+			GL.TexCoord2(x1, y2);
+			GL.Vertex3(pos.X, pos.Y + FrameSize.Height * scale.Height, DrawX.GLDepth);
+
+			GL.End();
         }
+		public void Draw(PointF pos)
+		{
+			Draw(pos, 0, new SizeF(1, 1));
+		}
+		public void Draw(PointF pos, uint frameIndex)
+		{
+			Draw(pos, frameIndex, new SizeF(1, 1));
+		}
+		public void Draw(PointF pos, uint frameIndex, float scale)
+		{
+			Draw(pos, frameIndex, new SizeF(scale, scale));
+		}
 
         public void Load()
         {
-            if (!IsLoaded)
-            {
-                SFMLSprite = new SFML.Graphics.Sprite(new SFML.Graphics.Texture(Filename));
+			if (!Loaded)
+			{
+				Bitmap bitmap = new Bitmap(Filename);
+				BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-                if (AutoSize)
-                {
-                    FrameWidth = (uint)SFMLSprite.GetLocalBounds().Width;
-                    FrameHeight = (uint)SFMLSprite.GetLocalBounds().Height;
-                    IndexWidth = 1;
-                    IndexHeight = 1;
-                    IndexLength = 1;
-                }
-                else
-                {
-                    IndexWidth = (uint)(SFMLSprite.GetLocalBounds().Width / FrameWidth);
-                    IndexHeight = (uint)(SFMLSprite.GetLocalBounds().Height / FrameHeight);
-                    IndexLength = IndexWidth * IndexHeight;
-                }
+				OpenGLTextureId = GL.GenTexture();
+				GL.BindTexture(TextureTarget.Texture2D, OpenGLTextureId);
+
+				GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bitmapData.Width, bitmapData.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bitmapData.Scan0);
+				bitmap.UnlockBits(bitmapData);
+				bitmap.Dispose();
+
+				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+
+				if (AutoSize)
+				{
+					FrameSize = new Size(bitmapData.Width, bitmapData.Height);
+					IndexSize = new Size(1, 1);
+				}
+				else
+				{
+					IndexSize = new Size(bitmapData.Width / FrameSize.Width, bitmapData.Height / FrameSize.Height);
+				}
                     
-                IsLoaded = true;
-            }
+				Loaded = true;
+			}
         }
 
         public void Unload()
         {
-            SFMLSprite.Dispose();
-            SFMLSprite = null;
-            IsLoaded = false;
+			if (Loaded)
+			{
+				GL.DeleteTexture(OpenGLTextureId);
+				Loaded = false;
+			}
         }
 
         public void AddAnimation(string id, uint[] animation)

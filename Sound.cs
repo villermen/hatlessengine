@@ -1,49 +1,73 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using OpenTK;
+using OpenTK.Audio.OpenAL;
 
 namespace HatlessEngine
 {
-    public class Sound : IExternalResource
+	public class Sound : ExternalResource
     {
         public string Filename { get; private set; }
         public string Id { get; private set; }
-        public bool IsLoaded { get; private set; }
-        internal SFML.Audio.SoundBuffer SFMLSoundBuffer;
-        private Dictionary<byte, SFML.Audio.Sound> SFMLSounds = new Dictionary<byte, SFML.Audio.Sound>(256);
-        private byte NextId = 0;
+        public bool Loaded { get; private set; }
+
+		private int OpenALBufferId;
 
         internal Sound(string id, string filename)
         {
             Id = id;
             Filename = filename;
-            IsLoaded = false;
+            Loaded = false;
         }
 
-        public byte Play(float volume = 1)
+		public SoundControl Play(float volume = 1f)
         {
-            if (!IsLoaded)
-                Load();
+			if (!Loaded)
+			{
+				if (Settings.JustInTimeResourceLoading)
+					Load();
+				else
+					throw new NotLoadedException();
+			}
 
-            SFMLSounds.Add(NextId, new SFML.Audio.Sound(SFMLSoundBuffer));
-            SFMLSounds[NextId].Volume = volume * 100;
-            SFMLSounds[NextId].Play();
+			//generate source and reference the buffer
+			int source = Resources.GetSource();
+			AL.Source(source, ALSourcei.Buffer, OpenALBufferId);
 
-            NextId++;
+			if (volume != 1)
+				AL.Source(source, ALSourcef.Gain, volume);
 
-            return (byte)(NextId - 1);
+			AL.SourcePlay(source);
+
+			return new SoundControl(source);
         }
 
         public void Load()
-        {
-            SFMLSoundBuffer = new SFML.Audio.SoundBuffer(Filename);
-            IsLoaded = true;
+		{
+			if (!Loaded)
+			{
+				WaveReader reader = new WaveReader(Filename);
+				if (reader.MetaLoaded)
+				{
+					OpenALBufferId = AL.GenBuffer();
+					int readSamples;
+					short[] waveData = reader.ReadAll(out readSamples);
+					AL.BufferData(OpenALBufferId, reader.ALFormat, waveData, waveData.Length * 2, reader.SampleRate);
+					Loaded = true;
+				}
+				else
+					throw new FileLoadException();
+			}
         }
 
         public void Unload()
         {
-            SFMLSoundBuffer.Dispose();
-            SFMLSoundBuffer = null;
-            IsLoaded = false;
+			if (Loaded)
+			{
+				AL.DeleteBuffer(OpenALBufferId);
+				Loaded = false;
+			}
         }
     }
 }
