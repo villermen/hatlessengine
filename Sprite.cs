@@ -34,7 +34,7 @@ namespace HatlessEngine
 			IndexSize = Size.Empty;
         }
 
-		public void Draw(PointF pos, uint frameIndex, SizeF scale)
+		public void Draw(PointF pos, uint frameIndex, PointF origin, PointF scale, float rotation)
         {
 			if (!Loaded)
 			{
@@ -44,10 +44,50 @@ namespace HatlessEngine
 					throw new NotLoadedException();
 			}
 
-			float x1 = 1f / IndexSize.Width * (frameIndex % IndexSize.Height);
-			float x2 = 1f / IndexSize.Width * (frameIndex % IndexSize.Height + 1);
-			float y1 = 1f / IndexSize.Height * (frameIndex / IndexSize.Height);
-			float y2 = 1f / IndexSize.Height * (frameIndex / IndexSize.Height + 1);
+			//calculate frame coordinates within the texture
+			float texX1 = 1f / IndexSize.Width * (frameIndex % IndexSize.Height);
+			float texY1 = 1f / IndexSize.Height * (frameIndex / IndexSize.Height);
+			float texX2 = 1f / IndexSize.Width * (frameIndex % IndexSize.Height + 1);
+			float texY2 = 1f / IndexSize.Height * (frameIndex / IndexSize.Height + 1);
+
+			//calculate output coordinates with the transformations
+			PointF absoluteOrigin = new PointF(pos.X + origin.X, pos.Y + origin.Y);
+
+			//default positions
+			float[] screenXCoords = new float[4];
+			float[] screenYCoords = new float[4];
+			screenXCoords[0] = pos.X; 
+			screenYCoords[0] = pos.Y; 
+			screenXCoords[1] = pos.X + FrameSize.Width;
+			screenYCoords[1] = pos.Y; 
+			screenXCoords[2] = pos.X + FrameSize.Width; 
+			screenYCoords[2] = pos.Y + FrameSize.Height;
+			screenXCoords[3] = pos.X;
+			screenYCoords[3] = pos.Y + FrameSize.Height; 
+
+			//scaling
+			if (scale != new PointF(1, 1))
+			{
+				for (byte i = 0; i < 4; i++)
+				{
+					screenXCoords[i] += (screenXCoords[i] - absoluteOrigin.X) * (scale.X - 1);
+					screenYCoords[i] += (screenYCoords[i] - absoluteOrigin.Y) * (scale.Y - 1);
+				}
+			}
+
+			//rotation
+			if (rotation != 0)
+			{
+				for (byte i = 0; i < 4; i++)
+				{
+					PointF positionToCheck = new PointF(screenXCoords[i], screenYCoords[i]);
+
+					float dist = Misc.DistanceBetweenPoints(absoluteOrigin, positionToCheck);
+					float angle = (float)(((Misc.AngleBetweenPoints(absoluteOrigin, positionToCheck) + rotation) / 180 - 0.5) * Math.PI);
+					screenXCoords[i] = absoluteOrigin.X + (float)Math.Cos(angle) * dist;
+					screenYCoords[i] = absoluteOrigin.Y + (float)Math.Sin(angle) * dist;
+				}
+			}
 
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.BindTexture(TextureTarget.Texture2D, OpenGLTextureId);
@@ -55,28 +95,32 @@ namespace HatlessEngine
 
 			GL.Begin(PrimitiveType.Quads);
 
-			GL.TexCoord2(x1, y1);
-			GL.Vertex3(pos.X, pos.Y, DrawX.GLDepth);
-			GL.TexCoord2(x2, y1);
-			GL.Vertex3(pos.X + FrameSize.Width * scale.Width, pos.Y, DrawX.GLDepth);
-			GL.TexCoord2(x2, y2);
-			GL.Vertex3(pos.X + FrameSize.Width * scale.Width, pos.Y + FrameSize.Height * scale.Height, DrawX.GLDepth);
-			GL.TexCoord2(x1, y2);
-			GL.Vertex3(pos.X, pos.Y + FrameSize.Height * scale.Height, DrawX.GLDepth);
+			GL.TexCoord2(texX1, texY1);
+			GL.Vertex3(screenXCoords[0], screenYCoords[0], DrawX.GLDepth);
+			GL.TexCoord2(texX2, texY1);
+			GL.Vertex3(screenXCoords[1], screenYCoords[1], DrawX.GLDepth);
+			GL.TexCoord2(texX2, texY2);
+			GL.Vertex3(screenXCoords[2], screenYCoords[2], DrawX.GLDepth);
+			GL.TexCoord2(texX1, texY2);
+			GL.Vertex3(screenXCoords[3], screenYCoords[3], DrawX.GLDepth);
 
 			GL.End();
         }
 		public void Draw(PointF pos)
 		{
-			Draw(pos, 0, new SizeF(1, 1));
+			Draw(pos, 0, new PointF(0, 0), new PointF(1, 1), 0);
 		}
 		public void Draw(PointF pos, uint frameIndex)
 		{
-			Draw(pos, frameIndex, new SizeF(1, 1));
+			Draw(pos, frameIndex, new PointF(0, 0), new PointF(1, 1), 0);
 		}
-		public void Draw(PointF pos, uint frameIndex, float scale)
+		public void Draw(PointF pos, uint frameIndex, PointF origin, float scale)
 		{
-			Draw(pos, frameIndex, new SizeF(scale, scale));
+			Draw(pos, frameIndex, origin, new PointF(scale, scale), 0);
+		}
+		public void Draw(PointF pos, uint frameIndex, PointF origin, PointF scale)
+		{
+			Draw(pos, frameIndex, origin, scale, 0);
 		}
 
         public void Load()
