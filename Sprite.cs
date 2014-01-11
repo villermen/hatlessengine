@@ -34,7 +34,7 @@ namespace HatlessEngine
 			IndexSize = Size.Empty;
         }
 
-		public void Draw(PointF pos, uint frameIndex, PointF origin, PointF scale, float rotation)
+		public void Draw(PointF pos, uint frameIndex, PointF scale, PointF origin, float rotation)
         {
 			if (!Loaded)
 			{
@@ -108,19 +108,19 @@ namespace HatlessEngine
         }
 		public void Draw(PointF pos)
 		{
-			Draw(pos, 0, new PointF(0, 0), new PointF(1, 1), 0);
+			Draw(pos, 0, new PointF(1, 1), new PointF(0, 0), 0);
 		}
 		public void Draw(PointF pos, uint frameIndex)
 		{
-			Draw(pos, frameIndex, new PointF(0, 0), new PointF(1, 1), 0);
+			Draw(pos, frameIndex, new PointF(1, 1), new PointF(0, 0), 0);
 		}
-		public void Draw(PointF pos, uint frameIndex, PointF origin, float scale)
+		public void Draw(PointF pos, uint frameIndex, float scale)
 		{
-			Draw(pos, frameIndex, origin, new PointF(scale, scale), 0);
+			Draw(pos, frameIndex, new PointF(scale, scale), new PointF(0, 0), 0);
 		}
-		public void Draw(PointF pos, uint frameIndex, PointF origin, PointF scale)
+		public void Draw(PointF pos, uint frameIndex, PointF scale)
 		{
-			Draw(pos, frameIndex, origin, scale, 0);
+			Draw(pos, frameIndex, scale, new PointF(0, 0), 0);
 		}
 
         public void Load()

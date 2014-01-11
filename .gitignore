@@ -214,6 +214,10 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
-#Custom
+#############
+## Custom
+#############
 DebugBuild/*
 !DebugBuild/*.dll
+ReleaseBuild/*
+!ReleaseBuild/HatlessEngine.dll

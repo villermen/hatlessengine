@@ -19,16 +19,18 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>ReleaseBuild</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="AfterBuild" name="ddsaf" command="..\packages\ILRepack.1.23.0\tools\ILRepack.exe /out:HatlessEngine.dll HatlessEngine.dll NVorbis.dll OpenTK.dll QuickFont.dll" workingdir="${TargetDir}" externalConsole="True" pauseExternalConsole="True" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Drawing" />
@@ -58,7 +60,6 @@
     <Compile Include="Spritemap.cs" />
     <Compile Include="SpritemapBlueprint.cs" />
     <Compile Include="Music.cs" />
-    <Compile Include="AnimatedSprite.cs" />
     <Compile Include="Objectmap.cs" />
     <Compile Include="Misc.cs" />
     <Compile Include="Log.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Font.cs" />
     <Compile Include="ButtonObject.cs" />
     <Compile Include="ObjectmapBlueprint.cs" />
+    <Compile Include="ManagedSprite.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

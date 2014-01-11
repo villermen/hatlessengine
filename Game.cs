@@ -41,9 +41,8 @@ namespace HatlessEngine
 			GL.ClearColor(Color.Gray);
 
 			GL.Enable(EnableCap.DepthTest);
-			GL.DepthMask(true);
-			GL.DepthFunc(DepthFunction.Greater);
-			GL.ClearDepth(-1);
+			GL.DepthFunc(DepthFunction.Lequal);
+			GL.ClearDepth(1);
 
 			Resources.AddView(new RectangleF(new PointF(0, 0), windowSize), new RectangleF(0, 0, 1, 1));
 
@@ -76,6 +75,9 @@ namespace HatlessEngine
 
 		private static void Step(object sender, FrameEventArgs e)
 		{
+			//update the weakreferences if they still exist
+			Resources.UpdateManagedSprites();
+
 			foreach (LogicalObject obj in Resources.Objects)
 			{
 				obj.Step();
@@ -92,8 +94,9 @@ namespace HatlessEngine
 		private static void Draw(object sender, FrameEventArgs e)
 		{
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-			//reset depth to be consistent over multiple frames
+			//reset depth and color to be consistent over multiple frames
 			DrawX.Depth = 0;
+			DrawX.DefaultColor = Color.Black;
 
 			foreach(View view in Resources.Views)
 			{

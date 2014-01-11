@@ -40,6 +40,8 @@ namespace HatlessEngine
 
 		internal static bool MusicStreamerActive = false;
 		internal static Thread MusicStreamerThread;
+
+		internal static List<WeakReference> ManagedSprites = new List<WeakReference>();
 		
 		public static View AddView(RectangleF area, RectangleF viewport)
         {
@@ -234,6 +236,27 @@ namespace HatlessEngine
 				Thread.Sleep(100); //cya in a tenth of a second!
 			}
 			MusicStreamerActive = false;
+		}
+
+		internal static void UpdateManagedSprites()
+		{
+			List<WeakReference> removeManagedSprites = new List<WeakReference>();
+			foreach(WeakReference managedSprite in ManagedSprites)
+			{
+				//check if alive and add to remove list if not
+				if (managedSprite.IsAlive)
+				{
+					//perform step
+					((ManagedSprite)managedSprite.Target).Step();
+				}
+				else
+					removeManagedSprites.Add(managedSprite);
+			}
+
+			foreach(WeakReference managedSprite in removeManagedSprites)
+			{
+				ManagedSprites.Remove(managedSprite);
+			}
 		}
     }
 }
