@@ -15,22 +15,23 @@ namespace HatlessEngine
 		/// </summary>
 		public static Color DefaultColor = Color.Black;
 
-		private static int _Depth;
+		internal static float GLDepth;
+		private static sbyte _Depth;
 		/// <summary>
 		/// Set the depth to draw at, will be used in all drawing related functions.
 		/// Higher = further away from the viewer.
 		/// Lower = closer to the viewer.
 		/// </summary>
-		public static int Depth
+		public static sbyte Depth
 		{
 			get { return _Depth; }
 			set
 			{
-				GLDepth = (float)value / int.MaxValue;
 				_Depth = value;
+				GLDepth = (value + 128) / 255f;
+				Log.Message(_Depth.ToString() + " -> " + GLDepth.ToString());
 			}
 		}
-		internal static float GLDepth;
 
 		public static void Point(PointF position, Color color, float size = 1)
 		{

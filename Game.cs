@@ -42,7 +42,7 @@ namespace HatlessEngine
 
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthFunc(DepthFunction.Lequal);
-			GL.ClearDepth(1);
+			GL.ClearDepth(1.0f);
 
 			Resources.AddView(new RectangleF(new PointF(0, 0), windowSize), new RectangleF(0, 0, 1, 1));
 
@@ -100,13 +100,16 @@ namespace HatlessEngine
 
 			foreach(View view in Resources.Views)
 			{
-				GL.LoadIdentity();
 				GL.Viewport((int)view.Viewport.Left * Window.Width, (int)view.Viewport.Top * Window.Height, (int)view.Viewport.Right * Window.Width, (int)view.Viewport.Bottom * Window.Height);
-				GL.Ortho(view.Area.Left, view.Area.Right, view.Area.Bottom, view.Area.Top, -1, 1);
+				GL.MatrixMode(MatrixMode.Projection);
+				GL.LoadIdentity();
+				GL.Ortho(view.Area.Left, view.Area.Right, view.Area.Bottom, view.Area.Top, 0.0f, -1.0f); //does not seem right, but it works (see it as duct-tape)
 
+				GL.MatrixMode(MatrixMode.Modelview);
 				//drawing
 				foreach (LogicalObject obj in Resources.Objects)
 				{
+					//send view's coords for clipping?
 					obj.Draw();
 				}
 			}
