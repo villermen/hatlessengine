@@ -41,9 +41,6 @@
     <Reference Include="NVorbis">
       <HintPath>..\..\NVorbis\NVorbis.dll</HintPath>
     </Reference>
-    <Reference Include="QuickFont">
-      <HintPath>..\..\QuickFont\QuickFont\bin\Debug\QuickFont.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -80,5 +77,11 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Exceptions\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\QuickFont\QuickFont.csproj">
+      <Project>{BBECE6FC-EF63-40F8-A734-A500D1DFC1AF}</Project>
+      <Name>QuickFont</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

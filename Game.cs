@@ -38,11 +38,13 @@ namespace HatlessEngine
 			//OpenGL initialization
 			GL.Enable(EnableCap.Texture2D);
 			GL.Enable(EnableCap.Blend);
+			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.ClearColor(Color.Gray);
 
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthFunc(DepthFunction.Lequal);
-			GL.ClearDepth(1.0f);
+			GL.ClearDepth(1f);
+			GL.DepthRange(1d, 0d); //does not seem right, but it works (see it as duct-tape)
 
 			Resources.AddView(new RectangleF(new PointF(0, 0), windowSize), new RectangleF(0, 0, 1, 1));
 
@@ -103,13 +105,13 @@ namespace HatlessEngine
 				GL.Viewport((int)view.Viewport.Left * Window.Width, (int)view.Viewport.Top * Window.Height, (int)view.Viewport.Right * Window.Width, (int)view.Viewport.Bottom * Window.Height);
 				GL.MatrixMode(MatrixMode.Projection);
 				GL.LoadIdentity();
-				GL.Ortho(view.Area.Left, view.Area.Right, view.Area.Bottom, view.Area.Top, 0.0f, -1.0f); //does not seem right, but it works (see it as duct-tape)
+				GL.Ortho(view.Area.Left, view.Area.Right, view.Area.Bottom, view.Area.Top, -1f, 1f);
 
 				GL.MatrixMode(MatrixMode.Modelview);
 				//drawing
 				foreach (LogicalObject obj in Resources.Objects)
 				{
-					//send view's coords for clipping?
+					//set view's coords for clipping?
 					obj.Draw();
 				}
 			}

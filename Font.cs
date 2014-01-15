@@ -23,7 +23,7 @@ namespace HatlessEngine
 		public void Draw(string str, PointF position, Color color)
 		{
 			QuickFont.Options.Colour = color;
-			QuickFont.Print(str, QFontAlignment.Left, new OpenTK.Vector2(position.X, position.Y));
+			QuickFont.Print(str, QFontAlignment.Left, new OpenTK.Vector2(position.X, position.Y), DrawX.GLDepth);
 		}
 		public void Draw(string str, PointF position)
 		{

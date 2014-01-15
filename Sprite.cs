@@ -89,7 +89,6 @@ namespace HatlessEngine
 				}
 			}
 
-			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.BindTexture(TextureTarget.Texture2D, OpenGLTextureId);
 			GL.Color3(Color.White);
 
