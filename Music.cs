@@ -9,7 +9,7 @@ namespace HatlessEngine
         public string Id { get; private set; }
         public bool Loaded { get; private set; }
 
-		public bool Looping { get; private set; } //implement in audiocontrol
+		public bool Loop = false; //implement in audiocontrol
 
 		internal bool Streaming = false;
 
@@ -20,6 +20,12 @@ namespace HatlessEngine
 
 		internal WaveReader WaveReader;
 
+		/// <summary>
+		/// Music to play directly after this one ends.
+		/// Of course this doesn't work when this one's in looping mode.
+		/// </summary>
+		public string PlayAfterMusic = "";
+
 		internal Music(string id, string filename)
         {
             Id = id;
@@ -27,7 +33,7 @@ namespace HatlessEngine
             Loaded = false;
         }
 
-		public void Play(float volume = 1f, bool looping = false)
+		public void Play(float initialVolume = 1f)
         {
 			if (!Loaded)
 			{
@@ -54,14 +60,13 @@ namespace HatlessEngine
 			//attach
 			AL.SourceQueueBuffer(SourceId, BufferIds[0]);
 
-			if (volume != 1)
-				AL.Source(SourceId, ALSourcef.Gain, volume);
+			if (initialVolume != 1)
+				AL.Source(SourceId, ALSourcef.Gain, initialVolume);
 
 			AL.SourcePlay(SourceId);
 
 			JustStartedPlaying = true;
 			Streaming = true;
-			Looping = looping;
 
 			Resources.LaunchMusicStreamerThread();
 

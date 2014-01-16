@@ -29,7 +29,6 @@ namespace HatlessEngine
 			{
 				_Depth = value;
 				GLDepth = (value + 128) / 255f;
-				Log.Message(_Depth.ToString() + " -> " + GLDepth.ToString());
 			}
 		}
 

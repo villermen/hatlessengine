@@ -132,7 +132,9 @@ namespace HatlessEngine
 		/// </summary>
 		internal static int GetSource()
 		{
-			int source = AL.GenSource();
+			int source;
+			//will execute multiple times if cleanup has not removed the source from AudioControls yet
+			while (AudioControls.ContainsKey(source = AL.GenSource())) { }
 			AudioSources.Add(source);
 			return source;
 		}
@@ -221,19 +223,30 @@ namespace HatlessEngine
 							//this was the last buffer, stop loading will ya
 							if (readSamples != requestedSamples)
 							{
-								if (music.Looping)
+								if (music.Loop)
 								{
 									music.WaveReader.Rewind();
 								}
 								else
+								{
 									music.Streaming = false; //reached end
+
+									//tight looping by hijacking sound source for new music
+									if (music.PlayAfterMusic != "")
+									{
+										Music newMusic = Resources.Music[music.PlayAfterMusic];
+										newMusic.SourceId = music.SourceId;
+										newMusic.WaveReader.Rewind();
+										newMusic.Streaming = true;
+									}
+								}
 							}
 
 							buffersProcessed--;
 						}
 					}
 				}
-				Thread.Sleep(100); //cya in a tenth of a second!
+				Thread.Sleep(200); //cya in a fifth of a second!
 			}
 			MusicStreamerActive = false;
 		}
