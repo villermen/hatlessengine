@@ -119,7 +119,7 @@ namespace HatlessEngine
 			}
 			else if (Format == SoundFormat.Ogg)
 			{
-				return ReadSamples((int)((VorbisReader.TotalTime.TotalSeconds + 1) * VorbisReader.SampleRate * VorbisReader.Channels), out readSamples);
+				return ReadSamples((int)VorbisReader.TotalSamples, out readSamples);
 			}
 			else
 				throw new NotSupportedException("Not Wave or Ogg.");
