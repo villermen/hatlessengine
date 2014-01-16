@@ -33,7 +33,7 @@ namespace HatlessEngine
             Loaded = false;
         }
 
-		public void Play(float initialVolume = 1f)
+		public void Play()
         {
 			if (!Loaded)
 			{
@@ -60,8 +60,8 @@ namespace HatlessEngine
 			//attach
 			AL.SourceQueueBuffer(SourceId, BufferIds[0]);
 
-			if (initialVolume != 1)
-				AL.Source(SourceId, ALSourcef.Gain, initialVolume);
+			if (_Volume != 1)
+				AL.Source(SourceId, ALSourcef.Gain, _Volume);
 
 			AL.SourcePlay(SourceId);
 

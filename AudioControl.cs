@@ -12,15 +12,20 @@ namespace HatlessEngine
 
 		internal AudioControl() { }
 
+		protected float _Volume = 1f;
+
 		public float Volume
 		{
 			get 
 			{ 
-				float value;
-				AL.GetSource(SourceId, ALSourcef.Gain, out value); 
-				return value;
+				return _Volume;
 			}
-			set { AL.Source(SourceId, ALSourcef.Gain, value); }
+			set 
+			{ 
+				if (IsPlaying())
+					AL.Source(SourceId, ALSourcef.Gain, value);
+				_Volume = value;
+			}
 		}
 
 		public void Pause()

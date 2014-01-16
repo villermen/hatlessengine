@@ -40,7 +40,9 @@ namespace HatlessEngine
 
 			AL.SourcePlay(source);
 
-			return new SoundControl(source);
+			SoundControl soundControl = new SoundControl(source);
+			soundControl.Volume = volume;
+			return soundControl;
         }
 
         public void Load()
