@@ -18,6 +18,18 @@ namespace HatlessEngine
 		public PointF Origin;
 		public float Rotation;
 
+		public bool UseCustomDepth = false;
+		private sbyte _Depth = 0;
+		public sbyte Depth
+		{
+			get { return _Depth; }
+			set
+			{
+				_Depth = value;
+				UseCustomDepth = true;
+			}
+		}
+
 		/// <summary>
 		/// If no AnimationId is set with the constructor it will not cycle, but if you change the speed it will take all the frames in the sprite.
 		/// Else it will loop through the given animation.
@@ -40,7 +52,7 @@ namespace HatlessEngine
 		/// <summary>
 		/// All parameters.
 		/// </summary>
-		public ManagedSprite(string targetSprite, PointF position, PointF scale, PointF origin, float rotation = 0, string animationId = "", uint startIndex = 0, float speed = 1)
+		public ManagedSprite(string targetSprite, PointF position, PointF scale, PointF origin, float rotation = 0, string animationId = "", uint startIndex = 0, float speed = 1, sbyte depth = 0)
 		{
 			TargetSprite = Resources.Sprites[targetSprite];
 			Position = position;
@@ -51,24 +63,27 @@ namespace HatlessEngine
 			AnimationIndex = startIndex;
 			AnimationSpeed = speed;
 
+			if (depth != 0) //prevent UseCustomDepth from being set
+				Depth = depth;
+
 			//add to resources for updates. weak so it will be removed when no longer used by user
 			Resources.ManagedSprites.Add(new WeakReference(this));
 		}
 		/// <summary>
 		/// No transformations initially set.
 		/// </summary>
-		public ManagedSprite(string targetSprite, string animationId = "", uint startIndex = 0, float speed = 1) : 
-			this(targetSprite, new PointF(0, 0), new PointF(1, 1), new PointF(0, 0), 0, animationId, startIndex, speed) { }
+		public ManagedSprite(string targetSprite, string animationId = "", uint startIndex = 0, float speed = 1, sbyte depth = 0) : 
+		this(targetSprite, new PointF(0, 0), new PointF(1, 1), new PointF(0, 0), 0, animationId, startIndex, speed, depth) { }
 		/// <summary>
 		/// With position, and no transformations.
 		/// </summary>
-		public ManagedSprite(string targetSprite, PointF position, string animationId = "", uint startIndex = 0, float speed = 1) :
-			this(targetSprite, position, new PointF(1, 1), new PointF(0, 0), 0, animationId, startIndex, speed) { }
+		public ManagedSprite(string targetSprite, PointF position, string animationId = "", uint startIndex = 0, float speed = 1, sbyte depth = 0) :
+			this(targetSprite, position, new PointF(1, 1), new PointF(0, 0), 0, animationId, startIndex, speed, depth) { }
 		/// <summary>
 		/// With position and scale.
 		/// </summary>
-		public ManagedSprite(string targetSprite, PointF position, PointF scale, string animationId = "", uint startIndex = 0, float speed = 1) :
-			this(targetSprite, position, scale, new PointF(0, 0), 0, animationId, startIndex, speed) { }
+		public ManagedSprite(string targetSprite, PointF position, PointF scale, string animationId = "", uint startIndex = 0, float speed = 1, sbyte depth = 0) :
+			this(targetSprite, position, scale, new PointF(0, 0), 0, animationId, startIndex, speed, depth) { }
 
 		public void Draw()
         {
@@ -85,6 +100,8 @@ namespace HatlessEngine
 			else
 				frameIndex = AnimationIndex;
 
+			if (UseCustomDepth)
+				DrawX.Depth = _Depth;
 			TargetSprite.Draw(pos, frameIndex, Scale, Origin, Rotation);
 		}
 
