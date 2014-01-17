@@ -17,8 +17,8 @@ I've put it on github to have a backup and an easy way to show it to the people 
  - Streaming music.
  - A central way of checking for input, and full gamepad support.
  - Multiple views.
- - 
-HatlessEngine makes use of the following libraries.
+
+HatlessEngine makes use of the following libraries:
  - [OpenTK](http://www.opentk.com/) (OpenGL, OpenAL & OpenCL)
  - [QuickFont](http://www.opentk.com/project/QuickFont) for font loading and text drawing.
  - [NVorbis](https://nvorbis.codeplex.com/) for ogg decoding.
