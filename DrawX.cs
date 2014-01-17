@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Drawing;
 using OpenTK.Graphics.OpenGL;
 
@@ -34,18 +34,23 @@ namespace HatlessEngine
 
 		public static void Point(PointF position, Color color, float size = 1)
 		{
-			GL.Disable(EnableCap.Blend);
+			RectangleF pointRectangle = new RectangleF((float)Math.Floor(position.X - size * 0.5f), (float)Math.Floor(position.Y - size * 0.5f), (float)Math.Floor(size), (float)Math.Floor(size));
 
-			GL.PointSize(size);
-			GL.Color3(color);
+			if (pointRectangle.IntersectsWith(Game.CurrentDrawArea))
+			{
+				GL.Disable(EnableCap.Blend);
 
-			GL.Begin(PrimitiveType.Points);
+				GL.PointSize(size);
+				GL.Color3(color);
 
-			GL.Vertex3(position.X, position.Y, GLDepth);
+				GL.Begin(PrimitiveType.Points);
 
-			GL.End();
+				GL.Vertex3(position.X, position.Y, GLDepth);
 
-			GL.Enable(EnableCap.Blend);
+				GL.End();
+
+				GL.Enable(EnableCap.Blend);
+			}
 		}
 		public static void Point(PointF position, float size = 1)
 		{
@@ -54,19 +59,24 @@ namespace HatlessEngine
 
 		public static void Line(PointF pos1, PointF pos2, Color color, float width = 1)
         {
-			GL.Disable(EnableCap.Blend); //maybe improve on this
+			RectangleF lineRectangle = new RectangleF(pos1.X, pos1.Y, pos2.X - pos1.X, pos2.Y - pos1.Y);
 
-			GL.LineWidth(width);
-			GL.Color3(color);
+			if (lineRectangle.IntersectsWith(Game.CurrentDrawArea))
+			{
+				GL.Disable(EnableCap.Blend); //maybe improve on this
 
-			GL.Begin(PrimitiveType.Lines);
+				GL.LineWidth(width);
+				GL.Color3(color);
 
-			GL.Vertex3(pos1.X, pos1.Y, GLDepth);
-			GL.Vertex3(pos2.X, pos2.Y, GLDepth);
+				GL.Begin(PrimitiveType.Lines);
 
-			GL.End();
+				GL.Vertex3(pos1.X, pos1.Y, GLDepth);
+				GL.Vertex3(pos2.X, pos2.Y, GLDepth);
 
-			GL.Enable(EnableCap.Blend);
+				GL.End();
+
+				GL.Enable(EnableCap.Blend);
+			}
         }
 		public static void Line(PointF pos1, PointF pos2, float width = 1)
 		{
@@ -75,20 +85,23 @@ namespace HatlessEngine
 
 		public static void Rectangle(RectangleF rect, Color color)
 		{
-			GL.Disable(EnableCap.Blend);
+			if (rect.IntersectsWith(Game.CurrentDrawArea))
+			{
+				GL.Disable(EnableCap.Blend);
 
-			GL.Color3(color);
+				GL.Color3(color);
 
-			GL.Begin(PrimitiveType.Quads);
+				GL.Begin(PrimitiveType.Quads);
 
-			GL.Vertex3(rect.Left, rect.Top, GLDepth);
-			GL.Vertex3(rect.Right, rect.Top, GLDepth);
-			GL.Vertex3(rect.Right, rect.Bottom, GLDepth);
-			GL.Vertex3(rect.Left, rect.Bottom, GLDepth);
+				GL.Vertex3(rect.Left, rect.Top, GLDepth);
+				GL.Vertex3(rect.Right, rect.Top, GLDepth);
+				GL.Vertex3(rect.Right, rect.Bottom, GLDepth);
+				GL.Vertex3(rect.Left, rect.Bottom, GLDepth);
 
-			GL.End();
+				GL.End();
 
-			GL.Enable(EnableCap.Blend);
+				GL.Enable(EnableCap.Blend);
+			}
 		}
 		public static void Rectangle(RectangleF rect)
 		{

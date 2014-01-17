@@ -16,6 +16,7 @@ namespace HatlessEngine
 	{
 		internal static GameWindow Window;
 		internal static AudioContext Audio;
+		internal static RectangleF CurrentDrawArea;
 
 		public static float Speed
 		{ 
@@ -37,6 +38,7 @@ namespace HatlessEngine
 
 			//OpenGL initialization
 			GL.Enable(EnableCap.Texture2D);
+			GL.Enable(EnableCap.PointSmooth);
 			GL.Enable(EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.ClearColor(Color.Gray);
@@ -102,6 +104,7 @@ namespace HatlessEngine
 
 			foreach(View view in Resources.Views)
 			{
+				CurrentDrawArea = view.Area;
 				GL.Viewport((int)view.Viewport.Left * Window.Width, (int)view.Viewport.Top * Window.Height, (int)view.Viewport.Right * Window.Width, (int)view.Viewport.Bottom * Window.Height);
 				GL.MatrixMode(MatrixMode.Projection);
 				GL.LoadIdentity();

@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -63,12 +63,12 @@ namespace HatlessEngine
 			screenXCoords[2] = pos.X + FrameSize.Width; 
 			screenYCoords[2] = pos.Y + FrameSize.Height;
 			screenXCoords[3] = pos.X;
-			screenYCoords[3] = pos.Y + FrameSize.Height; 
+			screenYCoords[3] = pos.Y + FrameSize.Height;
 
 			//scaling
 			if (scale != new PointF(1, 1))
 			{
-				for (byte i = 0; i < 4; i++)
+				for(byte i = 0; i < 4; i++)
 				{
 					screenXCoords[i] += (screenXCoords[i] - absoluteOrigin.X) * (scale.X - 1);
 					screenYCoords[i] += (screenYCoords[i] - absoluteOrigin.Y) * (scale.Y - 1);
@@ -78,7 +78,7 @@ namespace HatlessEngine
 			//rotation
 			if (rotation != 0)
 			{
-				for (byte i = 0; i < 4; i++)
+				for(byte i = 0; i < 4; i++)
 				{
 					PointF positionToCheck = new PointF(screenXCoords[i], screenYCoords[i]);
 
@@ -89,21 +89,38 @@ namespace HatlessEngine
 				}
 			}
 
-			GL.BindTexture(TextureTarget.Texture2D, OpenGLTextureId);
-			GL.Color3(Color.White);
+			//decide whether to actually draw it
+			bool inDrawArea = false;
+			for(byte i = 0; i < 4; i++)
+			{
+				if (screenXCoords[i] >= Game.CurrentDrawArea.Left &&
+					screenXCoords[i] <= Game.CurrentDrawArea.Right &&
+					screenYCoords[i] >= Game.CurrentDrawArea.Top &&
+					screenYCoords[i] <= Game.CurrentDrawArea.Bottom)
+				{
+					inDrawArea = true;
+					break;
+				}
+			}
 
-			GL.Begin(PrimitiveType.Quads);
+			if (inDrawArea)
+			{
+				GL.BindTexture(TextureTarget.Texture2D, OpenGLTextureId);
+				GL.Color3(Color.White);
 
-			GL.TexCoord2(texX1, texY1);
-			GL.Vertex3(screenXCoords[0], screenYCoords[0], DrawX.GLDepth);
-			GL.TexCoord2(texX2, texY1);
-			GL.Vertex3(screenXCoords[1], screenYCoords[1], DrawX.GLDepth);
-			GL.TexCoord2(texX2, texY2);
-			GL.Vertex3(screenXCoords[2], screenYCoords[2], DrawX.GLDepth);
-			GL.TexCoord2(texX1, texY2);
-			GL.Vertex3(screenXCoords[3], screenYCoords[3], DrawX.GLDepth);
+				GL.Begin(PrimitiveType.Quads);
 
-			GL.End();
+				GL.TexCoord2(texX1, texY1);
+				GL.Vertex3(screenXCoords[0], screenYCoords[0], DrawX.GLDepth);
+				GL.TexCoord2(texX2, texY1);
+				GL.Vertex3(screenXCoords[1], screenYCoords[1], DrawX.GLDepth);
+				GL.TexCoord2(texX2, texY2);
+				GL.Vertex3(screenXCoords[2], screenYCoords[2], DrawX.GLDepth);
+				GL.TexCoord2(texX1, texY2);
+				GL.Vertex3(screenXCoords[3], screenYCoords[3], DrawX.GLDepth);
+
+				GL.End();
+			}
         }
 		public void Draw(PointF pos)
 		{

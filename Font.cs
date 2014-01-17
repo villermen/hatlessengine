@@ -11,7 +11,7 @@ namespace HatlessEngine
         public string Id { get; private set; }
         public bool Loaded { get; private set; }
 
-		private QFont QuickFont;
+		internal QFont QuickFont;
 
 		internal Font(string id, string filename)
 		{
@@ -23,7 +23,13 @@ namespace HatlessEngine
 		public void Draw(string str, PointF position, Color color)
 		{
 			QuickFont.Options.Colour = color;
-			QuickFont.Print(str, QFontAlignment.Left, new OpenTK.Vector2(position.X, position.Y), DrawX.GLDepth);
+			ProcessedText pText = QuickFont.ProcessText(str, float.MaxValue, QFontAlignment.Left);
+			RectangleF textRect = new RectangleF(position, QuickFont.Measure(pText, 1f));
+
+			if (textRect.IntersectsWith(Game.CurrentDrawArea))
+			{
+				QuickFont.Print(pText, new OpenTK.Vector2(position.X, position.Y), DrawX.GLDepth);
+			}
 		}
 		public void Draw(string str, PointF position)
 		{
