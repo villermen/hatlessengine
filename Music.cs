@@ -21,6 +21,14 @@ namespace HatlessEngine
 		internal WaveReader WaveReader;
 
 		/// <summary>
+		/// Sample to start after when this music is looped.
+		/// One sample is both channels for stereo. 
+		/// Audacity is a good way to find out what sample you need.
+		/// Just split the files into an intro and loop region if you don't want to use this.
+		/// </summary>
+		public uint LoopStartSample = 0;
+
+		/// <summary>
 		/// Music to play directly after this one ends.
 		/// Of course this doesn't work when this one's in looping mode.
 		/// </summary>

@@ -130,9 +130,9 @@ namespace HatlessEngine
 			if (Format == SoundFormat.Wave)
 			{
 				byte[] byteBuffer = Reader.ReadBytes(BitsPerSample / 8 * samples);
-				readSamples = byteBuffer.Length;
+				readSamples = byteBuffer.Length / 2;
 
-				short[] waveData = new short[byteBuffer.Length / 2];
+				short[] waveData = new short[readSamples];
 				for(int i = 0; i < waveData.Length; i++)
 				{
 					waveData[i] = BitConverter.ToInt16(byteBuffer, i * 2);
@@ -156,14 +156,18 @@ namespace HatlessEngine
 				throw new NotSupportedException("Not Wave or Ogg.");
 		}
 
-		public void Rewind()
+		/// <summary>
+		/// Rewind to a position (0 for start)
+		/// </summary>
+		/// <param name="samples">Samples.</param>
+		public void Rewind(uint samples = 0)
 		{
 			if (MetaLoaded)
 			{
 				if (Format == SoundFormat.Wave)
-					Reader.BaseStream.Position = WaveSampleStartPosition;
+					Reader.BaseStream.Position = WaveSampleStartPosition + BitsPerSample / 8 * samples * Channels;
 				else if (Format == SoundFormat.Ogg)
-					VorbisReader.DecodedTime = TimeSpan.Zero;
+					VorbisReader.DecodedPosition = samples;
 			}
 		}
 

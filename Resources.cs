@@ -225,7 +225,7 @@ namespace HatlessEngine
 							{
 								if (music.Loop)
 								{
-									music.WaveReader.Rewind();
+									music.WaveReader.Rewind(music.LoopStartSample);
 								}
 								else
 								{
