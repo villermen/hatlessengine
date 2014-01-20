@@ -79,6 +79,8 @@ namespace HatlessEngine
 
 		private static void Step(object sender, FrameEventArgs e)
 		{
+			Input.UpdateState();
+
 			//update the weakreferences if they still exist
 			Resources.UpdateManagedSprites();
 
@@ -92,7 +94,7 @@ namespace HatlessEngine
 			Resources.ObjectAdditionAndRemoval();
 
 			//update input state (push buttonlist) for update before next step
-			Input.UpdateState();
+			Input.PushButtons();
 		}
 
 		private static void Draw(object sender, FrameEventArgs e)
