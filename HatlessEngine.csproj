@@ -49,7 +49,6 @@
     <Compile Include="Resources.cs" />
     <Compile Include="LogicalObject.cs" />
     <Compile Include="PhysicalObject.cs" />
-    <Compile Include="Speed.cs" />
     <Compile Include="DrawX.cs" />
     <Compile Include="Sprite.cs" />
     <Compile Include="Input.cs" />

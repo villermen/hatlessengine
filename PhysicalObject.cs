@@ -33,9 +33,39 @@ namespace HatlessEngine
             BOUNCE = 2,
             //BOUNCEBOTH = 3, or weightedbounce
         }
-
+		
 		public PointF Position = new PointF(0, 0);
-		public Speed Speed = new Speed(0, 0);
+		public PointF Speed = new PointF(0, 0);
+		private float _SpeedDirection = 0f;
+		public float SpeedDirection
+		{
+			get 
+			{
+				//get the right direction when it cannot be calculated from the vector components
+				if (Speed.X == 0 && Speed.Y == 0)
+					return _SpeedDirection;
+				return Misc.AngleBetweenPoints(new PointF(0, 0), Speed);
+			}
+			set 
+			{ 
+				float amplitude = Misc.DistanceBetweenPoints(new PointF(0, 0), Speed);
+				Speed.X = (float)Math.Cos((value / 180 - 0.5) * Math.PI) * amplitude;
+				Speed.Y = (float)Math.Sin((value / 180 - 0.5) * Math.PI) * amplitude;
+			}
+		}
+		public float SpeedAmplitude
+		{
+			get 
+			{
+				return Misc.DistanceBetweenPoints(new PointF(0, 0), Speed);
+			}
+			set 
+			{ 
+				float direction = Misc.AngleBetweenPoints(new PointF(0, 0), Speed);
+				Speed.X = (float)Math.Cos((direction / 180 - 0.5) * Math.PI) * value;
+				Speed.Y = (float)Math.Sin((direction / 180 - 0.5) * Math.PI) * value;
+			}
+		}
 
 		public RectangleF BoundBox;
 
@@ -57,7 +87,8 @@ namespace HatlessEngine
         internal override void AfterStep()
         {
             //move
-            Position += Speed;
+			Position.X += Speed.X;
+			Position.Y += Speed.Y;
 
             //update boundbox
 			BoundBox.Location = Position;    
