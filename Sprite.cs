@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -120,6 +120,8 @@ namespace HatlessEngine
 				GL.Vertex3(screenXCoords[3], screenYCoords[3], DrawX.GLDepth);
 
 				GL.End();
+
+				GL.BindTexture(TextureTarget.Texture2D, 0);
 			}
         }
 		public void Draw(PointF pos)

@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Drawing;
 using OpenTK.Graphics.OpenGL;
 
@@ -38,18 +38,14 @@ namespace HatlessEngine
 
 			if (pointRectangle.IntersectsWith(Game.CurrentDrawArea))
 			{
-				GL.Disable(EnableCap.Blend);
-
 				GL.PointSize(size);
-				GL.Color3(color);
+				GL.Color4(color);
 
 				GL.Begin(PrimitiveType.Points);
 
 				GL.Vertex3(position.X, position.Y, GLDepth);
 
 				GL.End();
-
-				GL.Enable(EnableCap.Blend);
 			}
 		}
 		public static void Point(PointF position, float size = 1)
@@ -63,10 +59,8 @@ namespace HatlessEngine
 
 			if (lineRectangle.IntersectsWith(Game.CurrentDrawArea))
 			{
-				GL.Disable(EnableCap.Blend); //maybe improve on this
-
 				GL.LineWidth(width);
-				GL.Color3(color);
+				GL.Color4(color);
 
 				GL.Begin(PrimitiveType.Lines);
 
@@ -74,8 +68,6 @@ namespace HatlessEngine
 				GL.Vertex3(pos2.X, pos2.Y, GLDepth);
 
 				GL.End();
-
-				GL.Enable(EnableCap.Blend);
 			}
         }
 		public static void Line(PointF pos1, PointF pos2, float width = 1)
@@ -87,9 +79,7 @@ namespace HatlessEngine
 		{
 			if (rect.IntersectsWith(Game.CurrentDrawArea))
 			{
-				GL.Disable(EnableCap.Blend);
-
-				GL.Color3(color);
+				GL.Color4(color);
 
 				GL.Begin(PrimitiveType.Quads);
 
@@ -99,8 +89,6 @@ namespace HatlessEngine
 				GL.Vertex3(rect.Left, rect.Bottom, GLDepth);
 
 				GL.End();
-
-				GL.Enable(EnableCap.Blend);
 			}
 		}
 		public static void Rectangle(RectangleF rect)

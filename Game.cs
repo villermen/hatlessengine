@@ -4,6 +4,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using OpenTK.Audio;
+using OpenTK.Graphics;
 using OpenTK.Audio.OpenAL;
 
 //OpenTK 1.1.1420.5205
@@ -37,15 +38,24 @@ namespace HatlessEngine
 			Window = new GameWindow(windowSize.Width, windowSize.Height);
 
 			//OpenGL initialization
-			GL.Enable(EnableCap.Texture2D);
 			GL.Enable(EnableCap.PointSmooth);
+			GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
+			GL.Enable(EnableCap.LineSmooth);
+			GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
+
 			GL.Enable(EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+			//GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+			//GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+
 			GL.ClearColor(Color.Gray);
+
+			GL.Enable(EnableCap.Texture2D);
 
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthFunc(DepthFunction.Lequal);
-			GL.ClearDepth(1f);
+			GL.ClearDepth(1d);
 			GL.DepthRange(1d, 0d); //does not seem right, but it works (see it as duct-tape)
 
 			Resources.AddView(new RectangleF(new PointF(0, 0), windowSize), new RectangleF(0, 0, 1, 1));
