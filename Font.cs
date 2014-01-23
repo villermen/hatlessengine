@@ -23,12 +23,13 @@ namespace HatlessEngine
 		public void Draw(string str, PointF position, Color color)
 		{
 			QuickFont.Options.Colour = color;
+			QuickFont.Options.Depth = DrawX.GLDepth;
 			ProcessedText pText = QuickFont.ProcessText(str, float.MaxValue, QFontAlignment.Left);
-			RectangleF textRect = new RectangleF(position, QuickFont.Measure(pText, 1f));
+			RectangleF textRect = new RectangleF(position, QuickFont.Measure(pText));
 
 			if (textRect.IntersectsWith(Game.CurrentDrawArea))
 			{
-				QuickFont.Print(pText, new OpenTK.Vector2(position.X, position.Y), DrawX.GLDepth);
+				QuickFont.Print(pText, new OpenTK.Vector2(position.X, position.Y));
 			}
 		}
 		public void Draw(string str, PointF position)
@@ -39,6 +40,8 @@ namespace HatlessEngine
         public void Load()
         {
 			QuickFont = new QFont(Filename, 12);
+			QuickFont.Options.UseDefaultBlendFunction = false;
+			QuickFont.Options.LockToPixel = true;
         }
 
         public void Unload()

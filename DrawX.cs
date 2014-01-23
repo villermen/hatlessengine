@@ -55,7 +55,8 @@ namespace HatlessEngine
 
 		public static void Line(PointF pos1, PointF pos2, Color color, float width = 1)
         {
-			RectangleF lineRectangle = new RectangleF(pos1.X, pos1.Y, pos2.X - pos1.X, pos2.Y - pos1.Y);
+			//weird math funcs to fix weird microsoft logic
+			RectangleF lineRectangle = new RectangleF(Math.Min(pos1.X, pos2.X), Math.Min(pos1.Y, pos2.Y), Math.Abs(pos2.X - pos1.X), Math.Abs(pos2.Y - pos1.Y));
 
 			if (lineRectangle.IntersectsWith(Game.CurrentDrawArea))
 			{
@@ -77,7 +78,9 @@ namespace HatlessEngine
 
 		public static void Rectangle(RectangleF rect, Color color)
 		{
-			if (rect.IntersectsWith(Game.CurrentDrawArea))
+			RectangleF correctedRect = new RectangleF(Math.Min(rect.Left, rect.Right), Math.Min(rect.Top, rect.Bottom), Math.Abs(rect.Width), Math.Abs(rect.Height));
+
+			if (correctedRect.IntersectsWith(Game.CurrentDrawArea))
 			{
 				GL.Color4(color);
 

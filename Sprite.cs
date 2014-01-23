@@ -105,6 +105,7 @@ namespace HatlessEngine
 
 			if (inDrawArea)
 			{
+				GL.Enable(EnableCap.Texture2D);
 				GL.BindTexture(TextureTarget.Texture2D, OpenGLTextureId);
 				GL.Color3(Color.White);
 
@@ -121,7 +122,7 @@ namespace HatlessEngine
 
 				GL.End();
 
-				GL.BindTexture(TextureTarget.Texture2D, 0);
+				GL.Disable(EnableCap.Texture2D);
 			}
         }
 		public void Draw(PointF pos)

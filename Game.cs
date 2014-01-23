@@ -43,15 +43,15 @@ namespace HatlessEngine
 			GL.Enable(EnableCap.LineSmooth);
 			GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
 
+			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+
 			GL.Enable(EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
-			//GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-			//GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+			GL.Enable(EnableCap.AlphaTest); //sorta hacky fix for glyph transparency
+			GL.AlphaFunc(AlphaFunction.Greater, 0f);
 
 			GL.ClearColor(Color.Gray);
-
-			GL.Enable(EnableCap.Texture2D);
 
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthFunc(DepthFunction.Lequal);
