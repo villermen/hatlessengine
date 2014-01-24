@@ -54,7 +54,6 @@
     <Compile Include="Input.cs" />
     <Compile Include="Button.cs" />
     <Compile Include="Spritemap.cs" />
-    <Compile Include="SpritemapBlueprint.cs" />
     <Compile Include="Music.cs" />
     <Compile Include="Objectmap.cs" />
     <Compile Include="Misc.cs" />
