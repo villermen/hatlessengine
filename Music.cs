@@ -103,5 +103,17 @@ namespace HatlessEngine
 				Loaded = false;
 			}
         }
+
+		public delegate void MusicChangedEventHandler(Music music);
+		/// <summary>
+		/// Occurs when this music is done playing and it's switching over the source to the given PlayAfterMusic.
+		/// </summary>
+		public event EventHandler<MusicChangedEventArgs> MusicChanged;
+
+		internal void PerformMusicChanged(Music newMusic)
+		{
+			if (MusicChanged != null)
+				MusicChanged(this, new MusicChangedEventArgs(newMusic));
+		}
     }
 }

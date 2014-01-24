@@ -72,10 +72,12 @@
     <Compile Include="ButtonObject.cs" />
     <Compile Include="ObjectmapBlueprint.cs" />
     <Compile Include="ManagedSprite.cs" />
+    <Compile Include="EventArgs\MusicChangedEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Exceptions\" />
+    <Folder Include="EventArgs\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\QuickFont\QuickFont.csproj">

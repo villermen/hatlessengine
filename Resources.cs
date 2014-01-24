@@ -238,6 +238,7 @@ namespace HatlessEngine
 										newMusic.SourceId = music.SourceId;
 										newMusic.WaveReader.Rewind();
 										newMusic.Streaming = true;
+										music.PerformMusicChanged(newMusic); //will be too soon
 									}
 								}
 							}
