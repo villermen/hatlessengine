@@ -63,8 +63,6 @@
     <Compile Include="LogLevel.cs" />
     <Compile Include="SoundControl.cs" />
     <Compile Include="AudioControl.cs" />
-    <Compile Include="Exceptions\AlreadyPlayingException.cs" />
-    <Compile Include="Exceptions\NotLoadedException.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ExternalResource.cs" />
     <Compile Include="WaveReader.cs" />
@@ -72,13 +70,10 @@
     <Compile Include="ButtonObject.cs" />
     <Compile Include="ObjectmapBlueprint.cs" />
     <Compile Include="ManagedSprite.cs" />
-    <Compile Include="EventArgs\MusicChangedEventArgs.cs" />
+    <Compile Include="Exceptions.cs" />
+    <Compile Include="EventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <Folder Include="Exceptions\" />
-    <Folder Include="EventArgs\" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\QuickFont\QuickFont.csproj">
       <Project>{BBECE6FC-EF63-40F8-A734-A500D1DFC1AF}</Project>

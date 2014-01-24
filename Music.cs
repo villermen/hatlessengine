@@ -57,7 +57,7 @@ namespace HatlessEngine
 
 			if (Streaming)
 			{
-				throw new AlreadyPlayingException();
+				throw new MusicAlreadyPlayingException();
 			}
 
 			WaveReader.Rewind();
