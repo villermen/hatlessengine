@@ -6,5 +6,10 @@ namespace HatlessEngine
 
 	public class MusicAlreadyPlayingException : Exception { }
 
-	public class ProtocolMismatchException : Exception { }
+	public class ProtocolMismatchException : Exception 
+	{
+		public ProtocolMismatchException() { }
+
+		public ProtocolMismatchException(string message) : base(message) { }
+	}
 }

@@ -15,6 +15,12 @@ namespace HatlessEngine
     {
 		//private static string RootDirectory = System.Environment.CurrentDirectory + "/res/";
 
+		/// <summary>
+		/// If resource execution (like Music.Play or Sprite.Draw) is requested when the resource is not loaded, instead of throwing an exception load it at that point.
+		/// NOT A GREAT PRACTICE, use this only in very specific situations, if loading fails at this point it will strill try to execute regardless.
+		/// </summary>
+		public static bool JustInTimeLoading = false;
+
         //resources
 		public static List<View> Views = new List<View>();
 		public static Dictionary<string, Sprite> Sprites = new Dictionary<string, Sprite>();
@@ -89,12 +95,15 @@ namespace HatlessEngine
             Objectmaps.Add(id, objectmap);
             return objectmap;
         }
-        public static Spritemap AddSpritemap(string id, params SpritemapBlueprint[] spritemapBlueprints)
+		public static Spritemap AddSpritemap(string id, params ManagedSprite[] managedSprites)
         {
-            Spritemap spritemap = new Spritemap(id, spritemapBlueprints);
+			Spritemap spritemap = new Spritemap(id, managedSprites);
             Spritemaps.Add(id, spritemap);
             return spritemap;
         }
+		/// <summary>
+		/// Add a spritemap from file (saved by Spritemap.WriteToFile)
+		/// </summary>
         public static Spritemap AddSpritemap(string id, string filename)
 		{
 			Spritemap spritemap = new Spritemap(id, filename);

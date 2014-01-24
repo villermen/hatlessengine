@@ -252,7 +252,7 @@ namespace HatlessEngine
         /// <summary>
 		/// Checks collision against every sprite in a spritemap with position pos.
         /// </summary>
-		public bool Collision(string spritemapId, PointF pos, out List<SpritemapBlueprint> sprites, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
+		/*public bool Collision(string spritemapId, PointF pos, out List<SpritemapBlueprint> sprites, CollisionSide side = CollisionSide.ALLOUTSIDE, CollisionAction action = CollisionAction.NONE)
         {
 			sprites = new List<SpritemapBlueprint>();
 
@@ -283,7 +283,7 @@ namespace HatlessEngine
             }
 
 			return sprites.Count > 0 ? true : false;
-		}
+		}*/
 
         public new void Destroy()
         {

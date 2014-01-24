@@ -17,6 +17,7 @@ namespace HatlessEngine
 
 		public PointF Origin;
 		public float Rotation;
+		public float RotationSpeed;
 
 		public bool UseCustomDepth = false;
 		private sbyte _Depth = 0;
@@ -31,7 +32,7 @@ namespace HatlessEngine
 		}
 
 		/// <summary>
-		/// If no AnimationId is set with the constructor it will not cycle, but if you change the speed it will take all the frames in the sprite.
+		/// If no AnimationId is set with the constructor it will not cycle, but if you change the AnimationSpeed it will take all the frames in the sprite.
 		/// Else it will loop through the given animation.
 		/// </summary>
 		public string AnimationId;
@@ -50,18 +51,24 @@ namespace HatlessEngine
 		private float IndexIncrement;
 
 		/// <summary>
+		/// While this is false, the sprite will not change in any way. (animation, rotation)
+		/// </summary>
+		public bool PerformStep = true;
+
+		/// <summary>
 		/// All parameters.
 		/// </summary>
-		public ManagedSprite(string targetSprite, PointF position, PointF scale, PointF origin, float rotation = 0, string animationId = "", uint startIndex = 0, float speed = 1, sbyte depth = 0)
+		public ManagedSprite(string targetSprite, PointF position, PointF scale, PointF origin, float rotation = 0f, float rotationSpeed = 0f, string animationId = "", uint startIndex = 0, float animationSpeed = 1f, sbyte depth = 0)
 		{
 			TargetSprite = Resources.Sprites[targetSprite];
 			Position = position;
 			Scale = scale;
 			Origin = origin;
 			Rotation = rotation;
+			RotationSpeed = rotationSpeed;
 			AnimationId = animationId;
 			AnimationIndex = startIndex;
-			AnimationSpeed = speed;
+			AnimationSpeed = animationSpeed;
 
 			if (depth != 0) //prevent UseCustomDepth from being set
 				Depth = depth;
@@ -72,18 +79,18 @@ namespace HatlessEngine
 		/// <summary>
 		/// No transformations initially set.
 		/// </summary>
-		public ManagedSprite(string targetSprite, string animationId = "", uint startIndex = 0, float speed = 1, sbyte depth = 0) : 
-		this(targetSprite, new PointF(0, 0), new PointF(1, 1), new PointF(0, 0), 0, animationId, startIndex, speed, depth) { }
+		public ManagedSprite(string targetSprite, string animationId = "", uint startIndex = 0, float animationSpeed = 1f, sbyte depth = 0) : 
+		this(targetSprite, new PointF(0f, 0f), new PointF(1f, 1f), new PointF(0, 0), 0f, 0f, animationId, startIndex, animationSpeed, depth) { }
 		/// <summary>
 		/// With position, and no transformations.
 		/// </summary>
-		public ManagedSprite(string targetSprite, PointF position, string animationId = "", uint startIndex = 0, float speed = 1, sbyte depth = 0) :
-			this(targetSprite, position, new PointF(1, 1), new PointF(0, 0), 0, animationId, startIndex, speed, depth) { }
+		public ManagedSprite(string targetSprite, PointF position, string animationId = "", uint startIndex = 0, float animationSpeed = 1f, sbyte depth = 0) :
+		this(targetSprite, position, new PointF(1f, 1f), new PointF(0, 0), 0f, 0f, animationId, startIndex, animationSpeed, depth) { }
 		/// <summary>
 		/// With position and scale.
 		/// </summary>
-		public ManagedSprite(string targetSprite, PointF position, PointF scale, string animationId = "", uint startIndex = 0, float speed = 1, sbyte depth = 0) :
-			this(targetSprite, position, scale, new PointF(0, 0), 0, animationId, startIndex, speed, depth) { }
+		public ManagedSprite(string targetSprite, PointF position, PointF scale, string animationId = "", uint startIndex = 0, float animationSpeed = 1, sbyte depth = 0) :
+		this(targetSprite, position, scale, new PointF(0f, 0f), 0f, 0f, animationId, startIndex, animationSpeed, depth) { }
 
 		public void Draw()
         {
@@ -107,39 +114,55 @@ namespace HatlessEngine
 
 		internal void Step()
         {
-			IndexIncrement += AnimationSpeed;
-
-			uint indexLength;
-			if (AnimationId != "")
+			if (PerformStep)
 			{
-				indexLength = (uint)(TargetSprite.Animations[AnimationId].Length - 1);
-			}
-			else
-			{
-				indexLength = (uint)(TargetSprite.IndexSize.Width * TargetSprite.IndexSize.Height);
-			}
+				//animation
+				IndexIncrement += AnimationSpeed;
 
-			while (IndexIncrement >= 1)
-			{
-				AnimationIndex++;
-
-				//reset if over the length
-				while (AnimationIndex > indexLength)
+				uint indexLength;
+				if (AnimationId != "")
 				{
-					AnimationIndex %= indexLength;
+					indexLength = (uint)(TargetSprite.Animations[AnimationId].Length - 1);
+				}
+				else
+				{
+					indexLength = (uint)(TargetSprite.IndexSize.Width * TargetSprite.IndexSize.Height);
 				}
 
-				IndexIncrement--;
+				while (IndexIncrement >= 1)
+				{
+					AnimationIndex++;
+
+					//reset if over the length
+					while (AnimationIndex > indexLength)
+					{
+						AnimationIndex %= indexLength;
+					}
+
+					IndexIncrement--;
+				}
+
+				//rotation
+				Rotation += RotationSpeed;
 			}
         }
 
         /// <summary>
-        /// Sets speed per second instead of per step.
+		/// Set AnimationSpeed per second instead of per step.
         /// </summary>
         /// <param name="fps">Amount of frames yer be wanting.</param>
         public void SetFramesPerSecond(float fps)
         {
 			AnimationSpeed = 1 / (Game.Speed / fps);
         }
+
+		/// <summary>
+		/// Set RotationSpeed per second instead of per step.
+		/// </summary>
+		/// <param name="degrees">Degrees per second.</param>
+		public void SetRotationDegreesPerSecond(float degrees)
+		{
+			RotationSpeed = 1 / (Game.Speed / degrees);
+		}
     }
 }

@@ -49,7 +49,7 @@ namespace HatlessEngine
         {
 			if (!Loaded)
 			{
-				if (Settings.JustInTimeResourceLoading)
+				if (Resources.JustInTimeLoading)
 					Load();
 				else
 					throw new NotLoadedException();

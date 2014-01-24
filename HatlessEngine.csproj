@@ -63,7 +63,6 @@
     <Compile Include="LogLevel.cs" />
     <Compile Include="SoundControl.cs" />
     <Compile Include="AudioControl.cs" />
-    <Compile Include="Settings.cs" />
     <Compile Include="WaveReader.cs" />
     <Compile Include="Font.cs" />
     <Compile Include="ButtonObject.cs" />

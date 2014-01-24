@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Drawing;
@@ -12,85 +12,119 @@ namespace HatlessEngine
     {
         public string Id { get; private set; }
 
-        public List<SpritemapBlueprint> Blueprints;
+		public static readonly ushort ProtocolVersion = 1;
 
-        internal Spritemap(string id, params SpritemapBlueprint[] blueprints)
+		public List<ManagedSprite> ManagedSprites;
+
+		internal Spritemap(string id, params ManagedSprite[] managedSprites)
         {
             Id = id;
-            Blueprints = new List<SpritemapBlueprint>(blueprints);
+			ManagedSprites = new List<ManagedSprite>(managedSprites);
         }
 
         internal Spritemap(string id, string filename)
         {
             Id = id;
-            Blueprints = new List<SpritemapBlueprint>();
+			ManagedSprites = new List<ManagedSprite>();
 
-            BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read));
-            ushort protocolVersion = reader.ReadUInt16();
-            switch (protocolVersion)
-            {
-                case 1:
-                    ushort uniqueSprites = reader.ReadUInt16();
-                    for (ushort i = 1; i <= uniqueSprites; i++)
-                    {
-                        Sprite currentSprite = Resources.Sprites[reader.ReadString()];
-                        ushort spriteOccurrences = reader.ReadUInt16();
-                        for (ushort j = 1; j <= spriteOccurrences; j++)
-                        { 
-						Blueprints.Add(new SpritemapBlueprint(currentSprite, new PointF(reader.ReadSingle(), reader.ReadSingle()), reader.ReadUInt32()));
-                        }
-                    }
-                    break;
-            }
-            reader.Close();
+			BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+			if (reader.ReadChars(4) != "HESm".ToCharArray())
+				throw new ProtocolMismatchException("The file's magic number is not 'HESm' (HatlessEngine Spritemap)");
+
+			//protocol version changes on updates to ManagedSprite
+			if (reader.ReadUInt16() != ProtocolVersion)
+				throw new ProtocolMismatchException("The file's protocol version is not equal to the required one (" + ProtocolVersion.ToString() + ")");
+
+			ushort spriteCount = reader.ReadUInt16();
+
+			for(ushort i = 0; i < spriteCount; i++)
+			{
+				string targetSprite = reader.ReadString();
+				PointF position = new PointF(reader.ReadSingle(), reader.ReadSingle());
+				PointF scale = new PointF(reader.ReadSingle(), reader.ReadSingle());
+				PointF origin = new PointF(reader.ReadSingle(), reader.ReadSingle());
+				float rotation = reader.ReadSingle();
+				float rotationSpeed = reader.ReadSingle();
+				string animationId = reader.ReadString();
+				uint startIndex = reader.ReadUInt32();
+				float animationSpeed = reader.ReadSingle();
+				sbyte depth = reader.ReadSByte();
+				
+				ManagedSprites.Add(new ManagedSprite(targetSprite, position, scale, origin, rotation, rotationSpeed, animationId, startIndex, animationSpeed, depth));
+			}
+
+			reader.Close();            
         }
+
+		/// <summary>
+		/// Draw all the sprites in this spritemap at their absolute positions.
+		/// </summary>
+		public void Draw()
+		{
+			foreach(ManagedSprite sprite in ManagedSprites)
+			{
+				sprite.Draw();
+			}
+		}
 
         /// <summary>
-        /// Draw the entire Spritemap to a position.
+		/// Draw all the sprites in this spritemap relative to a position.
         /// </summary>
-        /// <param name="pos">Dnno, figure it out for yourself.</param>
 		public void Draw(PointF pos)
         {
-            foreach (SpritemapBlueprint blueprint in Blueprints)
+			foreach (ManagedSprite sprite in ManagedSprites)
             {
-				blueprint.Sprite.Draw(new PointF(pos.X + blueprint.Rectangle.X, pos.Y + blueprint.Rectangle.Y), blueprint.Frame);
+				sprite.Draw(new PointF(pos.X + sprite.Position.X, pos.Y + sprite.Position.Y));
             }
         }
 
-        public void WriteToFile(string filename)
+		/// <summary>
+		/// Writes current state of all the ManagedSprites to a file.
+		/// Current state meaning it will not use the values the sprites have been created with.
+		/// If this behavior is undesired use FreezeSprites immediately after creation to keep them in their default position.
+		/// </summary>
+		public void WriteToFile(string filename)
         {
-            //prepare data for writing
-            Dictionary<string, List<Tuple<float, float, uint>>> data = new Dictionary<string, List<Tuple<float, float, uint>>>();
-            foreach (SpritemapBlueprint blueprint in Blueprints)
+			BinaryWriter writer = new BinaryWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None));
+			writer.Write(ProtocolVersion);
+			writer.Write((ushort)ManagedSprites.Count);
+			foreach (ManagedSprite sprite in ManagedSprites)
             {
-				Tuple<float, float, uint> tuple = new Tuple<float, float, uint>(blueprint.Rectangle.Location.X, blueprint.Rectangle.Location.Y, blueprint.Frame);
-
-                if (!data.ContainsKey(blueprint.Sprite.Id))
-                {
-                    List<Tuple<float, float, uint>> list = new List<Tuple<float, float, uint>>();
-                    list.Add(tuple);
-                    data.Add(blueprint.Sprite.Id, list);
-                }
-                else
-                    data[blueprint.Sprite.Id].Add(tuple);
-            }
-
-            //actually write
-            BinaryWriter writer = new BinaryWriter(new FileStream(filename, FileMode.Create, FileAccess.Write));
-            writer.Write((ushort)1); //protocol version
-            writer.Write((ushort)data.Count);
-            foreach (KeyValuePair<string, List<Tuple<float, float, uint>>> uniqueSprite in data)
-            {
-                writer.Write(uniqueSprite.Key);
-                writer.Write((ushort)uniqueSprite.Value.Count);
-                foreach (Tuple<float, float, uint> tuple in uniqueSprite.Value)
-                {
-                    writer.Write(tuple.Item1);
-                    writer.Write(tuple.Item2);
-                    writer.Write(tuple.Item3);
-                }
+				//writewritewritewrite...
+				writer.Write(sprite.TargetSprite.Id);
+				writer.Write(sprite.Position.X);
+				writer.Write(sprite.Position.Y);
+				writer.Write(sprite.Scale.X);
+				writer.Write(sprite.Scale.Y);
+				writer.Write(sprite.Origin.X);
+				writer.Write(sprite.Origin.Y);
+				writer.Write(sprite.Rotation);
+				writer.Write(sprite.RotationSpeed);
+				writer.Write(sprite.AnimationId);
+				writer.Write(sprite.AnimationIndex);
+				writer.Write(sprite.AnimationSpeed);
+				writer.Write(sprite.Depth);
             }
             writer.Close();
         }
+
+		/// <summary>
+		/// Will freeze all sprites in this spritemap, setting their PerformStep to false.
+		/// </summary>
+		public void FreezeSprites()
+		{
+			foreach(ManagedSprite sprite in ManagedSprites)
+				sprite.PerformStep = false;
+		}
+
+		/// <summary>
+		/// Will unfreeze all sprites in this spritemap, setting their PerformStep to true.
+		/// </summary>
+		public void UnfreezeSprites()
+		{
+			foreach(ManagedSprite sprite in ManagedSprites)
+				sprite.PerformStep = true;
+		}
     }
 }
