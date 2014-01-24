@@ -220,7 +220,19 @@ namespace HatlessEngine
 							if (++music.ActiveBufferId == 3)
 								music.ActiveBufferId = 0;
 
-							//this was the last buffer, stop loading will ya
+							//perform MusicChanged event in old music when it actually switched over
+							if (music.PerformMusicChangedEventDelay != 3)
+							{
+								music.PerformMusicChangedEventDelay--;
+								if (music.PerformMusicChangedEventDelay == 0)
+								{
+									music.PerformMusicChangedEventMusic.PerformMusicChanged(music);
+									music.PerformMusicChangedEventMusic = null;
+									music.PerformMusicChangedEventDelay = 3;
+								}
+							}
+
+							//this was the last buffer, take action
 							if (readSamples != requestedSamples)
 							{
 								if (music.Loop)
@@ -238,7 +250,10 @@ namespace HatlessEngine
 										newMusic.SourceId = music.SourceId;
 										newMusic.WaveReader.Rewind();
 										newMusic.Streaming = true;
-										music.PerformMusicChanged(newMusic); //will be too soon
+
+										//for having the MusicChanged event trigger at a more accurate time (still not perfect, but meh)
+										newMusic.PerformMusicChangedEventDelay = 2;
+										newMusic.PerformMusicChangedEventMusic = music;
 									}
 								}
 							}

@@ -18,6 +18,10 @@ namespace HatlessEngine
 
 		internal bool JustStartedPlaying = false;
 
+		//for triggering event in old music when this one is set as the PlayAfter one (needs to be triggered on a delay)
+		internal byte PerformMusicChangedEventDelay = 3;
+		internal Music PerformMusicChangedEventMusic = null;
+
 		internal WaveReader WaveReader;
 
 		/// <summary>
@@ -104,7 +108,6 @@ namespace HatlessEngine
 			}
         }
 
-		public delegate void MusicChangedEventHandler(Music music);
 		/// <summary>
 		/// Occurs when this music is done playing and it's switching over the source to the given PlayAfterMusic.
 		/// </summary>
@@ -113,7 +116,7 @@ namespace HatlessEngine
 		internal void PerformMusicChanged(Music newMusic)
 		{
 			if (MusicChanged != null)
-				MusicChanged(this, new MusicChangedEventArgs(newMusic));
+				MusicChanged(this, new MusicChangedEventArgs(this, newMusic));
 		}
     }
 }
