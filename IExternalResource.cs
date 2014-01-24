@@ -2,7 +2,7 @@
 
 namespace HatlessEngine
 {
-	public interface ExternalResource
+	public interface IExternalResource
     {
         string Id { get; }
         void Load();

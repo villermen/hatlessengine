@@ -5,7 +5,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace HatlessEngine
 {
-    public class Font : ExternalResource
+    public class Font : IExternalResource
     {
         public string Filename { get; private set; }
         public string Id { get; private set; }

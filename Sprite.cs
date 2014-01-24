@@ -6,7 +6,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace HatlessEngine
 {
-    public class Sprite : ExternalResource
+    public class Sprite : IExternalResource
     {   
         public string Filename { get; private set; }
         public string Id { get; private set; }

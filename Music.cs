@@ -3,7 +3,7 @@ using OpenTK.Audio.OpenAL;
 
 namespace HatlessEngine
 {
-	public class Music :  AudioControl, ExternalResource
+	public class Music :  AudioControl, IExternalResource
     {
         public string Filename { get; private set; }
         public string Id { get; private set; }

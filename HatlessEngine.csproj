@@ -64,7 +64,6 @@
     <Compile Include="SoundControl.cs" />
     <Compile Include="AudioControl.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="ExternalResource.cs" />
     <Compile Include="WaveReader.cs" />
     <Compile Include="Font.cs" />
     <Compile Include="ButtonObject.cs" />
@@ -72,6 +71,7 @@
     <Compile Include="ManagedSprite.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="EventArgs.cs" />
+    <Compile Include="IExternalResource.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
