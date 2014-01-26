@@ -23,7 +23,7 @@ namespace HatlessEngine
         public virtual void Draw() { }
         internal virtual void AfterDraw() { }
 
-        public void Destroy()
+		public void Destroy()
         {
 			OnDestroy();
             //add for removal from Resources.Objects (cant be done now because of iteration)

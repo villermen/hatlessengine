@@ -54,24 +54,19 @@ namespace HatlessEngine
 			PointF absoluteOrigin = new PointF(pos.X + origin.X, pos.Y + origin.Y);
 
 			//default positions
-			float[] screenXCoords = new float[4];
-			float[] screenYCoords = new float[4];
-			screenXCoords[0] = pos.X; 
-			screenYCoords[0] = pos.Y; 
-			screenXCoords[1] = pos.X + FrameSize.Width;
-			screenYCoords[1] = pos.Y; 
-			screenXCoords[2] = pos.X + FrameSize.Width; 
-			screenYCoords[2] = pos.Y + FrameSize.Height;
-			screenXCoords[3] = pos.X;
-			screenYCoords[3] = pos.Y + FrameSize.Height;
+			PointF[] screenCoords = new PointF[4];
+			screenCoords[0] = new PointF(pos.X, pos.Y);
+			screenCoords[1] = new PointF(pos.X + FrameSize.Width, pos.Y);
+			screenCoords[2] = new PointF(pos.X + FrameSize.Width, pos.Y + FrameSize.Height);
+			screenCoords[3] = new PointF(pos.X, pos.Y + FrameSize.Height);
 
 			//scaling
 			if (scale != new PointF(1, 1))
 			{
 				for(byte i = 0; i < 4; i++)
 				{
-					screenXCoords[i] += (screenXCoords[i] - absoluteOrigin.X) * (scale.X - 1);
-					screenYCoords[i] += (screenYCoords[i] - absoluteOrigin.Y) * (scale.Y - 1);
+					screenCoords[i].X += (screenCoords[i].X - absoluteOrigin.X) * (scale.X - 1);
+					screenCoords[i].Y += (screenCoords[i].Y - absoluteOrigin.Y) * (scale.Y - 1);
 				}
 			}
 
@@ -80,12 +75,7 @@ namespace HatlessEngine
 			{
 				for(byte i = 0; i < 4; i++)
 				{
-					PointF positionToCheck = new PointF(screenXCoords[i], screenYCoords[i]);
-
-					float dist = Misc.DistanceBetweenPoints(absoluteOrigin, positionToCheck);
-					float angle = (float)(((Misc.AngleBetweenPoints(absoluteOrigin, positionToCheck) + rotation) / 180 - 0.5) * Math.PI);
-					screenXCoords[i] = absoluteOrigin.X + (float)Math.Cos(angle) * dist;
-					screenYCoords[i] = absoluteOrigin.Y + (float)Math.Sin(angle) * dist;
+					screenCoords[i] = Misc.RotatePointOverOrigin(screenCoords[i], absoluteOrigin, rotation);
 				}
 			}
 
@@ -93,10 +83,8 @@ namespace HatlessEngine
 			bool inDrawArea = false;
 			for(byte i = 0; i < 4; i++)
 			{
-				if (screenXCoords[i] >= Game.CurrentDrawArea.Left &&
-					screenXCoords[i] <= Game.CurrentDrawArea.Right &&
-					screenYCoords[i] >= Game.CurrentDrawArea.Top &&
-					screenYCoords[i] <= Game.CurrentDrawArea.Bottom)
+				//do a collisioncheck here (this doesnt catch the middle collision case)
+				if (Game.CurrentDrawArea.Contains(screenCoords[i]))
 				{
 					inDrawArea = true;
 					break;
@@ -112,13 +100,13 @@ namespace HatlessEngine
 				GL.Begin(PrimitiveType.Quads);
 
 				GL.TexCoord2(texX1, texY1);
-				GL.Vertex3(screenXCoords[0], screenYCoords[0], DrawX.GLDepth);
+				GL.Vertex3(screenCoords[0].X, screenCoords[0].Y, DrawX.GLDepth);
 				GL.TexCoord2(texX2, texY1);
-				GL.Vertex3(screenXCoords[1], screenYCoords[1], DrawX.GLDepth);
+				GL.Vertex3(screenCoords[1].X, screenCoords[1].Y, DrawX.GLDepth);
 				GL.TexCoord2(texX2, texY2);
-				GL.Vertex3(screenXCoords[2], screenYCoords[2], DrawX.GLDepth);
+				GL.Vertex3(screenCoords[2].X, screenCoords[2].Y, DrawX.GLDepth);
 				GL.TexCoord2(texX1, texY2);
-				GL.Vertex3(screenXCoords[3], screenYCoords[3], DrawX.GLDepth);
+				GL.Vertex3(screenCoords[3].X, screenCoords[3].Y, DrawX.GLDepth);
 
 				GL.End();
 
