@@ -14,6 +14,7 @@ namespace HatlessEngine
             Arguments = new List<object>(arguments);
         }
 
-        public ObjectmapBlueprint(Type type) : this(type, new object[0]) { }
+        public ObjectmapBlueprint(Type type) 
+			: this(type, new object[0]) { }
     }
 }

@@ -70,6 +70,7 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="IExternalResource.cs" />
+    <Compile Include="RotatedRectangle.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

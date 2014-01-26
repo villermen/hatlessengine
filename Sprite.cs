@@ -20,7 +20,8 @@ namespace HatlessEngine
 		public Size FrameSize { get; private set; }
 		public Size IndexSize { get; private set; }
         
-		internal Sprite(string id, string filename) : this(id, filename, Size.Empty)
+		internal Sprite(string id, string filename) 
+			: this(id, filename, Size.Empty)
         {
             AutoSize = true;
         }
