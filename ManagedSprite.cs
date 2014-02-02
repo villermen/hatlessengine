@@ -11,11 +11,11 @@ namespace HatlessEngine
 	{
 		public Sprite TargetSprite { get; private set; }
 
-		public PointF Position;
+		public Point Position;
 
-		public PointF Scale;
+		public Point Scale;
 
-		public PointF Origin;
+		public Point Origin;
 		public float Rotation;
 		public float RotationSpeed;
 
@@ -55,10 +55,22 @@ namespace HatlessEngine
 		/// </summary>
 		public bool PerformStep = true;
 
+		public Rectangle SpriteRectangle 
+		{
+			get { return new Rectangle(Position, Scale * TargetSprite.FrameSize, Origin, Rotation); }
+			set
+			{
+				Position = value.Position;
+				Scale = value.Size / TargetSprite.FrameSize;
+				Origin = value.RelativeOrigin;
+				Rotation = value.Rotation;
+			}
+		}
+
 		/// <summary>
 		/// All parameters.
 		/// </summary>
-		public ManagedSprite(string targetSprite, PointF position, PointF scale, PointF origin, float rotation = 0f, float rotationSpeed = 0f, string animationId = "", uint startIndex = 0, float animationSpeed = 1f, sbyte depth = 0)
+		public ManagedSprite(string targetSprite, Point position, Point scale, Point origin, float rotation = 0f, float rotationSpeed = 0f, string animationId = "", uint startIndex = 0, float animationSpeed = 1f, sbyte depth = 0)
 		{
 			TargetSprite = Resources.Sprites[targetSprite];
 			Position = position;
@@ -80,17 +92,17 @@ namespace HatlessEngine
 		/// No transformations initially set.
 		/// </summary>
 		public ManagedSprite(string targetSprite, string animationId = "", uint startIndex = 0, float animationSpeed = 1f, sbyte depth = 0) : 
-		this(targetSprite, new PointF(0f, 0f), new PointF(1f, 1f), new PointF(0, 0), 0f, 0f, animationId, startIndex, animationSpeed, depth) { }
+		this(targetSprite, new Point(0f, 0f), new Point(1f, 1f), new Point(0, 0), 0f, 0f, animationId, startIndex, animationSpeed, depth) { }
 		/// <summary>
 		/// With position, and no transformations.
 		/// </summary>
-		public ManagedSprite(string targetSprite, PointF position, string animationId = "", uint startIndex = 0, float animationSpeed = 1f, sbyte depth = 0) :
-		this(targetSprite, position, new PointF(1f, 1f), new PointF(0, 0), 0f, 0f, animationId, startIndex, animationSpeed, depth) { }
+		public ManagedSprite(string targetSprite, Point position, string animationId = "", uint startIndex = 0, float animationSpeed = 1f, sbyte depth = 0) :
+		this(targetSprite, position, new Point(1f, 1f), new Point(0, 0), 0f, 0f, animationId, startIndex, animationSpeed, depth) { }
 		/// <summary>
 		/// With position and scale.
 		/// </summary>
-		public ManagedSprite(string targetSprite, PointF position, PointF scale, string animationId = "", uint startIndex = 0, float animationSpeed = 1, sbyte depth = 0) :
-		this(targetSprite, position, scale, new PointF(0f, 0f), 0f, 0f, animationId, startIndex, animationSpeed, depth) { }
+		public ManagedSprite(string targetSprite, Point position, Point scale, string animationId = "", uint startIndex = 0, float animationSpeed = 1, sbyte depth = 0) :
+		this(targetSprite, position, scale, new Point(0f, 0f), 0f, 0f, animationId, startIndex, animationSpeed, depth) { }
 
 		public void Draw()
         {
@@ -99,7 +111,7 @@ namespace HatlessEngine
 		/// <summary>
 		/// Override the position to draw at (does not update it)
 		/// </summary>
-		public void Draw(PointF pos)
+		public void Draw(Point pos)
 		{
 			uint frameIndex;
 			if (AnimationId != "")
@@ -126,7 +138,7 @@ namespace HatlessEngine
 				}
 				else
 				{
-					indexLength = (uint)(TargetSprite.IndexSize.Width * TargetSprite.IndexSize.Height);
+					indexLength = (uint)(TargetSprite.IndexSize.X * TargetSprite.IndexSize.Y);
 				}
 
 				while (IndexIncrement >= 1)

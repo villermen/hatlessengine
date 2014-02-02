@@ -49,7 +49,6 @@
     <Compile Include="Resources.cs" />
     <Compile Include="LogicalObject.cs" />
     <Compile Include="PhysicalObject.cs" />
-    <Compile Include="DrawX.cs" />
     <Compile Include="Sprite.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="Button.cs" />
@@ -70,7 +69,12 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="IExternalResource.cs" />
-    <Compile Include="RotatedRectangle.cs" />
+    <Compile Include="Rectangle.cs" />
+    <Compile Include="Point.cs" />
+    <Compile Include="DrawX.cs" />
+    <Compile Include="Color.cs" />
+    <Compile Include="Line.cs" />
+    <Compile Include="Circle.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

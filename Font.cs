@@ -20,19 +20,20 @@ namespace HatlessEngine
 			Loaded = false;
 		}
 
-		public void Draw(string str, PointF position, Color color)
+		public void Draw(string str, Point position, Color color)
 		{
-			QuickFont.Options.Colour = color;
+			QuickFont.Options.Colour = (OpenTK.Graphics.Color4)color;
 			QuickFont.Options.Depth = DrawX.GLDepth;
 			ProcessedText pText = QuickFont.ProcessText(str, float.MaxValue, QFontAlignment.Left);
-			RectangleF textRect = new RectangleF(position, QuickFont.Measure(pText));
+			SizeF sizeF = QuickFont.Measure(pText);
+			Rectangle textRect = new Rectangle(position, new Point(sizeF.Width, sizeF.Height));
 
 			if (textRect.IntersectsWith(Game.CurrentDrawArea))
 			{
 				QuickFont.Print(pText, new OpenTK.Vector2(position.X, position.Y));
 			}
 		}
-		public void Draw(string str, PointF position)
+		public void Draw(string str, Point position)
 		{
 			Draw(str, position, DrawX.DefaultColor);
 		}

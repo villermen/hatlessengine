@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Drawing.Imaging;
 using OpenTK.Graphics.OpenGL;
 
@@ -17,25 +16,25 @@ namespace HatlessEngine
         internal Dictionary<string, uint[]> Animations = new Dictionary<string, uint[]>();
 
         private bool AutoSize = false;
-		public Size FrameSize { get; private set; }
-		public Size IndexSize { get; private set; }
+		public Point FrameSize { get; private set; }
+		public Point IndexSize { get; private set; }
         
 		internal Sprite(string id, string filename) 
-			: this(id, filename, Size.Empty)
+			: this(id, filename, new Point(1f, 1f))
         {
             AutoSize = true;
         }
-		internal Sprite(string id, string filename, Size frameSize)
+		internal Sprite(string id, string filename, Point frameSize)
         {
             Id = id;
             Filename = filename;
             Loaded = false;
 
 			FrameSize = frameSize;
-			IndexSize = Size.Empty;
+			IndexSize = new Point(1f, 1f);
         }
 
-		public void Draw(PointF pos, uint frameIndex, PointF scale, PointF origin, float rotation)
+		public void Draw(Point pos, uint frameIndex, Point scale, Point origin, float rotation)
         {
 			if (!Loaded)
 			{
@@ -46,23 +45,23 @@ namespace HatlessEngine
 			}
 
 			//calculate frame coordinates within the texture
-			float texX1 = 1f / IndexSize.Width * (frameIndex % IndexSize.Height);
-			float texY1 = 1f / IndexSize.Height * (frameIndex / IndexSize.Height);
-			float texX2 = 1f / IndexSize.Width * (frameIndex % IndexSize.Height + 1);
-			float texY2 = 1f / IndexSize.Height * (frameIndex / IndexSize.Height + 1);
+			float texX1 = 1f / IndexSize.X * (frameIndex % IndexSize.Y);
+			float texY1 = 1f / IndexSize.Y * (frameIndex / IndexSize.Y);
+			float texX2 = 1f / IndexSize.X * (frameIndex % IndexSize.Y + 1);
+			float texY2 = 1f / IndexSize.Y * (frameIndex / IndexSize.Y + 1);
 
 			//calculate output coordinates with the transformations
-			PointF absoluteOrigin = new PointF(pos.X + origin.X, pos.Y + origin.Y);
+			Point absoluteOrigin = new Point(pos.X + origin.X, pos.Y + origin.Y);
 
 			//default positions
-			PointF[] screenCoords = new PointF[4];
-			screenCoords[0] = new PointF(pos.X, pos.Y);
-			screenCoords[1] = new PointF(pos.X + FrameSize.Width, pos.Y);
-			screenCoords[2] = new PointF(pos.X + FrameSize.Width, pos.Y + FrameSize.Height);
-			screenCoords[3] = new PointF(pos.X, pos.Y + FrameSize.Height);
+			Point[] screenCoords = new Point[4];
+			screenCoords[0] = new Point(pos.X, pos.Y);
+			screenCoords[1] = new Point(pos.X + FrameSize.X, pos.Y);
+			screenCoords[2] = new Point(pos.X + FrameSize.X, pos.Y + FrameSize.Y);
+			screenCoords[3] = new Point(pos.X, pos.Y + FrameSize.Y);
 
 			//scaling
-			if (scale != new PointF(1, 1))
+			if (scale != new Point(1, 1))
 			{
 				for(byte i = 0; i < 4; i++)
 				{
@@ -76,7 +75,7 @@ namespace HatlessEngine
 			{
 				for(byte i = 0; i < 4; i++)
 				{
-					screenCoords[i] = Misc.RotatePointOverOrigin(screenCoords[i], absoluteOrigin, rotation);
+					screenCoords[i].RotateOverOrigin(absoluteOrigin, rotation);
 				}
 			}
 
@@ -85,7 +84,7 @@ namespace HatlessEngine
 			for(byte i = 0; i < 4; i++)
 			{
 				//do a collisioncheck here (this doesnt catch the middle collision case)
-				if (Game.CurrentDrawArea.Contains(screenCoords[i]))
+				if (Game.CurrentDrawArea.IntersectsWith(screenCoords[i]))
 				{
 					inDrawArea = true;
 					break;
@@ -96,7 +95,7 @@ namespace HatlessEngine
 			{
 				GL.Enable(EnableCap.Texture2D);
 				GL.BindTexture(TextureTarget.Texture2D, OpenGLTextureId);
-				GL.Color3(Color.White);
+				GL.Color4((OpenTK.Graphics.Color4)Color.White);
 
 				GL.Begin(PrimitiveType.Quads);
 
@@ -114,29 +113,29 @@ namespace HatlessEngine
 				GL.Disable(EnableCap.Texture2D);
 			}
         }
-		public void Draw(PointF pos)
+		public void Draw(Point pos)
 		{
-			Draw(pos, 0, new PointF(1, 1), new PointF(0, 0), 0);
+			Draw(pos, 0, new Point(1, 1), new Point(0, 0), 0);
 		}
-		public void Draw(PointF pos, uint frameIndex)
+		public void Draw(Point pos, uint frameIndex)
 		{
-			Draw(pos, frameIndex, new PointF(1, 1), new PointF(0, 0), 0);
+			Draw(pos, frameIndex, new Point(1, 1), new Point(0, 0), 0);
 		}
-		public void Draw(PointF pos, uint frameIndex, float scale)
+		public void Draw(Point pos, uint frameIndex, float scale)
 		{
-			Draw(pos, frameIndex, new PointF(scale, scale), new PointF(0, 0), 0);
+			Draw(pos, frameIndex, new Point(scale, scale), new Point(0, 0), 0);
 		}
-		public void Draw(PointF pos, uint frameIndex, PointF scale)
+		public void Draw(Point pos, uint frameIndex, Point scale)
 		{
-			Draw(pos, frameIndex, scale, new PointF(0, 0), 0);
+			Draw(pos, frameIndex, scale, new Point(0, 0), 0);
 		}
 
         public void Load()
         {
 			if (!Loaded)
 			{
-				Bitmap bitmap = new Bitmap(Filename);
-				BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+				System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(Filename);
+				BitmapData bitmapData = bitmap.LockBits((System.Drawing.Rectangle)new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
 				OpenGLTextureId = GL.GenTexture();
 				GL.BindTexture(TextureTarget.Texture2D, OpenGLTextureId);
@@ -150,12 +149,12 @@ namespace HatlessEngine
 
 				if (AutoSize)
 				{
-					FrameSize = new Size(bitmapData.Width, bitmapData.Height);
-					IndexSize = new Size(1, 1);
+					FrameSize = new Point(bitmapData.Width, bitmapData.Height);
+					IndexSize = new Point(1, 1);
 				}
 				else
 				{
-					IndexSize = new Size(bitmapData.Width / FrameSize.Width, bitmapData.Height / FrameSize.Height);
+					IndexSize = new Point(bitmapData.Width / FrameSize.X, bitmapData.Height / FrameSize.Y);
 				}
                     
 				Loaded = true;

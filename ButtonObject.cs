@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Drawing;
 
 namespace HatlessEngine
@@ -21,7 +21,7 @@ namespace HatlessEngine
         }
         private Sprite Sprite;
 
-		public ButtonObject(PointF position, Sprite sprite) : base(position)
+		public ButtonObject(Point position, Sprite sprite) : base(position)
         {
             Sprite = sprite;
 			BoundBox.Size = sprite.FrameSize;
@@ -29,7 +29,7 @@ namespace HatlessEngine
 
         public sealed override void Step()
         {
-			if (BoundBox.Contains(Input.MousePosition))
+			if (BoundBox.IntersectsWith(Input.MousePosition))
             {
                 //mouseover
                 if (State == 0)

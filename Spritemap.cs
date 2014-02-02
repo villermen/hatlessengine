@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Drawing;
 
 namespace HatlessEngine
 {
@@ -41,9 +40,9 @@ namespace HatlessEngine
 			for(ushort i = 0; i < spriteCount; i++)
 			{
 				string targetSprite = reader.ReadString();
-				PointF position = new PointF(reader.ReadSingle(), reader.ReadSingle());
-				PointF scale = new PointF(reader.ReadSingle(), reader.ReadSingle());
-				PointF origin = new PointF(reader.ReadSingle(), reader.ReadSingle());
+				Point position = new Point(reader.ReadSingle(), reader.ReadSingle());
+				Point scale = new Point(reader.ReadSingle(), reader.ReadSingle());
+				Point origin = new Point(reader.ReadSingle(), reader.ReadSingle());
 				float rotation = reader.ReadSingle();
 				float rotationSpeed = reader.ReadSingle();
 				string animationId = reader.ReadString();
@@ -71,11 +70,11 @@ namespace HatlessEngine
         /// <summary>
 		/// Draw all the sprites in this spritemap relative to a position.
         /// </summary>
-		public void Draw(PointF pos)
+		public void Draw(Point pos)
         {
 			foreach (ManagedSprite sprite in ManagedSprites)
             {
-				sprite.Draw(new PointF(pos.X + sprite.Position.X, pos.Y + sprite.Position.Y));
+				sprite.Draw(new Point(pos.X + sprite.Position.X, pos.Y + sprite.Position.Y));
             }
         }
 

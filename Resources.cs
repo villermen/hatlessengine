@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Drawing;
 using OpenTK.Audio.OpenAL;
 using System.Threading;
 
@@ -49,16 +48,16 @@ namespace HatlessEngine
 
 		internal static List<WeakReference> ManagedSprites = new List<WeakReference>();
 		
-		public static View AddView(RectangleF area, RectangleF viewport)
+		public static View AddView(Rectangle area, Rectangle viewport)
         {
 			View view = new View(area, viewport);
             Views.Add(view);
             return view;
         }
-		public static Sprite AddSprite(string id, string filename, Size size)
+		public static Sprite AddSprite(string id, string filename, Point size)
         {
             Sprite sprite;
-			if (size == Size.Empty)
+			if (size == new Point(0f, 0f))
 				sprite = new Sprite(id, filename);
             else
                 sprite = new Sprite(id, filename, size);
@@ -69,7 +68,7 @@ namespace HatlessEngine
         }
         public static Sprite AddSprite(string id, string filename)
         {
-			return AddSprite(id, filename, Size.Empty);
+			return AddSprite(id, filename, new Point(0f, 0f));
 		}
         public static Font AddFont(string id, string filename)
         {

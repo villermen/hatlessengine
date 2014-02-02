@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Drawing;
 
 namespace HatlessEngine
 {
     public class View
     {
-		public RectangleF Area;
-		public RectangleF Viewport;
+		public Rectangle Area;
+		public Rectangle Viewport;
 
-		internal View(RectangleF area, RectangleF viewport)
+		internal View(Rectangle area, Rectangle viewport)
         {
             Area = area;
             Viewport = viewport;

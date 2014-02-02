@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
@@ -17,7 +16,7 @@ namespace HatlessEngine
 	{
 		internal static GameWindow Window;
 		internal static AudioContext Audio;
-		internal static RectangleF CurrentDrawArea;
+		internal static Rectangle CurrentDrawArea;
 
 		public static float Speed
 		{ 
@@ -33,16 +32,11 @@ namespace HatlessEngine
 			get { return (float)Window.RenderFrequency; }
 		}
 
-		public static void Run(Size windowSize, float speed = 100)
+		public static void Run(Point windowSize, float speed = 100)
 		{
-			Window = new GameWindow(windowSize.Width, windowSize.Height);
+			Window = new GameWindow((int)windowSize.X, (int)windowSize.Y, GraphicsMode.Default, "HatlessEngine");
 
 			//OpenGL initialization
-			GL.Enable(EnableCap.PointSmooth);
-			GL.Hint(HintTarget.PointSmoothHint, HintMode.Nicest);
-			GL.Enable(EnableCap.LineSmooth);
-			GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
-
 			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 
 			GL.Enable(EnableCap.Blend);
@@ -51,14 +45,14 @@ namespace HatlessEngine
 			GL.Enable(EnableCap.AlphaTest); //sorta hacky fix for glyph transparency
 			GL.AlphaFunc(AlphaFunction.Greater, 0f);
 
-			GL.ClearColor(Color.Gray);
+			GL.ClearColor((Color4)Color.Gray);
 
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthFunc(DepthFunction.Lequal);
 			GL.ClearDepth(1d);
 			GL.DepthRange(1d, 0d); //does not seem right, but it works (see it as duct-tape)
 
-			Resources.AddView(new RectangleF(new PointF(0, 0), windowSize), new RectangleF(0, 0, 1, 1));
+			Resources.AddView(new Rectangle(new Point(0f, 0f), windowSize), new Rectangle(0f, 0f, 1f, 1f));
 
 			Window.UpdateFrame += Step;
 			Window.RenderFrame += Draw;
@@ -117,10 +111,10 @@ namespace HatlessEngine
 			foreach(View view in Resources.Views)
 			{
 				CurrentDrawArea = view.Area;
-				GL.Viewport((int)view.Viewport.Left * Window.Width, (int)view.Viewport.Top * Window.Height, (int)view.Viewport.Right * Window.Width, (int)view.Viewport.Bottom * Window.Height);
+				GL.Viewport((int)view.Viewport.X * Window.Width, (int)view.Viewport.Y * Window.Height, (int)view.Viewport.X2 * Window.Width, (int)view.Viewport.Y2 * Window.Height);
 				GL.MatrixMode(MatrixMode.Projection);
 				GL.LoadIdentity();
-				GL.Ortho(view.Area.Left, view.Area.Right, view.Area.Bottom, view.Area.Top, -1f, 1f);
+				GL.Ortho(view.Area.X, view.Area.X2, view.Area.Y2, view.Area.Y, -1f, 1f);
 
 				GL.MatrixMode(MatrixMode.Modelview);
 				//drawing

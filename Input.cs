@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Collections.Generic;
 using OpenTK.Input;
 
@@ -30,7 +29,7 @@ namespace HatlessEngine
 		private static float[,] GamepadAxisValues = new float[8,16];
 		#endregion Gamepad
 
-		public static PointF MousePosition { get; private set; }
+		public static Point MousePosition { get; private set; }
 
 		//to trigger multiple mousewheel presses
 		private static int MouseWheelDelta = 0;
@@ -214,19 +213,17 @@ namespace HatlessEngine
 		//OpenTK event integration
 		internal static void MouseMove(object sender, MouseMoveEventArgs e)
 		{
-			PointF positionOnWindow = new PointF((float)e.X / Game.Window.Width, (float)e.Y / Game.Window.Height);
+			Point positionOnWindow = new Point((float)e.X / Game.Window.Width, (float)e.Y / Game.Window.Height);
 
 			//decide on which viewport the mouse currently is
 			foreach (View view in Resources.Views)
 			{
-				if (view.Viewport.Contains(positionOnWindow))
+				if (view.Viewport.IntersectsWith(positionOnWindow))
 				{
 					//calculate position on virtual gamespace
 					float x = view.Area.X + (positionOnWindow.X - view.Viewport.X) / view.Viewport.Width * view.Area.Width;
 					float y = view.Area.Y + (positionOnWindow.Y - view.Viewport.Y) / view.Viewport.Height * view.Area.Height;
-
-					MousePosition = new PointF(x, y);
-
+					MousePosition = new Point(x, y);
 					break;
 				}
 			}

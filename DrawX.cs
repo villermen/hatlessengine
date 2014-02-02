@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using OpenTK.Graphics.OpenGL;
 
 namespace HatlessEngine
@@ -32,7 +31,7 @@ namespace HatlessEngine
 			}
 		}
 
-		public static void Point(PointF position, Color color, float size = 1)
+		/*public static void Point(PointF position, Color color, float size = 1)
 		{
 			RectangleF pointRectangle = new RectangleF((float)Math.Floor(position.X - size * 0.5f), (float)Math.Floor(position.Y - size * 0.5f), (float)Math.Floor(size), (float)Math.Floor(size));
 
@@ -51,60 +50,79 @@ namespace HatlessEngine
 		public static void Point(PointF position, float size = 1)
 		{
 			Point(position, DefaultColor, size);
-		}
-
-		public static void Line(PointF pos1, PointF pos2, Color color, float width = 1)
+		}*/
+		public static void Line(Line line, Color color)
         {
-			//weird math funcs to fix weird microsoft logic
-			RectangleF lineRectangle = new RectangleF(Math.Min(pos1.X, pos2.X), Math.Min(pos1.Y, pos2.Y), Math.Abs(pos2.X - pos1.X), Math.Abs(pos2.Y - pos1.Y));
-
-			if (lineRectangle.IntersectsWith(Game.CurrentDrawArea))
-			{
-				GL.LineWidth(width);
-				GL.Color4(color);
-
-				GL.Begin(PrimitiveType.Lines);
-
-				GL.Vertex3(pos1.X, pos1.Y, GLDepth);
-				GL.Vertex3(pos2.X, pos2.Y, GLDepth);
-
-				GL.End();
-			}
+			Rectangle((Rectangle)line, color);
         }
-		public static void Line(PointF pos1, PointF pos2, float width = 1)
+		public static void Line(Line line)
 		{
-			Line(pos1, pos2, DefaultColor, width);
+			Line(line, DefaultColor);
 		}
 
-		public static void Rectangle(RectangleF rect, Color color)
+		public static void Rectangle(Rectangle rect, Color color)
 		{
-			RectangleF correctedRect = new RectangleF(Math.Min(rect.Left, rect.Right), Math.Min(rect.Top, rect.Bottom), Math.Abs(rect.Width), Math.Abs(rect.Height));
-
-			if (correctedRect.IntersectsWith(Game.CurrentDrawArea))
+			if (rect.IntersectsWith(Game.CurrentDrawArea))
 			{
-				GL.Color4(color);
+				Point[] points = rect.Points;
+
+				GL.Color4((OpenTK.Graphics.Color4)color);
 
 				GL.Begin(PrimitiveType.Quads);
 
-				GL.Vertex3(rect.Left, rect.Top, GLDepth);
-				GL.Vertex3(rect.Right, rect.Top, GLDepth);
-				GL.Vertex3(rect.Right, rect.Bottom, GLDepth);
-				GL.Vertex3(rect.Left, rect.Bottom, GLDepth);
+				GL.Vertex3(points[0].X, points[0].Y, GLDepth);
+				GL.Vertex3(points[1].X, points[1].Y, GLDepth);
+				GL.Vertex3(points[2].X, points[2].Y, GLDepth);
+				GL.Vertex3(points[3].X, points[3].Y, GLDepth);
 
 				GL.End();
 			}
 		}
-		public static void Rectangle(RectangleF rect)
+		public static void Rectangle(Rectangle rect) //at position, ignoring rectangle´s actual position
 		{
 			Rectangle(rect, DefaultColor);
 		}
-		public static void Text(string str, string fontId, PointF position, Color color)
+
+		public static void Text(string str, string fontId, Point pos, Color color)
 		{
-			Resources.Fonts[fontId].Draw(str, position, color);
+			Resources.Fonts[fontId].Draw(str, pos, color);
 		}
-		public static void Text(string str, string fontId, PointF position)
+		public static void Text(string str, string fontId, Point pos)
 		{
-			Text(str, fontId, position, DefaultColor);
+			Text(str, fontId, pos, DefaultColor);
+		}
+
+		public static void Circle(Circle circle, Color color, int segments = 90)
+		{
+			//calculate values used in incrementing
+			float theta = (float)(2f * Math.PI / segments); 
+			float cosT = (float)Math.Cos(theta);
+			float sinT = (float)Math.Sin(theta);
+
+			//start at angle = 0
+			float xAdd = 0;
+			float yAdd = -circle.Radius; 
+
+			GL.Color4((OpenTK.Graphics.Color4)color);
+			GL.Begin(PrimitiveType.TriangleFan);
+
+			GL.Vertex3(circle.X, circle.Y, GLDepth);
+			for(int i = 0; i < segments; i++) 
+			{ 
+				GL.Vertex3(circle.X + xAdd, circle.Y + yAdd, GLDepth);
+
+				//calculate x and y for next step
+				float oldXAdd = xAdd;
+				xAdd = xAdd * cosT - yAdd * sinT;
+				yAdd = oldXAdd * sinT + yAdd * cosT;
+			}
+			GL.Vertex3(circle.X, circle.Y - circle.Radius, GLDepth);
+
+			GL.End(); 
+		}
+		public static void Circle(Circle circle, int segments = 360)
+		{
+			Circle(circle, DefaultColor, segments);
 		}
     }
 }
