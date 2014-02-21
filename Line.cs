@@ -5,13 +5,23 @@ namespace HatlessEngine
 	/// <summary>
 	/// 2 points, connected, line!
 	/// </summary>
-	public struct Line
+	public struct Line : IShape
 	{
 		public float X1;
 		public float Y1;
 		public float X2;
 		public float Y2;
 		public float Width;
+
+		public Point Position
+		{
+			get { return Point1; }
+			set 
+			{ 
+				Point2 = value + Point2 - Point1;
+				Point1 = value;
+			}
+		}
 
 		public Point Point1
 		{
@@ -29,6 +39,22 @@ namespace HatlessEngine
 			get { return Point1.DistanceTo(Point2); }
 		}
 
+		public Point[] Points
+		{
+			get { return new Point[] { Point1, Point2 }; }
+		}
+
+		public Point[] Axes
+		{
+			get 
+			{
+				Point[] points = Points;
+				Point[] axes = new Point[1];
+				axes[0] = new Point((-points[1].Y + points[0].Y) / Width, (points[1].X - points[0].X) / Width);
+				return axes;
+			}
+		}
+
 		public Line(float x1, float y1, float x2, float y2, float width = 1f)
 		{
 			X1 = x1;
@@ -39,6 +65,11 @@ namespace HatlessEngine
 		}
 		public Line(Point pos1, Point pos2, float width = 1f)
 			: this(pos1.X, pos1.Y, pos2.X, pos2.Y, width) { }
+
+		public bool IntersectsWith(IShape shape)
+		{
+			return Misc.ShapesIntersecting(this, shape);
+		}
 
 		public static explicit operator Rectangle(Line line)
 		{

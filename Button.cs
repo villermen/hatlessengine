@@ -189,7 +189,7 @@ namespace HatlessEngine
         GP_30 = 3030,
         GP_31 = 3031,
         GP_32 = 3032,
-		GP_A1P = 3033, //read as: Gamepad Axis 1 positive
+		GP_A1P = 3033, //read as: GamePad Axis 1 Positive
 		GP_A1N = 3034, 
 		GP_A2P = 3035,
 		GP_A2N = 3036,
@@ -221,6 +221,22 @@ namespace HatlessEngine
 		GP_A15N = 3062,
 		GP_A16P = 3063,
 		GP_A16N = 3064,
+		GP_H1U = 3065, //read as: GamePad Hat 1 Up
+		GP_H1R = 3066,
+		GP_H1D = 3067,
+		GP_H1L = 3068,
+		GP_H2U = 3069,
+		GP_H2R = 3070,
+		GP_H2D = 3071,
+		GP_H2L = 3072,
+		GP_H3U = 3073,
+		GP_H3R = 3074,
+		GP_H3D = 3075,
+		GP_H3L = 3076,
+		GP_H4U = 3077,
+		GP_H4R = 3078,
+		GP_H4D = 3079,
+		GP_H4L = 3080,
 
 		//xbox 360 controller mappings
 		XBOX360_A = GP_1,

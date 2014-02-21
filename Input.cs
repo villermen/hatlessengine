@@ -106,7 +106,7 @@ namespace HatlessEngine
 					{
 						if (jState.IsButtonDown((JoystickButton)j))
 						{
-							GamepadCurrentStates[i].Add((Button)(3001 + i * 32 + j));
+							GamepadCurrentStates[i].Add((Button)(3001 + j));
 						}
 					}
 
@@ -121,6 +121,25 @@ namespace HatlessEngine
 							GamepadCurrentStates[i].Add((Button)(3033 + j * 2));
 						if (axisValue <= -GamePadDeadZone)
 							GamepadCurrentStates[i].Add((Button)(3034 + j * 2)); 
+
+						Log.Message(axisValue.ToString());
+					}
+
+					//update hats
+					for(byte j = 0; j < GamepadCapabilities[i].HatCount; j++)
+					{
+						int hatValue = (int)jState.GetHat((JoystickHat)j).Position;
+						if (hatValue != 0)
+						{
+							if (hatValue == 1 || hatValue == 2 || hatValue == 8)
+								GamepadCurrentStates[i].Add((Button)3065 + j * 4);
+							if (hatValue == 2 || hatValue == 3 || hatValue == 4)
+								GamepadCurrentStates[i].Add((Button)3065 + j * 4 + 1);
+							if (hatValue == 4 || hatValue == 5 || hatValue == 6)
+								GamepadCurrentStates[i].Add((Button)3065 + j * 4 + 2);
+							if (hatValue == 6 || hatValue == 7 || hatValue == 8)
+								GamepadCurrentStates[i].Add((Button)3065 + j * 4 + 3);
+						}
 					}
 				}
 				else
@@ -185,14 +204,13 @@ namespace HatlessEngine
 
 				str = str.Substring(0, str.Length - 2);
 			}
-			str += "\n";
 
 			//gamepad info
 			for(byte i = 0; i < 8; i++)
 			{
 				if (ConnectedGamepads[i])
 				{
-					str += "Gamepad " + (i + 1).ToString() + ": ";
+					str += "\nGamepad " + (i + 1).ToString() + ": ";
 
 					if (GamepadCurrentStates[i].Count > 0)
 					{
@@ -203,7 +221,6 @@ namespace HatlessEngine
 
 						str = str.Substring(0, str.Length - 2);
 					}
-					str += "\n";
 				}
 			}
 				

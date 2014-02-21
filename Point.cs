@@ -2,10 +2,26 @@
 
 namespace HatlessEngine
 {
-	public struct Point
+	public struct Point : IShape
 	{
 		public float X;
 		public float Y;
+
+		public Point Position
+		{
+			get { return new Point(X, Y); }
+			set { X = value.X; Y = value.Y; }
+		}
+
+		public Point[] Points
+		{
+			get { return new Point[] { this }; }
+		}
+
+		public Point[] Axes
+		{
+			get { return new Point[0]; }
+		}
 
 		public Point(float x, float y)
 		{
@@ -45,6 +61,11 @@ namespace HatlessEngine
 			Y = (float)(origin.Y + (X - origin.X) * Math.Sin(angle) + (Y - origin.Y) * Math.Cos(angle));
 			X = T;
 
+		}
+
+		public bool IntersectsWith(IShape shape)
+		{
+			return Misc.ShapesIntersecting(this, shape);
 		}
 
 		public static bool operator ==(Point point1, Point point2)

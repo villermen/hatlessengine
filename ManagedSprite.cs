@@ -62,7 +62,7 @@ namespace HatlessEngine
 			{
 				Position = value.Position;
 				Scale = value.Size / TargetSprite.FrameSize;
-				Origin = value.RelativeOrigin;
+				Origin = value.Origin;
 				Rotation = value.Rotation;
 			}
 		}

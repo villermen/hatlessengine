@@ -42,7 +42,7 @@ namespace HatlessEngine
 			}
 		}
 
-		public Rectangle BoundBox;
+		public Rectangle BoundBox = new Rectangle(0, 0, 0, 0);
 
 		public PhysicalObject(Point position) : base()
         {

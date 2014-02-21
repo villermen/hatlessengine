@@ -2,7 +2,7 @@
 
 namespace HatlessEngine
 {
-	public struct Circle
+	public struct Circle : IShape
 	{
 		public float X;
 		public float Y;
@@ -13,6 +13,22 @@ namespace HatlessEngine
 			get { return new Point(X, Y); }
 			set { X = value.X; Y = value.Y; }
 		}
+			
+		public Point[] Points
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+		public Point[] Axes
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+		public bool IntersectsWith(IShape shape)
+		{
+			throw new NotImplementedException();
+		}
+
 
 		public Circle(float x, float y, float radius)
 		{

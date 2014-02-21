@@ -35,6 +35,7 @@ namespace HatlessEngine
         }
 
 		public void Draw(Point pos, uint frameIndex, Point scale, Point origin, float rotation)
+
         {
 			if (!Loaded)
 			{
@@ -50,48 +51,11 @@ namespace HatlessEngine
 			float texX2 = 1f / IndexSize.X * (frameIndex % IndexSize.Y + 1);
 			float texY2 = 1f / IndexSize.Y * (frameIndex / IndexSize.Y + 1);
 
-			//calculate output coordinates with the transformations
-			Point absoluteOrigin = new Point(pos.X + origin.X, pos.Y + origin.Y);
+			//get transformed coordinates on screen using a rectangle
+			Rectangle screenRect = new Rectangle(pos, FrameSize * scale, origin * scale, rotation);
 
-			//default positions
-			Point[] screenCoords = new Point[4];
-			screenCoords[0] = new Point(pos.X, pos.Y);
-			screenCoords[1] = new Point(pos.X + FrameSize.X, pos.Y);
-			screenCoords[2] = new Point(pos.X + FrameSize.X, pos.Y + FrameSize.Y);
-			screenCoords[3] = new Point(pos.X, pos.Y + FrameSize.Y);
-
-			//scaling
-			if (scale != new Point(1, 1))
-			{
-				for(byte i = 0; i < 4; i++)
-				{
-					screenCoords[i].X += (screenCoords[i].X - absoluteOrigin.X) * (scale.X - 1);
-					screenCoords[i].Y += (screenCoords[i].Y - absoluteOrigin.Y) * (scale.Y - 1);
-				}
-			}
-
-			//rotation
-			if (rotation != 0)
-			{
-				for(byte i = 0; i < 4; i++)
-				{
-					screenCoords[i].RotateOverOrigin(absoluteOrigin, rotation);
-				}
-			}
-
-			//decide whether to actually draw it
-			bool inDrawArea = false;
-			for(byte i = 0; i < 4; i++)
-			{
-				//do a collisioncheck here (this doesnt catch the middle collision case)
-				if (Game.CurrentDrawArea.IntersectsWith(screenCoords[i]))
-				{
-					inDrawArea = true;
-					break;
-				}
-			}
-
-			if (inDrawArea)
+			//draw if its in view
+			if (screenRect.IntersectsWith(Game.CurrentDrawArea))
 			{
 				GL.Enable(EnableCap.Texture2D);
 				GL.BindTexture(TextureTarget.Texture2D, OpenGLTextureId);
@@ -100,13 +64,13 @@ namespace HatlessEngine
 				GL.Begin(PrimitiveType.Quads);
 
 				GL.TexCoord2(texX1, texY1);
-				GL.Vertex3(screenCoords[0].X, screenCoords[0].Y, DrawX.GLDepth);
+				GL.Vertex3(screenRect.Point1.X, screenRect.Point1.Y, DrawX.GLDepth);
 				GL.TexCoord2(texX2, texY1);
-				GL.Vertex3(screenCoords[1].X, screenCoords[1].Y, DrawX.GLDepth);
+				GL.Vertex3(screenRect.Point2.X, screenRect.Point2.Y, DrawX.GLDepth);
 				GL.TexCoord2(texX2, texY2);
-				GL.Vertex3(screenCoords[2].X, screenCoords[2].Y, DrawX.GLDepth);
+				GL.Vertex3(screenRect.Point3.X, screenRect.Point3.Y, DrawX.GLDepth);
 				GL.TexCoord2(texX1, texY2);
-				GL.Vertex3(screenCoords[3].X, screenCoords[3].Y, DrawX.GLDepth);
+				GL.Vertex3(screenRect.Point4.X, screenRect.Point4.Y, DrawX.GLDepth);
 
 				GL.End();
 
