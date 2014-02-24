@@ -16,8 +16,11 @@ namespace HatlessEngine
             //add object to Resource's objectlist
             Resources.AddObjects.Add(this);
         }
-
+			
         public virtual void Step() { }
+		/// <summary>
+		/// Runs directly after Step for each object.
+		/// </summary>
         internal virtual void AfterStep() { }
 
         public virtual void Draw() { }

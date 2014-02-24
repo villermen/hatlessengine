@@ -18,9 +18,18 @@ namespace HatlessEngine
 			get { return new Point[] { this }; }
 		}
 
-		public Point[] Axes
+		public Point[] PerpAxes
 		{
 			get { return new Point[0]; }
+		}
+
+		public float Length
+		{
+			get { return DistanceTo(Point.Zero); }
+		}
+		public float Angle
+		{
+			get { return Point.Zero.AngleTo(this); }
 		}
 
 		public Point(float x, float y)
@@ -33,7 +42,6 @@ namespace HatlessEngine
 		{
 			return (float)Math.Sqrt(Math.Pow(point.X - X, 2) + Math.Pow(point.Y - Y, 2));  
 		}
-		//distancetorectangle
 
 		public float AngleTo(Point point)
 		{
@@ -44,7 +52,6 @@ namespace HatlessEngine
 			}
 			return result;
 		}
-		//angletorectangle
 
 		/// <summary>
 		/// Rotates this point over an absolute origin by [angle] degrees.
@@ -111,6 +118,20 @@ namespace HatlessEngine
 		{
 			return new System.Drawing.PointF(point.X, point.Y);
 		}
+		public static implicit operator Point(float f)
+		{
+			return new Point(f, f);
+		}
+
+		public override string ToString()
+		{
+			return "(" + X.ToString() + ", " + Y.ToString() + ")";
+		}
+
+		/// <summary>
+		/// Point with X = 0 and Y = 0. Origin if you will.
+		/// </summary>
+		public static readonly Point Zero = new Point(0, 0);
 	}
 }
 

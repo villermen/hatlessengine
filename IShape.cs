@@ -12,9 +12,9 @@ namespace HatlessEngine
 		/// </summary>
 		Point[] Points { get; }
 		/// <summary>
-		/// Returns an array with relevant normalized perpendicular axes;
+		/// Returns an array with relevant normalized perpendicular axes, for use in the Separating Axis Theorem.
 		/// </summary>
-		Point[] Axes { get; }
+		Point[] PerpAxes { get; }
 
 		/// <summary>
 		/// Check if this shape overlaps another

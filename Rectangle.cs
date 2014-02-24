@@ -93,7 +93,22 @@ namespace HatlessEngine
 			get { return new Point[] { Point1, Point2, Point3, Point4 }; }
 		}
 
-		public Point[] Axes
+		public Line[] Lines
+		{
+			get 
+			{ 
+				Point[] points = Points;
+				return new Line[] 
+				{
+					new Line(points[0], points[1]),
+					new Line(points[1], points[2]),
+					new Line(points[2], points[3]),
+					new Line(points[3], points[0])
+				}; 
+			}
+		}
+
+		public Point[] PerpAxes
 		{
 			get 
 			{
@@ -135,6 +150,8 @@ namespace HatlessEngine
 		{
 			return new System.Drawing.Rectangle((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
 		}
+
+		public static readonly Rectangle Zero = new Rectangle(0, 0, 0, 0);
 	}
 }
 

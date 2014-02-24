@@ -8,7 +8,7 @@ namespace HatlessEngine
 		MOUSE_MIDDLE = 1002,
 		MOUSE_RIGHT = 1003,
 		MOUSE_X1 = 1004,
-        MOUSE_X2 = 1005,
+		MOUSE_X2 = 1005,
 		MOUSE_X3 = 1006,
 		MOUSE_X4 = 1007,
 		MOUSE_X5 = 1008,

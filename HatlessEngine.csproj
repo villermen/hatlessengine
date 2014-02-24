@@ -74,7 +74,6 @@
     <Compile Include="DrawX.cs" />
     <Compile Include="Color.cs" />
     <Compile Include="Line.cs" />
-    <Compile Include="Circle.cs" />
     <Compile Include="IShape.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

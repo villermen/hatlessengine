@@ -51,13 +51,13 @@ namespace HatlessEngine
 		{
 			Point(position, DefaultColor, size);
 		}*/
-		public static void Line(Line line, Color color)
+		public static void Line(Line line, Color color, float width = 1f)
         {
-			Rectangle((Rectangle)line, color);
+			Rectangle(line.ToRectangle(width), color);
         }
-		public static void Line(Line line)
+		public static void Line(Line line, float width = 1f)
 		{
-			Line(line, DefaultColor);
+			Line(line, DefaultColor, width);
 		}
 
 		public static void Rectangle(Rectangle rect, Color color)
@@ -92,7 +92,7 @@ namespace HatlessEngine
 			Text(str, fontId, pos, DefaultColor);
 		}
 
-		public static void Circle(Circle circle, Color color, int segments = 90)
+		public static void Circle(Point position, float radius, Color color, int segments = 90)
 		{
 			//calculate values used in incrementing
 			float theta = (float)(2f * Math.PI / segments); 
@@ -101,28 +101,28 @@ namespace HatlessEngine
 
 			//start at angle = 0
 			float xAdd = 0;
-			float yAdd = -circle.Radius; 
+			float yAdd = -radius; 
 
 			GL.Color4((OpenTK.Graphics.Color4)color);
 			GL.Begin(PrimitiveType.TriangleFan);
 
-			GL.Vertex3(circle.X, circle.Y, GLDepth);
+			GL.Vertex3(position.X, position.Y, GLDepth);
 			for(int i = 0; i < segments; i++) 
 			{ 
-				GL.Vertex3(circle.X + xAdd, circle.Y + yAdd, GLDepth);
+				GL.Vertex3(position.X + xAdd, position.Y + yAdd, GLDepth);
 
 				//calculate x and y for next step
 				float oldXAdd = xAdd;
 				xAdd = xAdd * cosT - yAdd * sinT;
 				yAdd = oldXAdd * sinT + yAdd * cosT;
 			}
-			GL.Vertex3(circle.X, circle.Y - circle.Radius, GLDepth);
+			GL.Vertex3(position.X, position.Y - radius, GLDepth);
 
 			GL.End(); 
 		}
-		public static void Circle(Circle circle, int segments = 360)
+		public static void Circle(Point position, float radius = 1f, int segments = 360)
 		{
-			Circle(circle, DefaultColor, segments);
+			Circle(position, radius, DefaultColor, segments);
 		}
     }
 }
