@@ -36,11 +36,11 @@ namespace HatlessEngine
                     State = 1;
 
                 //pressed
-                if (State == 1 && Input.IsPressed(Button.MOUSE_LEFT))
+				if (State == 1 && Input.IsPressed(Button.MouseLeft))
                     State = 2;
 
                 //clicked
-                if (State == 2 && Input.IsReleased(Button.MOUSE_LEFT))
+				if (State == 2 && Input.IsReleased(Button.MouseLeft))
                 {
                     OnClick();
                     State = 1;

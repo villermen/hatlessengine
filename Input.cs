@@ -169,8 +169,8 @@ namespace HatlessEngine
 		internal static void PushButtons()
 		{
 			//remove mousewheel from both states to prevent Released from occuring (pressed has already been detected)
-			CurrentState.Remove(Button.MOUSE_WHEELDOWN);
-			CurrentState.Remove(Button.MOUSE_WHEELUP);
+			CurrentState.Remove(Button.MousewheelUp);
+			CurrentState.Remove(Button.MousewheelDown);
 
 			//actually push the state
 			PreviousState = new List<Button>(CurrentState);
@@ -178,12 +178,12 @@ namespace HatlessEngine
 			//mousewheel buttons should be pressed multiple steps even though it might've actually been performed in one (delta > 1 or < -1)
 			if (MouseWheelDelta >= 1)
 			{
-				CurrentState.Add(Button.MOUSE_WHEELUP);
+				CurrentState.Add(Button.MousewheelUp);
 				MouseWheelDelta--;
 			}
 			if (MouseWheelDelta <= -1)
 			{
-				CurrentState.Add(Button.MOUSE_WHEELDOWN);
+				CurrentState.Add(Button.MousewheelDown);
 				MouseWheelDelta++;
 			}
 		}
@@ -261,16 +261,16 @@ namespace HatlessEngine
 		{
 			if (e.Delta >= 1)
 			{
-				if (!CurrentState.Contains(Button.MOUSE_WHEELUP))
-					CurrentState.Add(Button.MOUSE_WHEELUP);
+				if (!CurrentState.Contains(Button.MousewheelUp))
+					CurrentState.Add(Button.MousewheelUp);
 
 				//will simulate wheelups every remaining step
 				MouseWheelDelta += e.Delta - 1;
 			}
 			else if (e.Delta <= -1)
 			{
-				if (!CurrentState.Contains(Button.MOUSE_WHEELDOWN))
-					CurrentState.Add(Button.MOUSE_WHEELDOWN);
+				if (!CurrentState.Contains(Button.MousewheelDown))
+					CurrentState.Add(Button.MousewheelDown);
 				MouseWheelDelta += e.Delta + 1;
 			}
 		}
