@@ -12,26 +12,14 @@ namespace HatlessEngine
 		public enum CollisionAction
 		{
 			/// <summary>
-			/// Do not take action.
+			/// Set object's speed to 0 at touching point.
 			/// </summary>
-			None = 0,
+			Block = 0,
 			/// <summary>
-			/// Block this object at touching setting speed to 0.
+			/// Bounce perfectly off the surface changing the SpeedDirection only.
 			/// </summary>
-			Block = 1,
-			[Obsolete("Not implemented yet.", true)]
-			/// <summary>
-			/// Block both objects at touching point setting speed to 0.
-			/// </summary>
-			BlockBoth = 2,
-			/// <summary>
-			/// Bounce perfectly off the surface changing the SpeedDirection accordingly.
-			/// </summary>
-			Bounce = 3,
-			[Obsolete("Not implemented yet.", true)]
-			BounceBoth = 4,
-			[Obsolete("Not implemented yet.", true)]
-			Slide = 5
+			Bounce = 1,
+			//Slide = 2, keep distance left or only distance on unlocked axis left?			
 		}
 
 		public Point Position
@@ -39,10 +27,9 @@ namespace HatlessEngine
 			get { return BoundBox.Position; }
 			set { BoundBox.Position = value; }
 		}
-		private Point PreviousPosition = Point.Zero;
 		/// <summary>
-		/// Builtin speed, will be added to the position after each step.
-		/// Will be set after collision actions, does not get read for them.
+		/// Builtin speed, will be added to the position after each step keep collisions in mind.
+		/// Can be changed by collision actions.
 		/// </summary>
 		public Point Speed = Point.Zero;
 		private float _SpeedDirection = 0f;
@@ -77,9 +64,9 @@ namespace HatlessEngine
 			}
 		}
 		/// <summary>
-		/// Reduced by collision actions.
+		/// For checking whether collisions after the first are still in range.
 		/// </summary>
-		private float SpeedLeft = 1f;
+		private float SpeedLeft;
 
 		public Rectangle BoundBox = Rectangle.Zero;
 
@@ -87,7 +74,6 @@ namespace HatlessEngine
         {
             //set position
             Position = position;
-			BoundBox.Position = position;
 
             //add object to PhysicalObjectsByType along with each basetype up till PhysicalObject
             for (Type currentType = this.GetType(); currentType != typeof(LogicalObject); currentType = currentType.BaseType)
@@ -98,110 +84,231 @@ namespace HatlessEngine
             }
         }
 
+		#region Collision handling
+
+		private List<Tuple<IShape, CollisionAction>> ShapeCollisionRules = new List<Tuple<IShape, CollisionAction>>();
+		private List<Tuple<PhysicalObject, CollisionAction>> ObjectCollisionRules = new List<Tuple<PhysicalObject, CollisionAction>>();
+		private List<Tuple<Type, CollisionAction>> ObjectTypeCollisionRules = new List<Tuple<Type, CollisionAction>>();
+		private List<Tuple<ManagedSprite, CollisionAction>> ManagedSpriteCollisionRules = new List<Tuple<ManagedSprite, CollisionAction>>();
+		private List<Tuple<Spritemap, CollisionAction, Point, Sprite>> SpritemapCollisionRules = new List<Tuple<Spritemap, CollisionAction, Point, Sprite>>();
+
+		private List<Tuple<byte, int>> RemoveCollisionRules = new List<Tuple<byte, int>>();
+
         internal override void AfterStep()
         {
-			//move however much there is left to move
-			Position += Speed * SpeedLeft;
 			SpeedLeft = 1f;
-        }
-
-		/// <summary>
-		/// Collision with a moving shape.
-		/// </summary>
-		public bool Collision(IShape shape, Point shapeSpeed, CollisionAction action = CollisionAction.None)
-        {
-			float touchingAtSpeedFraction;
-			Point intersectionAxis;
-			Point relativeSpeed = Speed - shapeSpeed;
-			//if we can still reach the touching point
-			if (Misc.ShapesIntersectingWithSpeed(BoundBox, shape, relativeSpeed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction <= SpeedLeft)
+			do
 			{
-				//-1 to prevent most of the 'Hi I'm high speed and I don't care' passthroughs
-				if (touchingAtSpeedFraction >= 0f)
+				float minTouchingFraction = float.PositiveInfinity;
+				Point minTouchingAxis = Point.Zero;
+				CollisionAction minTouchingAction = CollisionAction.Block;
+
+				float ignoreFraction = 0f;
+				Point ignoreAxis = Point.Zero;
+
+				//so they don't have to be recreated ever goddem shape
+				float touchingAtSpeedFraction;
+				Point intersectionAxis;
+
+				foreach(Tuple<IShape, CollisionAction> rule in ShapeCollisionRules)
 				{
-					if (action == CollisionAction.Block)
+					if (Misc.ShapesIntersectingBySpeed(BoundBox, rule.Item1, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
 					{
-						Position += Speed * touchingAtSpeedFraction;
+						minTouchingFraction = touchingAtSpeedFraction;
+						minTouchingAxis = intersectionAxis;
+						minTouchingAction = rule.Item2;
+					}
+				}
+				foreach(Tuple<PhysicalObject, CollisionAction> rule in ObjectCollisionRules)
+				{
+					if (!rule.Item1.Destroyed)
+					{
+						if (Misc.ShapesIntersectingBySpeed(BoundBox, rule.Item1.BoundBox, rule.Item1.Speed - Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
+						{
+							minTouchingFraction = touchingAtSpeedFraction;
+							minTouchingAxis = intersectionAxis;
+							minTouchingAction = rule.Item2;
+						}
+					}
+					else
+					{
+						//remove from 
+						RemoveCollisionRules.Add(new Tuple<byte, int>(1, ObjectCollisionRules.IndexOf(rule)));
+					}
+				}
+				foreach(Tuple<Type, CollisionAction> rule in ObjectTypeCollisionRules)
+				{
+					foreach (PhysicalObject obj in Resources.PhysicalObjectsByType[rule.Item1])
+					{
+						if (Misc.ShapesIntersectingBySpeed(BoundBox, obj.BoundBox, obj.Speed - Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
+						{
+							minTouchingFraction = touchingAtSpeedFraction;
+							minTouchingAxis = intersectionAxis;
+							minTouchingAction = rule.Item2;
+						}
+					}
+				}
+				foreach(Tuple<ManagedSprite, CollisionAction> rule in ManagedSpriteCollisionRules)
+				{
+					if (Misc.ShapesIntersectingBySpeed(BoundBox, rule.Item1.SpriteRectangle, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
+					{
+						minTouchingFraction = touchingAtSpeedFraction;
+						minTouchingAxis = intersectionAxis;
+						minTouchingAction = rule.Item2;
+					}
+				}
+				foreach(Tuple<Spritemap, CollisionAction, Point, Sprite> rule in SpritemapCollisionRules)
+				{
+					foreach(ManagedSprite sprite in rule.Item1.ManagedSprites)
+					{
+						Rectangle sRect = sprite.SpriteRectangle;
+						sRect.Position += rule.Item3;
+						if (Misc.ShapesIntersectingBySpeed(BoundBox, sRect, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
+						{
+							minTouchingFraction = touchingAtSpeedFraction;
+							minTouchingAxis = intersectionAxis;
+							minTouchingAction = rule.Item2;
+						}
+					}
+				}
+
+				//collision is within range, perform it
+				if (minTouchingFraction < SpeedLeft)
+				{
+					//move to touching point
+					Position += Speed * minTouchingFraction;
+					SpeedLeft -= minTouchingFraction;
+
+					if (minTouchingAction == CollisionAction.Block)
+					{
 						Speed = 0f;
 						SpeedLeft = 0f;
 					}
-					if (action == CollisionAction.Bounce)
+					if (minTouchingAction == CollisionAction.Bounce)
 					{
-						Position += Speed * touchingAtSpeedFraction;
-						SpeedDirection = relativeSpeed.Angle - 180 + (intersectionAxis.Angle - relativeSpeed.Angle) * 2;
-						SpeedLeft -= touchingAtSpeedFraction;
+						SpeedDirection = Speed.Angle - 180 + (minTouchingAxis.Angle - Speed.Angle) * 2;
 					}
-				}
-				return true;
-			}
-			return false;
-        }
-		/// <summary>
-		/// Collision with a static shape
-		/// </summary>
-		public bool Collision(IShape shape, CollisionAction action = CollisionAction.None)
-		{
-			return Collision(shape, Point.Zero, action);
-		}
-		/// <summary>
-		/// Collision with an object.
-		/// </summary>
-		public bool Collision(PhysicalObject obj, CollisionAction action = CollisionAction.None)
-		{
-			return Collision(obj.BoundBox, obj.Speed, action);
-		}
-		/// <summary>
-		/// Collision with any object of the given type.
-		/// Will perform all collisions if action is not CollisionAction.None to make sure everything is accounted for.
-		/// Will stop at the first collision if only a bool is needed.
-		/// </summary>
-		public bool Collision(Type objType, CollisionAction action = CollisionAction.None)
-		{
-			bool result = false;
-			bool tempResult;
-			foreach (PhysicalObject obj in Resources.PhysicalObjectsByType[objType])
-			{
-				tempResult = Collision(obj.BoundBox, obj.Speed, action);
-				if (tempResult && action != CollisionAction.None)
-					result = true;
-				if (tempResult && action == CollisionAction.None)
-					return true;
-			}
-			return result;
-		}
-		/// <summary>
-		/// Collision with a ManagedSprite.
-		/// </summary>
-		public bool Collision(ManagedSprite mSprite, CollisionAction action = CollisionAction.None)
-		{
-			return Collision(mSprite.SpriteRectangle, Point.Zero, action);
-		}
-		/// <summary>
-		/// Collision with all ManagedSprites in a Spritemap, or with all ManagedSprites with the given name in the Spritemap.
-		/// Will perform all collisions if action is not CollisionAction.None to make sure everything is accounted for.
-		/// Will stop at the first collision if only a bool is needed.
-		/// </summary>
-		public bool Collision(string spritemapId, Point spritemapPos, string spriteNameFilter = "", CollisionAction action = CollisionAction.None)
-		{
-			bool result = false;
-			bool tempResult;
-			Spritemap sMap = Resources.Spritemaps[spritemapId];
-			foreach(ManagedSprite mSprite in sMap.ManagedSprites)
-			{
-				if (spriteNameFilter == "" || mSprite.TargetSprite.Id == spriteNameFilter)
-				{
-					Rectangle spriteRect = mSprite.SpriteRectangle; //clone, don't use the actual mSprite
-					spriteRect.Position += spritemapPos;
 
-					tempResult = Collision(spriteRect, Point.Zero, action);
-					if (tempResult && action != CollisionAction.None)
-						result = true;
-					if (tempResult && action == CollisionAction.None)
-						return true;
+					ignoreFraction = minTouchingFraction;
+					ignoreAxis = minTouchingAxis;
+				}
+				else //move the remaining distance
+				{
+					Position += Speed * SpeedLeft;
+					SpeedLeft = 0f;
+				}
+			} while (SpeedLeft > 0f);
+
+			//remove collisionrules
+			foreach(Tuple<byte, int> rule in RemoveCollisionRules)
+			{
+				switch(rule.Item1)
+				{
+					case 0:
+						ShapeCollisionRules.RemoveAt(rule.Item2);
+						break;
+					case 1:
+						ObjectCollisionRules.RemoveAt(rule.Item2);
+						break;
+					case 2:
+						ObjectTypeCollisionRules.RemoveAt(rule.Item2);
+						break;
+					case 3:
+						ManagedSpriteCollisionRules.RemoveAt(rule.Item2);
+						break;
+					case 4:
+						SpritemapCollisionRules.RemoveAt(rule.Item2);
+						break;
 				}
 			}
-			return result;
+			RemoveCollisionRules.Clear();
+        }
+			
+		/// <summary>
+		/// For a direct check on if this object is overlapping with a shape.
+		/// </summary>
+		public bool IntersectsWith(IShape shape)
+		{
+			return Misc.ShapesIntersecting(BoundBox, shape);
 		}
+
+		/// <summary>
+		/// Returns whether this object will intersect with the given shape using speed.
+		/// Cannot be trusted as there might be collisionrules preventing it from actually happening, or might change it so that it WILL actually happen.
+		/// Great for quick checks though...
+		/// </summary>
+		public bool IntersectsBySpeed(IShape shape)
+		{
+			float touchingAtSpeedFraction;
+			Point intersectionAxis;
+			return Misc.ShapesIntersectingBySpeed(BoundBox, shape, Speed, out touchingAtSpeedFraction, out intersectionAxis);
+		}
+
+		/// <summary>
+		/// Add rule for a static shape.
+		/// </summary>
+		public void AddCollisionRule(IShape shape, CollisionAction action, bool thisStepOnly = false)
+		{
+			Tuple<IShape, CollisionAction> rule = new Tuple<IShape, CollisionAction>(shape, action);
+			ShapeCollisionRules.Add(rule);
+
+			if (thisStepOnly)
+				RemoveCollisionRules.Add(new Tuple<byte, int>(0, ShapeCollisionRules.IndexOf(rule)));
+		}
+		/// <summary>
+		/// Add rule for a specific object.
+		/// </summary>
+		public void AddCollisionRule(PhysicalObject obj, CollisionAction action, bool thisStepOnly = false)
+		{
+			Tuple<PhysicalObject, CollisionAction> rule = new Tuple<PhysicalObject, CollisionAction>(obj, action);
+			ObjectCollisionRules.Add(rule);
+
+			if (thisStepOnly)
+				RemoveCollisionRules.Add(new Tuple<byte, int>(1, ObjectCollisionRules.IndexOf(rule)));
+		}
+		/// <summary>
+		/// Add rule for all objects of a type.
+		/// </summary>
+		public void AddCollisionRule(Type objType, CollisionAction action, bool thisStepOnly = false)
+		{
+			if (!objType.IsAssignableFrom(typeof(PhysicalObject)))
+				throw new ArgumentException("Type is not derived from PhysicalObject");
+
+			Tuple<Type, CollisionAction> rule = new Tuple<Type, CollisionAction>(objType, action);
+				ObjectTypeCollisionRules.Add(rule);
+
+			if (thisStepOnly)
+				RemoveCollisionRules.Add(new Tuple<byte, int>(2, ObjectTypeCollisionRules.IndexOf(rule)));
+		}
+		/// <summary>
+		/// Add rule for a ManagedSprite.
+		/// </summary>
+		public void AddCollisionRule(ManagedSprite mSprite, CollisionAction action, bool thisStepOnly = false)
+		{
+			Tuple<ManagedSprite, CollisionAction> rule = new Tuple<ManagedSprite, CollisionAction>(mSprite, action);
+				ManagedSpriteCollisionRules.Add(rule);
+
+			if (thisStepOnly)
+				RemoveCollisionRules.Add(new Tuple<byte, int>(3, ManagedSpriteCollisionRules.IndexOf(rule)));
+		}
+		/// <summary>
+		/// Add rule for all sprites in a spritemap with a specified position.
+		/// If spriteIdFilter is not an empty string it will only check for sprites with this id.
+		/// </summary>
+		public void AddCollisionRule(string spritemapId, Point spritemapPos, CollisionAction action, string spriteIdFilter = "", bool thisStepOnly = false)
+		{
+			Sprite spriteFilter = null;
+			if (spriteIdFilter != "")
+				spriteFilter = Resources.Sprites[spriteIdFilter];
+
+			Tuple<Spritemap, CollisionAction, Point, Sprite> rule = new Tuple<Spritemap, CollisionAction, Point, Sprite>(Resources.Spritemaps[spritemapId], action, spritemapPos, spriteFilter);
+			SpritemapCollisionRules.Add(rule);  
+
+			if (thisStepOnly)
+				RemoveCollisionRules.Add(new Tuple<byte, int>(4, SpritemapCollisionRules.IndexOf(rule)));
+		}
+
+		#endregion
 
         public new void Destroy()
         {

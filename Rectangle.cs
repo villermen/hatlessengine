@@ -151,6 +151,11 @@ namespace HatlessEngine
 			return new System.Drawing.Rectangle((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
 		}
 
+		public override string ToString()
+		{
+			return String.Format("({0}, {1}, {2}, {3})", Point1, Point2, Point3, Point4);
+		}
+
 		public static readonly Rectangle Zero = new Rectangle(0, 0, 0, 0);
 	}
 }

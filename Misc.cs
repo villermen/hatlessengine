@@ -66,17 +66,21 @@ namespace HatlessEngine
 		/// <summary>
 		/// Returns if, when and at what axis two given shapes are going to intersect using their speed.
 		/// </summary>
-		public static bool ShapesIntersectingWithSpeed(IShape shape1, IShape shape2, Point relativeSpeed, out float touchingAtSpeedFraction, out Point intersectionAxis)
+		public static bool ShapesIntersectingBySpeed(IShape shape1, IShape shape2, Point relativeSpeed, out float touchingAtSpeedFraction, out Point intersectionAxis)
 		{
-			touchingAtSpeedFraction = 0f;
+			touchingAtSpeedFraction = 1f;
 			intersectionAxis = Point.Zero;
+
+			if (relativeSpeed == Point.Zero)
+				return false;
+
+			bool fractionFound = false;
 			Point[] shape1Points = shape1.Points;
 			Point[] shape2Points = shape2.Points;
 			List<Point> allAxes = new List<Point>(shape1.PerpAxes);
 			allAxes.AddRange(shape2.PerpAxes);
 
 			float multiplier;
-			float minScalarOverlapValue = float.PositiveInfinity;
 
 			foreach(Point axis in allAxes)
 			{
@@ -110,32 +114,35 @@ namespace HatlessEngine
 				multiplier = (float)((relativeSpeed.X * axis.X + relativeSpeed.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
 				float speedScalar = multiplier * axis.X * axis.X + multiplier * axis.Y * axis.Y;
 
-				float scalarOverlapValue;
+				float thisTouchingAtSpeedFraction;
 				if (speedScalar >= 0)
 				{
-					shape1ScalarMax += speedScalar;
-					scalarOverlapValue = shape1ScalarMax - shape2ScalarMin;
+					if (shape1ScalarMax + speedScalar < shape2ScalarMin || shape1ScalarMin > shape2ScalarMax)
+						return false;
+
+					thisTouchingAtSpeedFraction = (shape2ScalarMin - shape1ScalarMax) / Math.Abs(speedScalar);
 				}
 				else
 				{
-					shape1ScalarMin += speedScalar;
-					scalarOverlapValue = shape2ScalarMax - shape1ScalarMin; 
+					if (shape1ScalarMin + speedScalar > shape2ScalarMax || shape1ScalarMax < shape2ScalarMin)
+						return false;
+
+					thisTouchingAtSpeedFraction = (shape1ScalarMin - shape2ScalarMax) / Math.Abs(speedScalar);
 				}
 
-				//does not overlap with added speed
-				if (shape1ScalarMax <= shape2ScalarMin || shape1ScalarMin >= shape2ScalarMax)
-					return false;
-
-				if (scalarOverlapValue < minScalarOverlapValue && speedScalar != 0)
+				if (thisTouchingAtSpeedFraction <= touchingAtSpeedFraction && thisTouchingAtSpeedFraction >= -0.00001f && thisTouchingAtSpeedFraction <= 1f)
 				{
-					touchingAtSpeedFraction = 1 - scalarOverlapValue / Math.Abs(speedScalar);
+					//float precision error passthrough bug
+					if (thisTouchingAtSpeedFraction < 0f)
+						thisTouchingAtSpeedFraction = 0f;
+
+					touchingAtSpeedFraction = thisTouchingAtSpeedFraction;
 					intersectionAxis = axis;
-					minScalarOverlapValue = scalarOverlapValue;
+					fractionFound = true;
 				}
 			}
-				
-			//returns true even if there was an intersection to begin with, use touchingAtSpeedFraction to detect
-			return true;
+
+			return fractionFound;
 		}
     }
 }
