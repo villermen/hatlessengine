@@ -22,17 +22,23 @@ namespace HatlessEngine
 			//Slide = 2, keep distance left or only distance on unlocked axis left?			
 		}
 
+		/// <summary>
+		/// Change the position of Bounds easily.
+		/// </summary>
 		public Point Position
 		{
-			get { return BoundBox.Position; }
-			set { BoundBox.Position = value; }
+			get { return Bounds.Position; }
+			set { Bounds.Position = value; }
 		}
 		/// <summary>
-		/// Builtin speed, will be added to the position after each step keep collisions in mind.
+		/// Builtin speed, will be added to the position after each step while keeping collisionrules in mind.
 		/// Can be changed by collision actions.
 		/// </summary>
 		public Point Speed = Point.Zero;
 		private float _SpeedDirection = 0f;
+		/// <summary>
+		/// Get the direction of the speed or change it while keeping it's velocity.
+		/// </summary>
 		public float SpeedDirection
 		{
 			get 
@@ -50,7 +56,10 @@ namespace HatlessEngine
 				_SpeedDirection = value;
 			}
 		}
-		public float SpeedAmplitude
+		/// <summary>
+		/// Get the Velocity (amplitude) of the speed or change it while keeping it's direction.
+		/// </summary>
+		public float SpeedVelocity
 		{
 			get 
 			{
@@ -68,7 +77,11 @@ namespace HatlessEngine
 		/// </summary>
 		private float SpeedLeft;
 
-		public Rectangle BoundBox = Rectangle.Zero;
+		/// <summary>
+		/// The bounds of this object, used for collision detection.
+		/// Set to a new shape to update it, or cast it to your type before updating.
+		/// </summary>
+		public IShape Bounds = Point.Zero;
 
 		public PhysicalObject(Point position) : base()
         {
@@ -112,7 +125,7 @@ namespace HatlessEngine
 
 				foreach(Tuple<IShape, CollisionAction> rule in ShapeCollisionRules)
 				{
-					if (Misc.ShapesIntersectingBySpeed(BoundBox, rule.Item1, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
+					if (Misc.ShapesIntersectingBySpeed(Bounds, rule.Item1, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
 					{
 						minTouchingFraction = touchingAtSpeedFraction;
 						minTouchingAxis = intersectionAxis;
@@ -123,7 +136,7 @@ namespace HatlessEngine
 				{
 					if (!rule.Item1.Destroyed)
 					{
-						if (Misc.ShapesIntersectingBySpeed(BoundBox, rule.Item1.BoundBox, rule.Item1.Speed - Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
+						if (Misc.ShapesIntersectingBySpeed(Bounds, rule.Item1.Bounds, rule.Item1.Speed - Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
 						{
 							minTouchingFraction = touchingAtSpeedFraction;
 							minTouchingAxis = intersectionAxis;
@@ -140,7 +153,7 @@ namespace HatlessEngine
 				{
 					foreach (PhysicalObject obj in Resources.PhysicalObjectsByType[rule.Item1])
 					{
-						if (Misc.ShapesIntersectingBySpeed(BoundBox, obj.BoundBox, obj.Speed - Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
+						if (Misc.ShapesIntersectingBySpeed(Bounds, obj.Bounds, obj.Speed - Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
 						{
 							minTouchingFraction = touchingAtSpeedFraction;
 							minTouchingAxis = intersectionAxis;
@@ -150,7 +163,7 @@ namespace HatlessEngine
 				}
 				foreach(Tuple<ManagedSprite, CollisionAction> rule in ManagedSpriteCollisionRules)
 				{
-					if (Misc.ShapesIntersectingBySpeed(BoundBox, rule.Item1.SpriteRectangle, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
+					if (Misc.ShapesIntersectingBySpeed(Bounds, rule.Item1.SpriteRectangle, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
 					{
 						minTouchingFraction = touchingAtSpeedFraction;
 						minTouchingAxis = intersectionAxis;
@@ -163,7 +176,7 @@ namespace HatlessEngine
 					{
 						Rectangle sRect = sprite.SpriteRectangle;
 						sRect.Position += rule.Item3;
-						if (Misc.ShapesIntersectingBySpeed(BoundBox, sRect, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
+						if (Misc.ShapesIntersectingBySpeed(Bounds, sRect, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
 						{
 							minTouchingFraction = touchingAtSpeedFraction;
 							minTouchingAxis = intersectionAxis;
@@ -229,7 +242,7 @@ namespace HatlessEngine
 		/// </summary>
 		public bool IntersectsWith(IShape shape)
 		{
-			return Misc.ShapesIntersecting(BoundBox, shape);
+			return Misc.ShapesIntersecting(Bounds, shape);
 		}
 
 		/// <summary>
@@ -241,7 +254,7 @@ namespace HatlessEngine
 		{
 			float touchingAtSpeedFraction;
 			Point intersectionAxis;
-			return Misc.ShapesIntersectingBySpeed(BoundBox, shape, Speed, out touchingAtSpeedFraction, out intersectionAxis);
+			return Misc.ShapesIntersectingBySpeed(Bounds, shape, Speed, out touchingAtSpeedFraction, out intersectionAxis);
 		}
 
 		/// <summary>

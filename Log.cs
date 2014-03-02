@@ -13,11 +13,11 @@ namespace HatlessEngine
             FileEnabled = false;
         }
 
-		public static void Message(string message, LogLevel logLevel = LogLevel.DEBUG)
+		public static void Message(string message, LogLevel logLevel = LogLevel.Debug)
         {
             string formattedMessage;
 
-            if (logLevel != LogLevel.NONE)
+			if (logLevel != LogLevel.None)
             {
                 formattedMessage = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " [" + logLevel.ToString() + "] " + message;
             }
@@ -29,7 +29,7 @@ namespace HatlessEngine
             WriteConsole(formattedMessage);
             WriteFile(formattedMessage);
 
-            if (logLevel == LogLevel.FATAL)
+			if (logLevel == LogLevel.Fatal)
             {
 				//MessageBox.ShowDialog(message, "Fatal error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Game.Exit();

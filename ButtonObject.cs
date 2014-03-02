@@ -24,12 +24,12 @@ namespace HatlessEngine
 		public ButtonObject(Point position, Sprite sprite) : base(position)
         {
             Sprite = sprite;
-			BoundBox.Size = sprite.FrameSize;
+			Bounds = new Rectangle(position, sprite.FrameSize);
         }
 
         public sealed override void Step()
         {
-			if (BoundBox.IntersectsWith(Input.MousePosition))
+			if (Bounds.IntersectsWith(Input.MousePosition))
             {
                 //mouseover
                 if (State == 0)
