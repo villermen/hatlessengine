@@ -156,7 +156,7 @@ namespace HatlessEngine
 			return String.Format("({0}, {1}, {2}, {3})", Point1, Point2, Point3, Point4);
 		}
 
-		public static readonly Rectangle Zero = new Rectangle(0, 0, 0, 0);
+		public static readonly Rectangle Zero = new Rectangle(0f, 0f, 0f, 0f);
 	}
 }
 

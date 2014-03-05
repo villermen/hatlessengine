@@ -75,6 +75,7 @@
     <Compile Include="Color.cs" />
     <Compile Include="Line.cs" />
     <Compile Include="IShape.cs" />
+    <Compile Include="WindowSettings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -131,7 +131,7 @@ namespace HatlessEngine
 		/// <summary>
 		/// Point with X = 0 and Y = 0. Origin if you will.
 		/// </summary>
-		public static readonly Point Zero = new Point(0, 0);
+		public static readonly Point Zero = new Point(0f, 0f);
 	}
 }
 

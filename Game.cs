@@ -18,23 +18,50 @@ namespace HatlessEngine
 		internal static AudioContext Audio;
 		internal static Rectangle CurrentDrawArea;
 
+		public static bool Running = false;
+
+		/// <summary>
+		/// Gets or sets the desired amount of steps per second.
+		/// </summary>
 		public static float Speed
 		{ 
 			get { return (float)Window.TargetUpdateFrequency; }
 			set { Window.TargetUpdateFrequency = value; }
 		}
-		public static float LPS
+		/// <summary>
+		/// Gets the actual amount of steps per second.
+		/// </summary>
+		public static float StepsPerSecond
 		{
 			get { return (float)Window.UpdateFrequency; }
 		}
-		public static float FPS
+
+		/// <summary>
+		/// Gets the actual amount of frames per second.
+		/// </summary>
+		public static float FramesPerSecond
 		{
 			get { return (float)Window.RenderFrequency; }
 		}
 
-		public static void Run(Point windowSize, float speed = 100)
+		public static void Run(float speed = 100f)
 		{
-			Window = new GameWindow((int)windowSize.X, (int)windowSize.Y, GraphicsMode.Default, "HatlessEngine");
+			GameWindowFlags flags = GameWindowFlags.Default;
+			if (WindowSettings.InitialState == WindowState.Fullscreen)
+				flags = GameWindowFlags.Fullscreen;
+				
+			Window = new GameWindow(WindowSettings.InitialWidth, WindowSettings.InitialHeight, GraphicsMode.Default, WindowSettings.InitialTitle, flags);
+			Running = true;
+
+			//apply remaining settings
+			if (WindowSettings.InitialPosition != Point.Zero)
+				WindowSettings.Position = WindowSettings.InitialPosition;
+			WindowSettings.DesiredFrameRate = WindowSettings.InitialDesiredFrameRate;
+			WindowSettings.VSync = WindowSettings.InitialVSync;
+			WindowSettings.CursorVisible = WindowSettings.InitialCursorVisible;
+			WindowSettings.Visible = WindowSettings.InitialVisible;
+			WindowSettings.State = WindowSettings.InitialState;
+			WindowSettings.Border = WindowSettings.InitialBorder;
 
 			//OpenGL initialization
 			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
@@ -52,7 +79,7 @@ namespace HatlessEngine
 			GL.ClearDepth(1d);
 			GL.DepthRange(1d, 0d); //does not seem right, but it works (see it as duct-tape)
 
-			Resources.AddView(new Rectangle(new Point(0f, 0f), windowSize), new Rectangle(0f, 0f, 1f, 1f));
+			Resources.AddView(new Rectangle(new Point(0f, 0f), WindowSettings.Size), new Rectangle(0f, 0f, 1f, 1f));
 
 			Window.UpdateFrame += Step;
 			Window.RenderFrame += Draw;

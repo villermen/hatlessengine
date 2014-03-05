@@ -120,9 +120,7 @@ namespace HatlessEngine
 						if (axisValue >= GamePadDeadZone)
 							GamepadCurrentStates[i].Add((Button)(3033 + j * 2));
 						if (axisValue <= -GamePadDeadZone)
-							GamepadCurrentStates[i].Add((Button)(3034 + j * 2)); 
-
-						Log.Message(axisValue.ToString());
+							GamepadCurrentStates[i].Add((Button)(3034 + j * 2));
 					}
 
 					//update hats
