@@ -90,7 +90,7 @@ namespace HatlessEngine
         {
 			if (!Loaded)
 			{
-				WaveReader = new WaveReader(Filename);
+				WaveReader = new WaveReader(Resources.GetStream(Filename));
 				if (WaveReader.MetaLoaded)
 					Loaded = true;
 				BufferIds = AL.GenBuffers(3);

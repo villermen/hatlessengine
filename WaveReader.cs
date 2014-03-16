@@ -31,9 +31,9 @@ namespace HatlessEngine
 		private BinaryReader Reader;
 		private VorbisReader VorbisReader;
 
-		public WaveReader(string filename)
+		public WaveReader(Stream stream)
 		{
-			Reader = new BinaryReader(File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read));
+			Reader = new BinaryReader(stream);
 			string signature = new string(Reader.ReadChars(4));
 
 			if (signature == "RIFF") //Wave

@@ -62,6 +62,7 @@ namespace HatlessEngine
 			WindowSettings.Visible = WindowSettings.InitialVisible;
 			WindowSettings.State = WindowSettings.InitialState;
 			WindowSettings.Border = WindowSettings.InitialBorder;
+			WindowSettings.Icon = WindowSettings.InitialIcon;
 
 			//OpenGL initialization
 			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);

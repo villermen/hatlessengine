@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using OpenTK.Audio.OpenAL;
 using System.Threading;
+using System.Reflection;
 
 namespace HatlessEngine
 {
@@ -12,7 +13,10 @@ namespace HatlessEngine
     /// </summary>
     public static class Resources
     {
-		//private static string RootDirectory = System.Environment.CurrentDirectory + "/res/";
+		/// <summary>
+		/// If set this (optionally relative) will be checked before the program's location will be checked.
+		/// </summary>
+		public static string RootDirectory = "";
 
 		/// <summary>
 		/// If resource execution (like Music.Play or Sprite.Draw) is requested when the resource is not loaded, instead of throwing an exception load it at that point.
@@ -47,7 +51,41 @@ namespace HatlessEngine
 		internal static Thread MusicStreamerThread;
 
 		internal static List<WeakReference> ManagedSprites = new List<WeakReference>();
-		
+
+		/// <summary>
+		/// Gets the FileStream of a (resource) file with the given filename.
+		/// All resources are loaded this way.
+		/// Priority: 
+		/// 1: Embedded Resource in the entry assembly.
+		/// 2: File in the RootDirectory.
+		/// 3: File in the application's directory, or an absolute filepath.
+		/// Returns null if not able to obtain a stream from all locations.
+		/// Also, don't work with backslashes, they are nasty and unaccounted for.
+		/// </summary>
+		public static Stream GetStream(string fileName)
+		{
+			Assembly entryAssembly = Assembly.GetEntryAssembly();
+			Stream stream = entryAssembly.GetManifestResourceStream(entryAssembly.GetName().Name + "." + fileName.Replace('/', '.'));
+			if (stream != null)
+				return stream;
+
+			if (RootDirectory != "" && File.Exists(RootDirectory + fileName))
+			{
+				stream = File.Open(RootDirectory + fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+				if (stream != null)
+					return stream;
+			}
+
+			if (File.Exists(fileName))
+			{
+				stream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+				if (stream != null)
+					return stream;
+			}
+
+			return null;
+		}
+
 		public static View AddView(Rectangle area, Rectangle viewport)
         {
 			View view = new View(area, viewport);

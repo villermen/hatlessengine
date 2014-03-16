@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace HatlessEngine
 {
@@ -20,6 +21,7 @@ namespace HatlessEngine
 		internal static WindowState InitialState = WindowState.Normal;
 		internal static bool InitialBorder = true;
 		private static bool _Resizable = true;
+		internal static string InitialIcon = "";
 
 		public static Point Position
 		{
@@ -229,8 +231,26 @@ namespace HatlessEngine
 				_Resizable = value;
 			}
 		}
-
-		//Icon
+		/// <summary>
+		/// Sets the window to use the specified .ico file as icon.
+		/// The 32x32 variant of the icon will be used, and if it's not available it will resize another.
+		/// If set to "", the icon from the entry assembly will be used.
+		/// </summary>
+		public static string Icon
+		{
+			set
+			{
+				if (Game.Running)
+				{
+					if (value != "")
+						Game.Window.Icon = new System.Drawing.Icon(Resources.GetStream(value), new System.Drawing.Size(32, 32));
+					else
+						Game.Window.Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetEntryAssembly().Location);
+				}
+				else
+					InitialIcon = value;
+			}
+		}
 		//cursor
 		//border buttons
 	}

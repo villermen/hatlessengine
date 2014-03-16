@@ -49,7 +49,7 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 			{
-				WaveReader reader = new WaveReader(Filename);
+				WaveReader reader = new WaveReader(Resources.GetStream(Filename));
 				if (reader.MetaLoaded)
 				{
 					OpenALBufferId = AL.GenBuffer();

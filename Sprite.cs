@@ -98,7 +98,7 @@ namespace HatlessEngine
         {
 			if (!Loaded)
 			{
-				System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(Filename);
+				System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(Resources.GetStream(Filename));
 				BitmapData bitmapData = bitmap.LockBits((System.Drawing.Rectangle)new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
 				OpenGLTextureId = GL.GenTexture();
