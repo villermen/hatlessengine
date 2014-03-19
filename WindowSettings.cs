@@ -251,7 +251,8 @@ namespace HatlessEngine
 					InitialIcon = value;
 			}
 		}
-		//cursor
+
+		//CursorSprite
 		//border buttons
 	}
 

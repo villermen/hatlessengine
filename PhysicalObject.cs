@@ -285,7 +285,7 @@ namespace HatlessEngine
 		public void AddCollisionRule(Type objType, CollisionAction action, bool thisStepOnly = false)
 		{
 			if (!objType.IsAssignableFrom(typeof(PhysicalObject)))
-				throw new ArgumentException("Type is not derived from PhysicalObject");
+				throw new InvalidObjectTypeException("objType is not derived from PhysicalObject");
 
 			Tuple<Type, CollisionAction> rule = new Tuple<Type, CollisionAction>(objType, action);
 				ObjectTypeCollisionRules.Add(rule);

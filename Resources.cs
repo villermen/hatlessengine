@@ -126,7 +126,7 @@ namespace HatlessEngine
             Sounds.Add(id, sound);
             return sound;
 		}
-        public static Objectmap AddObjectmap(string id, params ObjectmapBlueprint[] objectmapBlueprints)
+        public static Objectmap AddObjectmap(string id, params ObjectBlueprint[] objectmapBlueprints)
         {
             Objectmap objectmap = new Objectmap(id, objectmapBlueprints);
             Objectmaps.Add(id, objectmap);

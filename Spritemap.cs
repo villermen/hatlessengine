@@ -86,6 +86,7 @@ namespace HatlessEngine
 		public void WriteToFile(string filename)
         {
 			BinaryWriter writer = new BinaryWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None));
+			writer.Write("HESm".ToCharArray());
 			writer.Write(ProtocolVersion);
 			writer.Write((ushort)ManagedSprites.Count);
 			foreach (ManagedSprite sprite in ManagedSprites)

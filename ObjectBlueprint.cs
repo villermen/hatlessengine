@@ -3,18 +3,20 @@ using System.Collections.Generic;
 
 namespace HatlessEngine
 {
-    public class ObjectmapBlueprint
+    public class ObjectBlueprint
     {
         public Type Type;
         public List<object> Arguments;
 
-        public ObjectmapBlueprint(Type type, params object[] arguments)
+        public ObjectBlueprint(Type type, params object[] arguments)
         {
+			if (!type.IsAssignableFrom(typeof(LogicalObject)))
+				throw new ArgumentException("Type is not derived from LogicalObject");
             Type = type;
             Arguments = new List<object>(arguments);
         }
 
-        public ObjectmapBlueprint(Type type) 
+        public ObjectBlueprint(Type type) 
 			: this(type, new object[0]) { }
     }
 }

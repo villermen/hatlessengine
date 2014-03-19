@@ -12,4 +12,11 @@ namespace HatlessEngine
 
 		public ProtocolMismatchException(string message) : base(message) { }
 	}
+
+	public class InvalidObjectTypeException : Exception 
+	{
+		public InvalidObjectTypeException() { }
+
+		public InvalidObjectTypeException(string message) : base(message) { }
+	}
 }
