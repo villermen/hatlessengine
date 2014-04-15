@@ -3,20 +3,18 @@ using System.Collections.Generic;
 
 namespace HatlessEngine
 {
-    public class ObjectBlueprint
+	[Serializable]
+	public struct ObjectBlueprint
     {
         public Type Type;
-        public List<object> Arguments;
+		public object[] Arguments;
 
-        public ObjectBlueprint(Type type, params object[] arguments)
+		public ObjectBlueprint(Type type, params object[] arguments)
         {
-			if (!type.IsAssignableFrom(typeof(LogicalObject)))
+			if (!type.IsSubclassOf(typeof(LogicalObject)))
 				throw new ArgumentException("Type is not derived from LogicalObject");
             Type = type;
-            Arguments = new List<object>(arguments);
+			Arguments = arguments;
         }
-
-        public ObjectBlueprint(Type type) 
-			: this(type, new object[0]) { }
     }
 }

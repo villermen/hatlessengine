@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Formatters;
 
 namespace HatlessEngine
 {
@@ -12,9 +14,12 @@ namespace HatlessEngine
     {
         public string Id { get; private set; }
 
+		/// <summary>
+		/// protocol version changes on changes to ObjectBlueprint.
+		/// </summary>
 		public static readonly ushort ProtocolVersion = 1;
 
-        private List<ObjectBlueprint> Blueprints;
+		public List<ObjectBlueprint> Blueprints;
         public List<LogicalObject> ActiveObjects = new List<LogicalObject>();
 
         internal Objectmap(string id, params ObjectBlueprint[] blueprints)
@@ -22,22 +27,23 @@ namespace HatlessEngine
             Id = id;
             Blueprints = new List<ObjectBlueprint>(blueprints);
         }
-
-		[Obsolete("Not yet implemented.")]
+			
 		internal Objectmap(string id, string filename)
 		{
 			Id = id;
-			Blueprints = new List<ObjectBlueprint>();
 
 			BinaryReader reader = new BinaryReader(Resources.GetStream(filename));
 
-			if (reader.ReadChars(4) != "HEOm".ToCharArray())
+			if (new String(reader.ReadChars(4)) != "HEOm")
 				throw new ProtocolMismatchException("The file's magic number is not 'HEOm' (HatlessEngine Objectmap)");
-				
+
 			if (reader.ReadUInt16() != ProtocolVersion)
 				throw new ProtocolMismatchException("The file's protocol version is not equal to the required one (" + ProtocolVersion.ToString() + ")");
+				
+			BinaryFormatter formatter = new BinaryFormatter();
+			Blueprints = (List<ObjectBlueprint>)formatter.Deserialize(reader.BaseStream);
 
-			//Type.
+			reader.Close();
 		}
 
         public List<LogicalObject> CreateObjects()
@@ -45,30 +51,25 @@ namespace HatlessEngine
             List<LogicalObject> returnList = new List<LogicalObject>();
             foreach (ObjectBlueprint blueprint in Blueprints)
             {
-                LogicalObject logicalObject = (LogicalObject)Activator.CreateInstance(blueprint.Type, blueprint.Arguments.ToArray());
+                LogicalObject logicalObject = (LogicalObject)Activator.CreateInstance(blueprint.Type, blueprint.Arguments);
                 ActiveObjects.Add(logicalObject);
                 returnList.Add(logicalObject);
             }
             return returnList;
         }
 
-		[Obsolete("Not yet implemented.")]
 		public void WriteToFile(string filename)
 		{
-			BinaryWriter writer = new BinaryWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None));
+			BinaryWriter writer = new BinaryWriter(new FileStream(filename, FileMode.Truncate, FileAccess.Write, FileShare.None));
 			writer.Write("HEOm".ToCharArray());
 			writer.Write(ProtocolVersion);
 
-			//amount of blueprints
+			BinaryFormatter formatter = new BinaryFormatter();
+			formatter.TypeFormat = FormatterTypeStyle.TypesWhenNeeded;
+            formatter.FilterLevel = TypeFilterLevel.Low;
+			formatter.Serialize(writer.BaseStream, Blueprints);
 
-			//objecttype
-			//amount of arguments
-
-			//argumenttype 
-			//amount of arguments (if zero, read in value / else, next type...)
-			//argumenttype
-			//argumentvalue
-
+			writer.Close();
 		}
 
         public void DestroyObjects()

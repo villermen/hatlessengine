@@ -2,7 +2,8 @@
 
 namespace HatlessEngine
 {
-    public class View
+	[Serializable]
+	public struct View
     {
 		public Rectangle Area;
 		public Rectangle Viewport;

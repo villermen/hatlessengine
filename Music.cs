@@ -78,7 +78,7 @@ namespace HatlessEngine
 			AL.SourcePlay(SourceId);
 
 			JustStartedPlaying = true;
-			Streaming = true;
+            Streaming = true;
 
 			Resources.LaunchMusicStreamerThread();
 

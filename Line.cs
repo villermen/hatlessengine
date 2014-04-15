@@ -5,6 +5,7 @@ namespace HatlessEngine
 	/// <summary>
 	/// 2 points, connected, line!
 	/// </summary>
+	[Serializable]
 	public struct Line : IShape
 	{
 		public float X1;

@@ -2,6 +2,7 @@
 
 namespace HatlessEngine
 {
+	[Serializable]
 	public struct Color
 	{
 		public byte R;

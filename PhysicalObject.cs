@@ -4,8 +4,8 @@ using System.Collections.Generic;
 namespace HatlessEngine
 {
     /// <summary>
-    /// Object that has a physical position and size in the game.
-    /// Has built-in support for a sprite, boundbox etc.
+    /// Object that has physical properties.
+    /// Has built-in support for a sprite, boundbox, collision detection etc.
     /// </summary>
     public class PhysicalObject : LogicalObject
     {
@@ -88,13 +88,13 @@ namespace HatlessEngine
             //set position
             Position = position;
 
-            //add object to PhysicalObjectsByType along with each basetype up till PhysicalObject
+			//add object to PhysicalObjectsByType along with each basetype up till PhysicalObject
             for (Type currentType = this.GetType(); currentType != typeof(LogicalObject); currentType = currentType.BaseType)
             {
                 if (!Resources.PhysicalObjectsByType.ContainsKey(currentType))
                     Resources.PhysicalObjectsByType[currentType] = new List<PhysicalObject>();
-                Resources.PhysicalObjectsByType[currentType].Add(this);
-            }
+				Resources.PhysicalObjectsByType[currentType].Add(this);
+			}
         }
 
 		#region Collision handling
@@ -284,7 +284,7 @@ namespace HatlessEngine
 		/// </summary>
 		public void AddCollisionRule(Type objType, CollisionAction action, bool thisStepOnly = false)
 		{
-			if (!objType.IsAssignableFrom(typeof(PhysicalObject)))
+			if (!objType.IsSubclassOf(typeof(PhysicalObject)))
 				throw new InvalidObjectTypeException("objType is not derived from PhysicalObject");
 
 			Tuple<Type, CollisionAction> rule = new Tuple<Type, CollisionAction>(objType, action);

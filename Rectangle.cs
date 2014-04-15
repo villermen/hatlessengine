@@ -2,6 +2,7 @@
 
 namespace HatlessEngine
 {
+	[Serializable]
 	public struct Rectangle : IShape
 	{
 		public float X;

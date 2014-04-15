@@ -11,6 +11,9 @@ namespace HatlessEngine
     {
         public string Id { get; private set; }
 
+		/// <summary>
+		/// protocol version changes on changes to ManagedSprite
+		/// </summary>
 		public static readonly ushort ProtocolVersion = 1;
 
 		public List<ManagedSprite> ManagedSprites;
@@ -28,10 +31,9 @@ namespace HatlessEngine
 
 			BinaryReader reader = new BinaryReader(Resources.GetStream(filename));
 
-			if (reader.ReadChars(4) != "HESm".ToCharArray())
+			if (new string(reader.ReadChars(4)) != "HESm")
 				throw new ProtocolMismatchException("The file's magic number is not 'HESm' (HatlessEngine Spritemap)");
-
-			//protocol version changes on updates to ManagedSprite
+				
 			if (reader.ReadUInt16() != ProtocolVersion)
 				throw new ProtocolMismatchException("The file's protocol version is not equal to the required one (" + ProtocolVersion.ToString() + ")");
 
@@ -85,7 +87,7 @@ namespace HatlessEngine
 		/// </summary>
 		public void WriteToFile(string filename)
         {
-			BinaryWriter writer = new BinaryWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None));
+			BinaryWriter writer = new BinaryWriter(new FileStream(filename, FileMode.Truncate, FileAccess.Write, FileShare.None));
 			writer.Write("HESm".ToCharArray());
 			writer.Write(ProtocolVersion);
 			writer.Write((ushort)ManagedSprites.Count);

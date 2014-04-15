@@ -59,7 +59,6 @@ namespace HatlessEngine
 		/// 1: Embedded Resource in the entry assembly.
 		/// 2: File in the RootDirectory.
 		/// 3: File in the application's directory, or an absolute filepath.
-		/// Returns null if not able to obtain a stream from all locations.
 		/// Also, don't work with backslashes, they are nasty and unaccounted for.
 		/// </summary>
 		public static Stream GetStream(string fileName)
@@ -83,7 +82,7 @@ namespace HatlessEngine
 					return stream;
 			}
 
-			return null;
+            throw new FileNotFoundException("The file could not be found in any of the possible locations.");
 		}
 
 		public static View AddView(Rectangle area, Rectangle viewport)
@@ -132,6 +131,15 @@ namespace HatlessEngine
             Objectmaps.Add(id, objectmap);
             return objectmap;
         }
+		/// <summary>
+		/// Add an Objectmap from file (saved by Objectmap.WriteToFile)
+		/// </summary>
+		public static Objectmap AddObjectmap(string id, string filename)
+		{
+			Objectmap objectmap = new Objectmap(id, filename);
+			Objectmaps.Add(id, objectmap);
+			return objectmap;
+		}
 		public static Spritemap AddSpritemap(string id, params ManagedSprite[] managedSprites)
         {
 			Spritemap spritemap = new Spritemap(id, managedSprites);
@@ -139,7 +147,7 @@ namespace HatlessEngine
             return spritemap;
         }
 		/// <summary>
-		/// Add a spritemap from file (saved by Spritemap.WriteToFile)
+		/// Add a Spritemap from file (saved by Spritemap.WriteToFile)
 		/// </summary>
         public static Spritemap AddSpritemap(string id, string filename)
 		{

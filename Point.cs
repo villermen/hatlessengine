@@ -2,6 +2,7 @@
 
 namespace HatlessEngine
 {
+	[Serializable]
 	public struct Point : IShape
 	{
 		public float X;
