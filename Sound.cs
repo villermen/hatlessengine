@@ -12,7 +12,13 @@ namespace HatlessEngine
         public string Id { get; private set; }
         public bool Loaded { get; private set; }
 
+        //default balance/volume?
+
 		private int OpenALBufferId;
+
+        private WaveReader.SoundFormat SoundFormat;
+        private ALFormat ALFormat;
+        private TimeSpan Duration;
 
         internal Sound(string id, string filename)
         {
@@ -21,7 +27,7 @@ namespace HatlessEngine
             Loaded = false;
         }
 
-		public SoundControl Play(float volume = 1f)
+		public SoundControl Play(float volume = 1f, float balance = 0f)
         {
 			if (!Loaded)
 			{
@@ -35,13 +41,12 @@ namespace HatlessEngine
 			int source = Resources.GetSource();
 			AL.Source(source, ALSourcei.Buffer, OpenALBufferId);
 
-			if (volume != 1)
-				AL.Source(source, ALSourcef.Gain, volume);
+            SoundControl soundControl = new SoundControl(source);
+            soundControl.Volume = volume;
+            soundControl.Balance = balance;
 
 			AL.SourcePlay(source);
 
-			SoundControl soundControl = new SoundControl(source);
-			soundControl.Volume = volume;
 			return soundControl;
         }
 
@@ -49,13 +54,18 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 			{
-				WaveReader reader = new WaveReader(Resources.GetStream(Filename));
-				if (reader.MetaLoaded)
+				WaveReader waveReader = new WaveReader(Resources.GetStream(Filename));
+				if (waveReader.MetaLoaded)
 				{
 					OpenALBufferId = AL.GenBuffer();
 					int readSamples;
-					short[] waveData = reader.ReadAll(out readSamples);
-					AL.BufferData(OpenALBufferId, reader.ALFormat, waveData, waveData.Length * 2, reader.SampleRate);
+					short[] waveData = waveReader.ReadAll(out readSamples);
+					AL.BufferData(OpenALBufferId, waveReader.ALFormat, waveData, waveData.Length * 2, waveReader.SampleRate);
+
+                    SoundFormat = waveReader.Format;
+                    ALFormat = waveReader.ALFormat;
+                    Duration = waveReader.Duration;
+
 					Loaded = true;
 				}
 				else
@@ -70,6 +80,14 @@ namespace HatlessEngine
 				AL.DeleteBuffer(OpenALBufferId);
 				Loaded = false;
 			}
+        }
+
+        public override string ToString()
+        {
+            if (Loaded)
+                return "'" + Id + "' (" + Filename + ", " + SoundFormat.ToString() + ", " + ALFormat.ToString() + ", " + Duration.ToString() + ")";
+            else
+                return "'" + Id + "' (" + Filename + ", Unloaded)";            
         }
     }
 }

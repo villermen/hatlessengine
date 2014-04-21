@@ -102,6 +102,7 @@ namespace HatlessEngine
 
 			//OpenAL initialization
 			Audio = new AudioContext();
+            AL.DistanceModel(ALDistanceModel.None);
 
 			if (Started != null)
 				Started(null, EventArgs.Empty);

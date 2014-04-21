@@ -13,7 +13,9 @@ namespace HatlessEngine
 		internal AudioControl() { }
 
 		protected float _Volume = 1f;
-
+        /// <summary>
+        /// [0f,1f]
+        /// </summary>
 		public float Volume
 		{
 			get 
@@ -22,11 +24,28 @@ namespace HatlessEngine
 			}
 			set 
 			{ 
-				if (IsPlaying())
-					AL.Source(SourceId, ALSourcef.Gain, value);
+			    AL.Source(SourceId, ALSourcef.Gain, value);
 				_Volume = value;
 			}
 		}
+
+        protected float _Balance = 0f;
+        /// <summary>
+        /// [-1f,1f], only works for mono audio.
+        /// </summary>
+        public float Balance
+        {
+            get
+            {
+                return _Balance;
+            }
+            set
+            {
+                OpenTK.Vector3 position = new OpenTK.Vector3(value, 0f, (float)Math.Sqrt(1 - Math.Pow(value, 2))); //Thanks to Ethan Lee from FNA
+                AL.Source(SourceId, ALSource3f.Position, ref position);
+                _Balance = value;
+            }
+        }
 
 		public void Pause()
 		{

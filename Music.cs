@@ -45,7 +45,11 @@ namespace HatlessEngine
             Loaded = false;
         }
 
-		public void Play()
+        /// <summary>
+        /// Start playing the music.
+        /// volume and balance will set the Volume and Balance before the music starts. (For convenience.)
+        /// </summary>
+        public void Play(float volume, float balance)
         {
 			if (!Loaded)
 			{
@@ -72,8 +76,9 @@ namespace HatlessEngine
 			//attach
 			AL.SourceQueueBuffer(SourceId, BufferIds[0]);
 
-			if (_Volume != 1)
-				AL.Source(SourceId, ALSourcef.Gain, _Volume);
+            //set volume and balance before playback
+            Volume = volume;
+            Balance = balance;
 
 			AL.SourcePlay(SourceId);
 
@@ -84,6 +89,14 @@ namespace HatlessEngine
 
 			Resources.AudioSources.Add(SourceId);
 			Resources.AudioControls.Add(SourceId, this);
+        }
+        public void Play(float volume)
+        {
+            Play(volume, _Balance);
+        }
+        public void Play()
+        {
+            Play(_Volume, _Balance);
         }
 
         public void Load()
@@ -118,5 +131,13 @@ namespace HatlessEngine
 			if (MusicChanged != null)
 				MusicChanged(this, new MusicChangedEventArgs(this, newMusic));
 		}
+
+        public override string ToString()
+        {
+            if (Loaded)
+                return "'" + Id + "' (" + Filename + ", " + WaveReader.Format.ToString() + ", " + WaveReader.ALFormat.ToString() + ", " + WaveReader.Duration.ToString() + ")";
+            else
+                return "'" + Id + "' (" + Filename + ", Unloaded)";            
+        }
     }
 }

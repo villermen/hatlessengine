@@ -13,7 +13,7 @@ namespace HatlessEngine
 		public enum SoundFormat { 
 			Unsupported = 0,
 			Wave = 1,
-			Ogg = 2 }
+			Vorbis = 2 }
 
 		public bool MetaLoaded = false;
 		public SoundFormat Format;
@@ -30,6 +30,8 @@ namespace HatlessEngine
 
 		private BinaryReader Reader;
 		private VorbisReader VorbisReader;
+
+        public TimeSpan Duration;
 
 		public WaveReader(Stream stream)
 		{
@@ -85,14 +87,16 @@ namespace HatlessEngine
 									ALFormat = ALFormat.Stereo16;
 							}
 
+                            Duration = new TimeSpan(0, 0, 0, 0, (int)Math.Ceiling((float)WaveTotalSamples / (float)SampleRate / (float)Channels * 1000f));
+
 							MetaLoaded = true;
 						}
 					}
 				}
 			} 
-			else if (signature == "OggS") //Ogg
+			else if (signature == "OggS") //Vorbis / Ogg Sound
 			{
-				Format = SoundFormat.Ogg;
+				Format = SoundFormat.Vorbis;
 
 				VorbisReader = new VorbisReader(Reader.BaseStream, true);
 
@@ -104,6 +108,8 @@ namespace HatlessEngine
 					ALFormat = ALFormat.Mono16;
 				else
 					ALFormat = ALFormat.Stereo16;
+
+                Duration = VorbisReader.TotalTime;
 
 				MetaLoaded = true;
 			}
@@ -117,12 +123,12 @@ namespace HatlessEngine
 			{
 				return ReadSamples(WaveTotalSamples, out readSamples);
 			}
-			else if (Format == SoundFormat.Ogg)
+			else if (Format == SoundFormat.Vorbis)
 			{
 				return ReadSamples((int)VorbisReader.TotalSamples, out readSamples);
 			}
 			else
-				throw new NotSupportedException("Not Wave or Ogg.");
+				throw new NotSupportedException("Not Wave or Vorbis.");
 		}
 
 		public short[] ReadSamples(int samples, out int readSamples)
@@ -139,7 +145,7 @@ namespace HatlessEngine
 				}
 				return waveData;
 			} 
-			else if (Format == SoundFormat.Ogg)
+			else if (Format == SoundFormat.Vorbis)
 			{
 				float[] floatBuffer = new float[samples];
 				readSamples = VorbisReader.ReadSamples(floatBuffer, 0, samples);
@@ -153,7 +159,7 @@ namespace HatlessEngine
 				return waveData;
 			} 
 			else
-				throw new NotSupportedException("Not Wave or Ogg.");
+				throw new NotSupportedException("Not Wave or Vorbis.");
 		}
 
 		/// <summary>
@@ -166,7 +172,7 @@ namespace HatlessEngine
 			{
 				if (Format == SoundFormat.Wave)
 					Reader.BaseStream.Position = WaveSampleStartPosition + BitsPerSample / 8 * samples * Channels;
-				else if (Format == SoundFormat.Ogg)
+				else if (Format == SoundFormat.Vorbis)
 					VorbisReader.DecodedPosition = samples;
 			}
 		}
