@@ -41,8 +41,7 @@ namespace HatlessEngine
             }
             set
             {
-                OpenTK.Vector3 position = new OpenTK.Vector3(value, 0f, (float)Math.Sqrt(1 - Math.Pow(value, 2))); //Thanks to Ethan Lee from FNA
-                AL.Source(SourceId, ALSource3f.Position, ref position);
+                AL.Source(SourceId, ALSource3f.Position, value, 0f, (float)Math.Sqrt(1 - Math.Pow(value, 2))); //Thanks to Ethan Lee from FNA
                 _Balance = value;
             }
         }
