@@ -85,7 +85,7 @@ namespace HatlessEngine
 			JustStartedPlaying = true;
             Streaming = true;
 
-			Resources.LaunchMusicStreamerThread();
+			MusicStreamer.Launch();
 
 			Resources.AudioSources.Add(SourceId);
 			Resources.AudioControls.Add(SourceId, this);
