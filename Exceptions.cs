@@ -4,7 +4,9 @@ namespace HatlessEngine
 {
 	public class NotLoadedException : Exception { }
 
-	public class MusicAlreadyPlayingException : Exception { }
+    public class AlreadyLoadedException : Exception { }
+
+    public class InvalidDeviceException : Exception { }
 
 	public class ProtocolMismatchException : Exception 
 	{

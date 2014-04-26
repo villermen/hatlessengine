@@ -35,9 +35,11 @@ namespace HatlessEngine
                 workNeedsDoing = false;
 
                 //work when there's workin' to do
-                foreach (KeyValuePair<string, Music> pair in Resources.Music)
+                foreach (Music music in Resources.Music.Values)
                 {
-                    Music music = pair.Value;
+                    //you no play, we no stream
+                    if (AL.GetSourceState(music.SourceId) != ALSourceState.Playing)
+                        music.Streaming = false;
 
                     if (music.Streaming)
                     {
@@ -57,11 +59,9 @@ namespace HatlessEngine
                         //if the music's done with a buffer, fill it again and append it
                         while (buffersProcessed > 0)
                         {
-                            Log.Message("Processing buffer " + music.ActiveBufferId.ToString() + " for " + music.Id);
-
                             AL.SourceUnqueueBuffer(music.SourceId);
 
-                            //fill the just released buffer
+                            //fill the just released buffer with half a second of goodness
                             int requestedSamples = music.WaveReader.SampleRate / 2 * music.WaveReader.Channels;
                             int readSamples;
                             short[] waveData = music.WaveReader.ReadSamples(requestedSamples, out readSamples);
@@ -114,7 +114,7 @@ namespace HatlessEngine
                         }
                     }
                 }
-                Thread.Sleep(200); //cya in a fifth of a second!
+                Thread.Sleep(400); //get back before the buffers runs out will ya
             }
             Running = false;
         }

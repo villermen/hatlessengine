@@ -51,26 +51,37 @@ namespace HatlessEngine
         }
 
         public void Load()
-		{
-			if (!Loaded)
-			{
-				WaveReader waveReader = new WaveReader(Resources.GetStream(Filename));
-				if (waveReader.MetaLoaded)
-				{
-					OpenALBufferId = AL.GenBuffer();
-					int readSamples;
-					short[] waveData = waveReader.ReadAll(out readSamples);
-					AL.BufferData(OpenALBufferId, waveReader.ALFormat, waveData, waveData.Length * 2, waveReader.SampleRate);
+        {
+            if (!Loaded)
+            {
+                WaveReader waveReader = new WaveReader(Resources.GetStream(Filename));
+                if (waveReader.MetaLoaded)
+                {
+                    OpenALBufferId = AL.GenBuffer();
+                    int readSamples;
+                    short[] waveData = waveReader.ReadAll(out readSamples);
+                    AL.BufferData(OpenALBufferId, waveReader.ALFormat, waveData, waveData.Length * 2, waveReader.SampleRate);
 
                     SoundFormat = waveReader.Format;
                     ALFormat = waveReader.ALFormat;
                     Duration = waveReader.Duration;
 
-					Loaded = true;
-				}
-				else
-					throw new FileLoadException();
-			}
+                    Loaded = true;
+                }
+                else
+                    throw new FileLoadException();
+            }
+            else
+                throw new AlreadyLoadedException();
+        }
+
+        /// <summary>
+        /// For rearming after AudioContext has been destroyed.
+        /// </summary>
+        internal void LoadForced()
+        {
+            Loaded = false;
+            Load();
         }
 
         public void Unload()

@@ -61,7 +61,8 @@ namespace HatlessEngine
 
 			if (Streaming)
 			{
-				throw new MusicAlreadyPlayingException();
+                Stop(); //needs better solution
+                Streaming = false;
 			}
 
 			WaveReader.Rewind();
@@ -101,13 +102,29 @@ namespace HatlessEngine
 
         public void Load()
         {
-			if (!Loaded)
-			{
-				WaveReader = new WaveReader(Resources.GetStream(Filename));
-				if (WaveReader.MetaLoaded)
-					Loaded = true;
-				BufferIds = AL.GenBuffers(3);
-			}
+            if (!Loaded)
+            {
+                WaveReader = new WaveReader(Resources.GetStream(Filename));
+                if (WaveReader.MetaLoaded)
+                    Loaded = true;
+                else
+                    throw new System.IO.FileLoadException();
+                BufferIds = AL.GenBuffers(3);
+            }
+            else
+                throw new AlreadyLoadedException();
+        }
+
+        /// <summary>
+        /// For rearming after AudioContext has been destroyed.
+        /// </summary>
+        internal void LoadForced()
+        {
+            Loaded = false;
+            Load();
+
+            //we don't have the old buffers and source so streaming won't do much. (Don't hog the streamer is what im getting at.)
+            Streaming = false;
         }
 
         public void Unload()
