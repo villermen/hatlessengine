@@ -75,6 +75,11 @@ namespace HatlessEngine
 			//can be cast to rectangle for collision detection
 			return new Rectangle(Position, new Point(width, Length), new Point(width / 2, Length), Point1.AngleTo(Point2));
 		}
+
+        public override string ToString()
+        {
+            return String.Format("({0}, {1})", Point1, Point2);
+        }
 	}
 }
 

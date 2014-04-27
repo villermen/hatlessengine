@@ -11,15 +11,19 @@ namespace HatlessEngine
     {
 		public enum CollisionAction
 		{
+            /// <summary>
+            /// Do nothing. For triggering a method only.
+            /// </summary>
+            None = 0,
 			/// <summary>
 			/// Set object's speed to 0 at touching point.
 			/// </summary>
-			Block = 0,
+			Block = 1,
 			/// <summary>
 			/// Bounce perfectly off the surface changing the SpeedDirection only.
 			/// </summary>
-			Bounce = 1,
-			//Slide = 2, keep distance left or only distance on unlocked axis left?			
+			Bounce = 2,
+			//Slide = 4, keep distance left or only distance on unlocked axis left?			
 		}
 
 		/// <summary>
@@ -99,11 +103,11 @@ namespace HatlessEngine
 
 		#region Collision handling
 
-		private List<Tuple<IShape, CollisionAction>> ShapeCollisionRules = new List<Tuple<IShape, CollisionAction>>();
-		private List<Tuple<PhysicalObject, CollisionAction>> ObjectCollisionRules = new List<Tuple<PhysicalObject, CollisionAction>>();
-		private List<Tuple<Type, CollisionAction>> ObjectTypeCollisionRules = new List<Tuple<Type, CollisionAction>>();
-		private List<Tuple<ManagedSprite, CollisionAction>> ManagedSpriteCollisionRules = new List<Tuple<ManagedSprite, CollisionAction>>();
-		private List<Tuple<Spritemap, CollisionAction, Point, Sprite>> SpritemapCollisionRules = new List<Tuple<Spritemap, CollisionAction, Point, Sprite>>();
+        private List<Tuple<IShape, CollisionAction, Action<IShape>>> ShapeCollisionRules = new List<Tuple<IShape, CollisionAction, Action<IShape>>>();
+        private List<Tuple<PhysicalObject, CollisionAction, Action<PhysicalObject>>> ObjectCollisionRules = new List<Tuple<PhysicalObject, CollisionAction, Action<PhysicalObject>>>();
+        private List<Tuple<Type, CollisionAction, Action<PhysicalObject>>> ObjectTypeCollisionRules = new List<Tuple<Type, CollisionAction, Action<PhysicalObject>>>();
+        private List<Tuple<ManagedSprite, CollisionAction, Action<ManagedSprite>>> ManagedSpriteCollisionRules = new List<Tuple<ManagedSprite, CollisionAction, Action<ManagedSprite>>>();
+        private List<Tuple<Spritemap, CollisionAction, Point, Sprite, Action<ManagedSprite>>> SpritemapCollisionRules = new List<Tuple<Spritemap, CollisionAction, Point, Sprite, Action<ManagedSprite>>>();
 
 		private List<Tuple<byte, int>> RemoveCollisionRules = new List<Tuple<byte, int>>();
 
@@ -113,26 +117,30 @@ namespace HatlessEngine
 			do
 			{
 				float minTouchingFraction = float.PositiveInfinity;
-				Point minTouchingAxis = Point.Zero;
-				CollisionAction minTouchingAction = CollisionAction.Block;
+                Point minTouchingAxis = Point.Zero;
+                CollisionAction minTouchingAction = CollisionAction.None;
+                Delegate minTouchingMethod = null;
+                object minTouchingMethodArg = null;
 
 				float ignoreFraction = 0f;
 				Point ignoreAxis = Point.Zero;
 
-				//so they don't have to be recreated ever goddem shape
+				//so they don't have to be recreated everytime
 				float touchingAtSpeedFraction;
 				Point intersectionAxis;
 
-				foreach(Tuple<IShape, CollisionAction> rule in ShapeCollisionRules)
+				foreach(Tuple<IShape, CollisionAction, Action<IShape>> rule in ShapeCollisionRules)
 				{
 					if (Misc.ShapesIntersectingBySpeed(Bounds, rule.Item1, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
 					{
 						minTouchingFraction = touchingAtSpeedFraction;
 						minTouchingAxis = intersectionAxis;
 						minTouchingAction = rule.Item2;
+                        minTouchingMethod = rule.Item3;
+                        minTouchingMethodArg = rule.Item1;
 					}
 				}
-				foreach(Tuple<PhysicalObject, CollisionAction> rule in ObjectCollisionRules)
+				foreach(Tuple<PhysicalObject, CollisionAction, Action<PhysicalObject>> rule in ObjectCollisionRules)
 				{
 					if (!rule.Item1.Destroyed)
 					{
@@ -141,6 +149,8 @@ namespace HatlessEngine
 							minTouchingFraction = touchingAtSpeedFraction;
 							minTouchingAxis = intersectionAxis;
 							minTouchingAction = rule.Item2;
+                            minTouchingMethod = rule.Item3;
+                            minTouchingMethodArg = rule.Item1;
 						}
 					}
 					else
@@ -149,7 +159,7 @@ namespace HatlessEngine
 						RemoveCollisionRules.Add(new Tuple<byte, int>(1, ObjectCollisionRules.IndexOf(rule)));
 					}
 				}
-				foreach(Tuple<Type, CollisionAction> rule in ObjectTypeCollisionRules)
+                foreach (Tuple<Type, CollisionAction, Action<PhysicalObject>> rule in ObjectTypeCollisionRules)
 				{
 					foreach (PhysicalObject obj in Resources.PhysicalObjectsByType[rule.Item1])
 					{
@@ -158,29 +168,35 @@ namespace HatlessEngine
 							minTouchingFraction = touchingAtSpeedFraction;
 							minTouchingAxis = intersectionAxis;
 							minTouchingAction = rule.Item2;
+                            minTouchingMethod = rule.Item3;
+                            minTouchingMethodArg = obj;
 						}
 					}
 				}
-				foreach(Tuple<ManagedSprite, CollisionAction> rule in ManagedSpriteCollisionRules)
+                foreach (Tuple<ManagedSprite, CollisionAction, Action<ManagedSprite>> rule in ManagedSpriteCollisionRules)
 				{
 					if (Misc.ShapesIntersectingBySpeed(Bounds, rule.Item1.SpriteRectangle, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
 					{
 						minTouchingFraction = touchingAtSpeedFraction;
 						minTouchingAxis = intersectionAxis;
 						minTouchingAction = rule.Item2;
+                        minTouchingMethod = rule.Item3;
+                        minTouchingMethodArg = rule.Item1;
 					}
 				}
-				foreach(Tuple<Spritemap, CollisionAction, Point, Sprite> rule in SpritemapCollisionRules)
+                foreach (Tuple<Spritemap, CollisionAction, Point, Sprite, Action<ManagedSprite>> rule in SpritemapCollisionRules)
 				{
 					foreach(ManagedSprite sprite in rule.Item1.ManagedSprites)
 					{
-						Rectangle sRect = sprite.SpriteRectangle;
+						Rectangle sRect = sprite.SpriteRectangle; //copy sprite so the actual sprite won't get moved
 						sRect.Position += rule.Item3;
 						if (Misc.ShapesIntersectingBySpeed(Bounds, sRect, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
 						{
 							minTouchingFraction = touchingAtSpeedFraction;
 							minTouchingAxis = intersectionAxis;
 							minTouchingAction = rule.Item2;
+                            minTouchingMethod = rule.Item5;
+                            minTouchingMethodArg = sprite;
 						}
 					}
 				}
@@ -201,6 +217,10 @@ namespace HatlessEngine
 					{
 						SpeedDirection = Speed.Angle - 180 + (minTouchingAxis.Angle - Speed.Angle) * 2;
 					}
+
+                    //fire specified method
+                    if (minTouchingMethod != null)
+                        minTouchingMethod.DynamicInvoke(minTouchingMethodArg);
 
 					ignoreFraction = minTouchingFraction;
 					ignoreAxis = minTouchingAxis;
@@ -260,9 +280,9 @@ namespace HatlessEngine
 		/// <summary>
 		/// Add rule for a static shape.
 		/// </summary>
-		public void AddCollisionRule(IShape shape, CollisionAction action, bool thisStepOnly = false)
+		public void AddCollisionRule(IShape shape, CollisionAction action, Action<IShape> method = null, bool thisStepOnly = false)
 		{
-			Tuple<IShape, CollisionAction> rule = new Tuple<IShape, CollisionAction>(shape, action);
+			Tuple<IShape, CollisionAction, Action<IShape>> rule = new Tuple<IShape, CollisionAction, Action<IShape>>(shape, action, method);
 			ShapeCollisionRules.Add(rule);
 
 			if (thisStepOnly)
@@ -271,9 +291,9 @@ namespace HatlessEngine
 		/// <summary>
 		/// Add rule for a specific object.
 		/// </summary>
-		public void AddCollisionRule(PhysicalObject obj, CollisionAction action, bool thisStepOnly = false)
+		public void AddCollisionRule(PhysicalObject obj, CollisionAction action, Action<PhysicalObject> method = null, bool thisStepOnly = false)
 		{
-			Tuple<PhysicalObject, CollisionAction> rule = new Tuple<PhysicalObject, CollisionAction>(obj, action);
+            Tuple<PhysicalObject, CollisionAction, Action<PhysicalObject>> rule = new Tuple<PhysicalObject, CollisionAction, Action<PhysicalObject>>(obj, action, method);
 			ObjectCollisionRules.Add(rule);
 
 			if (thisStepOnly)
@@ -282,13 +302,13 @@ namespace HatlessEngine
 		/// <summary>
 		/// Add rule for all objects of a type.
 		/// </summary>
-		public void AddCollisionRule(Type objType, CollisionAction action, bool thisStepOnly = false)
+		public void AddCollisionRule(Type objType, CollisionAction action, Action<PhysicalObject> method = null, bool thisStepOnly = false)
 		{
 			if (!objType.IsSubclassOf(typeof(PhysicalObject)))
 				throw new InvalidObjectTypeException("objType is not derived from PhysicalObject");
 
-			Tuple<Type, CollisionAction> rule = new Tuple<Type, CollisionAction>(objType, action);
-				ObjectTypeCollisionRules.Add(rule);
+            Tuple<Type, CollisionAction, Action<PhysicalObject>> rule = new Tuple<Type, CollisionAction, Action<PhysicalObject>>(objType, action, method);
+			ObjectTypeCollisionRules.Add(rule);
 
 			if (thisStepOnly)
 				RemoveCollisionRules.Add(new Tuple<byte, int>(2, ObjectTypeCollisionRules.IndexOf(rule)));
@@ -296,10 +316,10 @@ namespace HatlessEngine
 		/// <summary>
 		/// Add rule for a ManagedSprite.
 		/// </summary>
-		public void AddCollisionRule(ManagedSprite mSprite, CollisionAction action, bool thisStepOnly = false)
+        public void AddCollisionRule(ManagedSprite mSprite, CollisionAction action, Action<ManagedSprite> method = null, bool thisStepOnly = false)
 		{
-			Tuple<ManagedSprite, CollisionAction> rule = new Tuple<ManagedSprite, CollisionAction>(mSprite, action);
-				ManagedSpriteCollisionRules.Add(rule);
+            Tuple<ManagedSprite, CollisionAction, Action<ManagedSprite>> rule = new Tuple<ManagedSprite, CollisionAction, Action<ManagedSprite>>(mSprite, action, method);
+			ManagedSpriteCollisionRules.Add(rule);
 
 			if (thisStepOnly)
 				RemoveCollisionRules.Add(new Tuple<byte, int>(3, ManagedSpriteCollisionRules.IndexOf(rule)));
@@ -308,13 +328,13 @@ namespace HatlessEngine
 		/// Add rule for all sprites in a spritemap with a specified position.
 		/// If spriteIdFilter is not an empty string it will only check for sprites with this id.
 		/// </summary>
-		public void AddCollisionRule(string spritemapId, Point spritemapPos, CollisionAction action, string spriteIdFilter = "", bool thisStepOnly = false)
+        public void AddCollisionRule(string spritemapId, Point spritemapPos, CollisionAction action, Action<ManagedSprite> method = null, string spriteIdFilter = "", bool thisStepOnly = false)
 		{
 			Sprite spriteFilter = null;
 			if (spriteIdFilter != "")
 				spriteFilter = Resources.Sprites[spriteIdFilter];
 
-			Tuple<Spritemap, CollisionAction, Point, Sprite> rule = new Tuple<Spritemap, CollisionAction, Point, Sprite>(Resources.Spritemaps[spritemapId], action, spritemapPos, spriteFilter);
+            Tuple<Spritemap, CollisionAction, Point, Sprite, Action<ManagedSprite>> rule = new Tuple<Spritemap, CollisionAction, Point, Sprite, Action<ManagedSprite>>(Resources.Spritemaps[spritemapId], action, spritemapPos, spriteFilter, method);
 			SpritemapCollisionRules.Add(rule);  
 
 			if (thisStepOnly)
