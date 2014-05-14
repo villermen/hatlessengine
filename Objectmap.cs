@@ -21,6 +21,7 @@ namespace HatlessEngine
 
 		public List<ObjectBlueprint> Blueprints;
         public List<LogicalObject> ActiveObjects = new List<LogicalObject>();
+        internal List<PhysicalObject> ActivePhysicalObjects = new List<PhysicalObject>();
 
         internal Objectmap(string id, params ObjectBlueprint[] blueprints)
         {
@@ -53,6 +54,9 @@ namespace HatlessEngine
             {
                 LogicalObject logicalObject = (LogicalObject)Activator.CreateInstance(blueprint.Type, blueprint.Arguments);
                 ActiveObjects.Add(logicalObject);
+                //for collision checking against this map
+                if (blueprint.Type.IsSubclassOf(typeof(PhysicalObject)))
+                    ActivePhysicalObjects.Add((PhysicalObject)logicalObject);
                 returnList.Add(logicalObject);
             }
             return returnList;
@@ -79,6 +83,7 @@ namespace HatlessEngine
                 logicalObject.Destroy();
             }
             ActiveObjects.Clear();
+            ActivePhysicalObjects.Clear();
         }
     }
 }

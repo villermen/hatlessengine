@@ -13,6 +13,8 @@ namespace HatlessEngine
 		public float X2;
 		public float Y2;
 
+        private float _Rotation;
+
 		public Point Position
 		{
 			get { return Point1; }
@@ -22,6 +24,16 @@ namespace HatlessEngine
 				Point1 = value;
 			}
 		}
+
+        public float Rotation
+        {
+            get { return _Rotation; }
+            set 
+            {
+                Point2 = Point2.RotateOverOrigin(Point1, value - _Rotation);
+                _Rotation = value;
+            }
+        }
 
 		public Point Point1
 		{
@@ -61,6 +73,7 @@ namespace HatlessEngine
 			Y1 = y1;
 			X2 = x2;
 			Y2 = y2;
+            _Rotation = 0f;
 		}
 		public Line(Point pos1, Point pos2)
 			: this(pos1.X, pos1.Y, pos2.X, pos2.Y) { }

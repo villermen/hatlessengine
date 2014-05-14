@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AudioSettings.cs" />
+    <Compile Include="CollisionRule.cs" />
     <Compile Include="MusicStreamer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Game.cs" />

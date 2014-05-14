@@ -9,23 +9,6 @@ namespace HatlessEngine
     /// </summary>
     public class PhysicalObject : LogicalObject
     {
-		public enum CollisionAction
-		{
-            /// <summary>
-            /// Do nothing. For triggering a method only.
-            /// </summary>
-            None = 0,
-			/// <summary>
-			/// Set object's speed to 0 at touching point.
-			/// </summary>
-			Block = 1,
-			/// <summary>
-			/// Bounce perfectly off the surface changing the SpeedDirection only.
-			/// </summary>
-			Bounce = 2,
-			//Slide = 4, keep distance left or only distance on unlocked axis left?			
-		}
-
 		/// <summary>
 		/// Change the position of Bounds easily.
 		/// </summary>
@@ -103,158 +86,149 @@ namespace HatlessEngine
 
 		#region Collision handling
 
-        private List<Tuple<IShape, CollisionAction, Action<IShape>>> ShapeCollisionRules = new List<Tuple<IShape, CollisionAction, Action<IShape>>>();
-        private List<Tuple<PhysicalObject, CollisionAction, Action<PhysicalObject>>> ObjectCollisionRules = new List<Tuple<PhysicalObject, CollisionAction, Action<PhysicalObject>>>();
-        private List<Tuple<Type, CollisionAction, Action<PhysicalObject>>> ObjectTypeCollisionRules = new List<Tuple<Type, CollisionAction, Action<PhysicalObject>>>();
-        private List<Tuple<ManagedSprite, CollisionAction, Action<ManagedSprite>>> ManagedSpriteCollisionRules = new List<Tuple<ManagedSprite, CollisionAction, Action<ManagedSprite>>>();
-        private List<Tuple<Spritemap, CollisionAction, Point, Sprite, Action<ManagedSprite>>> SpritemapCollisionRules = new List<Tuple<Spritemap, CollisionAction, Point, Sprite, Action<ManagedSprite>>>();
-
-		private List<Tuple<byte, int>> RemoveCollisionRules = new List<Tuple<byte, int>>();
+        public List<CollisionRule> CollisionRules = new List<CollisionRule>();
 
         internal override void AfterStep()
         {
 			SpeedLeft = 1f;
 			do
 			{
-				float minTouchingFraction = float.PositiveInfinity;
+				float minTouchingSpeedFraction = float.PositiveInfinity;
                 Point minTouchingAxis = Point.Zero;
-                CollisionAction minTouchingAction = CollisionAction.None;
-                Delegate minTouchingMethod = null;
+                CollisionRule minTouchingRule = null;
                 object minTouchingMethodArg = null;
 
-				float ignoreFraction = 0f;
-				Point ignoreAxis = Point.Zero;
+                CollisionRule ignoreRule = null;
 
-				//so they don't have to be recreated everytime
-				float touchingAtSpeedFraction;
-				Point intersectionAxis;
+                //decide what object of the rules is closest and within collision range
+                foreach(CollisionRule cRule in CollisionRules)
+                {
+                    //skip if this rule doesn't have to be checked anyway
+                    if (cRule == ignoreRule || !cRule.Active)
+                        continue;
 
-				foreach(Tuple<IShape, CollisionAction, Action<IShape>> rule in ShapeCollisionRules)
-				{
-					if (Misc.ShapesIntersectingBySpeed(Bounds, rule.Item1, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
-					{
-						minTouchingFraction = touchingAtSpeedFraction;
-						minTouchingAxis = intersectionAxis;
-						minTouchingAction = rule.Item2;
-                        minTouchingMethod = rule.Item3;
-                        minTouchingMethodArg = rule.Item1;
-					}
-				}
-				foreach(Tuple<PhysicalObject, CollisionAction, Action<PhysicalObject>> rule in ObjectCollisionRules)
-				{
-					if (!rule.Item1.Destroyed)
-					{
-						if (Misc.ShapesIntersectingBySpeed(Bounds, rule.Item1.Bounds, rule.Item1.Speed - Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
-						{
-							minTouchingFraction = touchingAtSpeedFraction;
-							minTouchingAxis = intersectionAxis;
-							minTouchingAction = rule.Item2;
-                            minTouchingMethod = rule.Item3;
-                            minTouchingMethodArg = rule.Item1;
-						}
-					}
-					else
-					{
-						//remove from 
-						RemoveCollisionRules.Add(new Tuple<byte, int>(1, ObjectCollisionRules.IndexOf(rule)));
-					}
-				}
-                foreach (Tuple<Type, CollisionAction, Action<PhysicalObject>> rule in ObjectTypeCollisionRules)
-				{
-					foreach (PhysicalObject obj in Resources.PhysicalObjectsByType[rule.Item1])
-					{
-						if (Misc.ShapesIntersectingBySpeed(Bounds, obj.Bounds, obj.Speed - Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
-						{
-							minTouchingFraction = touchingAtSpeedFraction;
-							minTouchingAxis = intersectionAxis;
-							minTouchingAction = rule.Item2;
-                            minTouchingMethod = rule.Item3;
-                            minTouchingMethodArg = obj;
-						}
-					}
-				}
-                foreach (Tuple<ManagedSprite, CollisionAction, Action<ManagedSprite>> rule in ManagedSpriteCollisionRules)
-				{
-					if (Misc.ShapesIntersectingBySpeed(Bounds, rule.Item1.SpriteRectangle, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
-					{
-						minTouchingFraction = touchingAtSpeedFraction;
-						minTouchingAxis = intersectionAxis;
-						minTouchingAction = rule.Item2;
-                        minTouchingMethod = rule.Item3;
-                        minTouchingMethodArg = rule.Item1;
-					}
-				}
-                foreach (Tuple<Spritemap, CollisionAction, Point, Sprite, Action<ManagedSprite>> rule in SpritemapCollisionRules)
-				{
-					foreach(ManagedSprite sprite in rule.Item1.ManagedSprites)
-					{
-						Rectangle sRect = sprite.SpriteRectangle; //copy sprite so the actual sprite won't get moved
-						sRect.Position += rule.Item3;
-						if (Misc.ShapesIntersectingBySpeed(Bounds, sRect, Speed, out touchingAtSpeedFraction, out intersectionAxis) && touchingAtSpeedFraction < minTouchingFraction && !(touchingAtSpeedFraction == ignoreFraction && intersectionAxis == ignoreAxis))
-						{
-							minTouchingFraction = touchingAtSpeedFraction;
-							minTouchingAxis = intersectionAxis;
-							minTouchingAction = rule.Item2;
-                            minTouchingMethod = rule.Item5;
-                            minTouchingMethodArg = sprite;
-						}
-					}
-				}
+                    float touchingSpeedFraction = float.PositiveInfinity;
+                    Point intersectionAxis;
 
-				//collision is within range, perform it
-				if (minTouchingFraction < SpeedLeft)
+                    switch (cRule.Type)
+                    {
+                        case CollisionRuleType.Shape:
+                            if (Misc.ShapesIntersectingBySpeed(Bounds, (IShape)cRule.Target, Speed, out touchingSpeedFraction, out intersectionAxis) && touchingSpeedFraction < minTouchingSpeedFraction)
+                            {
+                                minTouchingSpeedFraction = touchingSpeedFraction;
+                                minTouchingAxis = intersectionAxis;
+                                minTouchingRule = cRule;
+                                minTouchingMethodArg = cRule.Target;
+                            }
+                            break;
+
+                        case CollisionRuleType.Object:
+                            if (Misc.ShapesIntersectingBySpeed(Bounds, ((PhysicalObject)cRule.Target).Bounds, Speed - ((PhysicalObject)cRule.Target).Speed, out touchingSpeedFraction, out intersectionAxis) && touchingSpeedFraction < minTouchingSpeedFraction)
+                            {
+                                minTouchingSpeedFraction = touchingSpeedFraction;
+                                minTouchingAxis = intersectionAxis;
+                                minTouchingRule = cRule;
+                                minTouchingMethodArg = cRule.Target;
+                            }
+                            break;
+
+                        case CollisionRuleType.ObjectType:
+                            foreach (PhysicalObject obj in Resources.PhysicalObjectsByType[(Type)cRule.Target])
+                            {
+                                if (Misc.ShapesIntersectingBySpeed(Bounds, obj.Bounds, Speed - obj.Speed, out touchingSpeedFraction, out intersectionAxis) && touchingSpeedFraction < minTouchingSpeedFraction)
+                                {
+                                    minTouchingSpeedFraction = touchingSpeedFraction;
+                                    minTouchingAxis = intersectionAxis;
+                                    minTouchingRule = cRule;
+                                    minTouchingMethodArg = obj;
+                                }  
+                            }
+                            break;
+
+                        case CollisionRuleType.Objectmap:
+                            foreach (PhysicalObject obj in ((Objectmap)cRule.Target).ActivePhysicalObjects)
+                            {
+                                //whether the object should be checked if the filter is enabled
+                                if (!cRule.FilterEnabled || cRule.ObjectmapFilter.Contains(obj.GetType())) //account for inheritance
+                                {
+                                    if (Misc.ShapesIntersectingBySpeed(Bounds, obj.Bounds, Speed - obj.Speed, out touchingSpeedFraction, out intersectionAxis) && touchingSpeedFraction < minTouchingSpeedFraction)
+                                    {
+                                        minTouchingSpeedFraction = touchingSpeedFraction;
+                                        minTouchingAxis = intersectionAxis;
+                                        minTouchingRule = cRule;
+                                        minTouchingMethodArg = obj;
+                                    }
+                                }
+                            }
+                            break;
+
+                        case CollisionRuleType.ManagedSprite:
+                            if (Misc.ShapesIntersectingBySpeed(Bounds, ((ManagedSprite)cRule.Target).SpriteRectangle, Speed, out touchingSpeedFraction, out intersectionAxis) && touchingSpeedFraction < minTouchingSpeedFraction)
+                            {
+                                minTouchingSpeedFraction = touchingSpeedFraction;
+                                minTouchingAxis = intersectionAxis;
+                                minTouchingRule = cRule;
+                                minTouchingMethodArg = cRule.Target;
+                            }
+                            break;
+
+                        case CollisionRuleType.Spritemap:
+                            foreach (ManagedSprite sprite in ((Spritemap)cRule.Target).ManagedSprites)
+                            {
+                                //whether the object should be checked if the filter is enabled
+                                if (!cRule.FilterEnabled || cRule.SpritemapFilter.Contains(sprite.TargetSprite)) //account for inheritance
+                                {
+                                    Rectangle sRect = sprite.SpriteRectangle; //copy over so it the relative position won't be changed
+                                    sRect.Position += cRule.SpritemapOffset;
+
+                                    if (Misc.ShapesIntersectingBySpeed(Bounds, sRect, Speed, out touchingSpeedFraction, out intersectionAxis) && touchingSpeedFraction < minTouchingSpeedFraction)
+                                    {
+                                        minTouchingSpeedFraction = touchingSpeedFraction;
+                                        minTouchingAxis = intersectionAxis;
+                                        minTouchingRule = cRule;
+                                        minTouchingMethodArg = sprite;
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                }
+
+				
+				if (minTouchingSpeedFraction < SpeedLeft)
 				{
+                    //collision is within range, perform it
+
 					//move to touching point
-					Position += Speed * minTouchingFraction;
-					SpeedLeft -= minTouchingFraction;
+					Position += Speed * minTouchingSpeedFraction;
+					SpeedLeft -= minTouchingSpeedFraction;
 
-					if (minTouchingAction == CollisionAction.Block)
-					{
-						Speed = 0f;
-						SpeedLeft = 0f;
-					}
-					if (minTouchingAction == CollisionAction.Bounce)
-					{
-						SpeedDirection = Speed.Angle - 180 + (minTouchingAxis.Angle - Speed.Angle) * 2;
-					}
+                    switch (minTouchingRule.Action)
+                    {
+                        case CollisionAction.Block:
+                            Speed = 0f;
+						    SpeedLeft = 0f;
+                            break;
 
-                    //fire specified method
-                    if (minTouchingMethod != null)
-                        minTouchingMethod.DynamicInvoke(minTouchingMethodArg);
+                        case CollisionAction.Bounce:
+                            SpeedDirection = Speed.Angle - 180 + (minTouchingAxis.Angle - Speed.Angle) * 2;
+                            break;
+                    }
 
-					ignoreFraction = minTouchingFraction;
-					ignoreAxis = minTouchingAxis;
+                    minTouchingRule.CallMethod(minTouchingMethodArg);
+
+                    if (minTouchingRule.DeactivateAfterCollision)
+                        minTouchingRule.Active = false;
+
+                    ignoreRule = minTouchingRule;
 				}
-				else //move the remaining distance
+				else 
 				{
+                    //move the remaining distance
 					Position += Speed * SpeedLeft;
 					SpeedLeft = 0f;
 				}
 			} while (SpeedLeft > 0f);
-
-			//remove collisionrules
-			foreach(Tuple<byte, int> rule in RemoveCollisionRules)
-			{
-				switch(rule.Item1)
-				{
-					case 0:
-						ShapeCollisionRules.RemoveAt(rule.Item2);
-						break;
-					case 1:
-						ObjectCollisionRules.RemoveAt(rule.Item2);
-						break;
-					case 2:
-						ObjectTypeCollisionRules.RemoveAt(rule.Item2);
-						break;
-					case 3:
-						ManagedSpriteCollisionRules.RemoveAt(rule.Item2);
-						break;
-					case 4:
-						SpritemapCollisionRules.RemoveAt(rule.Item2);
-						break;
-				}
-			}
-			RemoveCollisionRules.Clear();
         }
 			
 		/// <summary>
@@ -275,70 +249,6 @@ namespace HatlessEngine
 			float touchingAtSpeedFraction;
 			Point intersectionAxis;
 			return Misc.ShapesIntersectingBySpeed(Bounds, shape, Speed, out touchingAtSpeedFraction, out intersectionAxis);
-		}
-
-		/// <summary>
-		/// Add rule for a static shape.
-		/// </summary>
-		public void AddCollisionRule(IShape shape, CollisionAction action, Action<IShape> method = null, bool thisStepOnly = false)
-		{
-			Tuple<IShape, CollisionAction, Action<IShape>> rule = new Tuple<IShape, CollisionAction, Action<IShape>>(shape, action, method);
-			ShapeCollisionRules.Add(rule);
-
-			if (thisStepOnly)
-				RemoveCollisionRules.Add(new Tuple<byte, int>(0, ShapeCollisionRules.IndexOf(rule)));
-		}
-		/// <summary>
-		/// Add rule for a specific object.
-		/// </summary>
-		public void AddCollisionRule(PhysicalObject obj, CollisionAction action, Action<PhysicalObject> method = null, bool thisStepOnly = false)
-		{
-            Tuple<PhysicalObject, CollisionAction, Action<PhysicalObject>> rule = new Tuple<PhysicalObject, CollisionAction, Action<PhysicalObject>>(obj, action, method);
-			ObjectCollisionRules.Add(rule);
-
-			if (thisStepOnly)
-				RemoveCollisionRules.Add(new Tuple<byte, int>(1, ObjectCollisionRules.IndexOf(rule)));
-		}
-		/// <summary>
-		/// Add rule for all objects of a type.
-		/// </summary>
-		public void AddCollisionRule(Type objType, CollisionAction action, Action<PhysicalObject> method = null, bool thisStepOnly = false)
-		{
-			if (!objType.IsSubclassOf(typeof(PhysicalObject)))
-				throw new InvalidObjectTypeException("objType is not derived from PhysicalObject");
-
-            Tuple<Type, CollisionAction, Action<PhysicalObject>> rule = new Tuple<Type, CollisionAction, Action<PhysicalObject>>(objType, action, method);
-			ObjectTypeCollisionRules.Add(rule);
-
-			if (thisStepOnly)
-				RemoveCollisionRules.Add(new Tuple<byte, int>(2, ObjectTypeCollisionRules.IndexOf(rule)));
-		}
-		/// <summary>
-		/// Add rule for a ManagedSprite.
-		/// </summary>
-        public void AddCollisionRule(ManagedSprite mSprite, CollisionAction action, Action<ManagedSprite> method = null, bool thisStepOnly = false)
-		{
-            Tuple<ManagedSprite, CollisionAction, Action<ManagedSprite>> rule = new Tuple<ManagedSprite, CollisionAction, Action<ManagedSprite>>(mSprite, action, method);
-			ManagedSpriteCollisionRules.Add(rule);
-
-			if (thisStepOnly)
-				RemoveCollisionRules.Add(new Tuple<byte, int>(3, ManagedSpriteCollisionRules.IndexOf(rule)));
-		}
-		/// <summary>
-		/// Add rule for all sprites in a spritemap with a specified position.
-		/// If spriteIdFilter is not an empty string it will only check for sprites with this id.
-		/// </summary>
-        public void AddCollisionRule(string spritemapId, Point spritemapPos, CollisionAction action, Action<ManagedSprite> method = null, string spriteIdFilter = "", bool thisStepOnly = false)
-		{
-			Sprite spriteFilter = null;
-			if (spriteIdFilter != "")
-				spriteFilter = Resources.Sprites[spriteIdFilter];
-
-            Tuple<Spritemap, CollisionAction, Point, Sprite, Action<ManagedSprite>> rule = new Tuple<Spritemap, CollisionAction, Point, Sprite, Action<ManagedSprite>>(Resources.Spritemaps[spritemapId], action, spritemapPos, spriteFilter, method);
-			SpritemapCollisionRules.Add(rule);  
-
-			if (thisStepOnly)
-				RemoveCollisionRules.Add(new Tuple<byte, int>(4, SpritemapCollisionRules.IndexOf(rule)));
 		}
 
 		#endregion

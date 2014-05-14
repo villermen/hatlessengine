@@ -13,6 +13,11 @@ namespace HatlessEngine
 			get { return new Point(X, Y); }
 			set { X = value.X; Y = value.Y; }
 		}
+        public float Rotation
+        {
+            get { return 0f; }
+            set { }
+        }
 
 		public Point[] Points
 		{
@@ -59,7 +64,7 @@ namespace HatlessEngine
 		/// </summary>
 		/// <param name="origin">Absolute origin.</param>
 		/// <param name="angle">Degrees to rotate.</param>
-		public void RotateOverOrigin(Point origin, float angle)
+		public Point RotateOverOrigin(Point origin, float angle)
 		{
 			//convert angle to radians
 			angle = (float)(Math.PI / 180 * angle);
@@ -68,7 +73,7 @@ namespace HatlessEngine
 			T = (float)(origin.X + (X - origin.X) * Math.Cos(angle) - (Y - origin.Y) * Math.Sin(angle));
 			Y = (float)(origin.Y + (X - origin.X) * Math.Sin(angle) + (Y - origin.Y) * Math.Cos(angle));
 			X = T;
-
+            return this;
 		}
 
 		public bool IntersectsWith(IShape shape)

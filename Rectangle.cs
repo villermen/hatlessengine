@@ -11,7 +11,7 @@ namespace HatlessEngine
 		public float Height;
 		public float OriginX;
 		public float OriginY;
-		public float Rotation;
+		private float _Rotation;
 
 		public Point Position
 		{
@@ -32,6 +32,12 @@ namespace HatlessEngine
 			get { return new Point(OriginX, OriginY); }
 			set { OriginX = value.X; OriginY = value.Y; }
 		}
+
+        public float Rotation
+        {
+            get { return _Rotation; }
+            set { _Rotation = value; }
+        }
 
 		public Point Point1
 		{
@@ -129,7 +135,7 @@ namespace HatlessEngine
 			Height = height;
 			OriginX = originX;
 			OriginY = originY;
-			Rotation = rotation;
+			_Rotation = rotation;
 		}
 		public Rectangle(Point position, Point size, Point origin, float rotation = 0)
 			: this(position.X, position.Y, size.X, size.Y, origin.X, origin.Y, rotation) { }

@@ -39,6 +39,11 @@ namespace HatlessEngine
 		{
 			return new OpenTK.Graphics.Color4(color.R, color.G, color.B, color.A);
 		}
+
+        public override string ToString()
+        {
+            return String.Format("({0}, {1}, {2}, {3})", R, G, B, A);
+        }
 	}
 }
 

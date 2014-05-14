@@ -6,6 +6,7 @@ namespace HatlessEngine
 	public interface IShape
 	{
 		Point Position { get; set; }
+        float Rotation { get; set; }
 
 		/// <summary>
 		/// Returns an array with all the points of the shape.
