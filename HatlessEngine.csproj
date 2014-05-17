@@ -61,7 +61,6 @@
     <Compile Include="Misc.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Sound.cs" />
-    <Compile Include="LogLevel.cs" />
     <Compile Include="SoundControl.cs" />
     <Compile Include="AudioControl.cs" />
     <Compile Include="WaveReader.cs" />

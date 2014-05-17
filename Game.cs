@@ -84,6 +84,7 @@ namespace HatlessEngine
 
 			Window.UpdateFrame += Step;
 			Window.RenderFrame += Draw;
+            Window.Closed += ExitCleanup;
 
 			//input
 			Window.Mouse.Move += Input.MouseMove;
@@ -160,6 +161,13 @@ namespace HatlessEngine
 		{
 			Window.Close();
 		}
+        /// <summary>
+        /// Will be fired after the window is closed (so after exiting).
+        /// </summary>
+        private static void ExitCleanup(object sender, EventArgs e)
+        {
+            Log.CloseAllStreams();
+        }
 
 		public static event EventHandler Started;
 	}
