@@ -37,6 +37,7 @@ namespace HatlessEngine
 
         //objects
 		public static List<LogicalObject> Objects = new List<LogicalObject>();
+        public static List<PhysicalObject> PhysicalObjects = new List<PhysicalObject>();
 		public static Dictionary<Type, List<PhysicalObject>> PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
 
 		internal static List<int> AudioSources = new List<int>();

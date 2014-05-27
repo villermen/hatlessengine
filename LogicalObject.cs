@@ -21,10 +21,8 @@ namespace HatlessEngine
 		/// <summary>
 		/// Runs directly after Step for each object.
 		/// </summary>
-        internal virtual void AfterStep() { }
 
         public virtual void Draw() { }
-        internal virtual void AfterDraw() { }
 
 		public void Destroy()
         {

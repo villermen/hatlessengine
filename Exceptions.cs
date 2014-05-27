@@ -21,4 +21,6 @@ namespace HatlessEngine
 
 		public InvalidObjectTypeException(string message) : base(message) { }
 	}
+
+    public class CannotUnseeException : Exception { }
 }

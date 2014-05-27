@@ -5,7 +5,15 @@ namespace HatlessEngine
 	[Serializable]
 	public struct Rectangle : IShape
 	{
+        /// <summary>
+        /// Horizontal coordinate of the rectangle's position.
+        /// Will not be the X of the topleft most corner if rotated or origin is not zero.
+        /// </summary>
 		public float X;
+        /// <summary>
+        /// Vertical coordinate of the rectangle's position.
+        /// Will not be the Y of the topleft most corner if rotated or origin is not zero.
+        /// </summary>
 		public float Y;
 		public float Width;
 		public float Height;

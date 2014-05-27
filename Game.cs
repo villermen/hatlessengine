@@ -5,6 +5,7 @@ using OpenTK.Input;
 using OpenTK.Audio;
 using OpenTK.Graphics;
 using OpenTK.Audio.OpenAL;
+using System.Collections.Generic;
 
 //OpenTK 1.1.1420.5205
 //NVorbis 0.7.4 for decoding ogg sound
@@ -118,10 +119,59 @@ namespace HatlessEngine
 			Resources.UpdateManagedSprites();
 
 			foreach (LogicalObject obj in Resources.Objects)
-			{
 				obj.Step();
-				obj.AfterStep();
-			}
+
+            //collision time!
+            float minX = float.PositiveInfinity;
+            float minY = float.PositiveInfinity;
+            float maxX = float.NegativeInfinity;
+            float maxY = float.NegativeInfinity;
+            foreach(PhysicalObject obj in Resources.PhysicalObjects)
+            {
+                obj.UpdateCoverableArea();
+
+                if (obj.CoverableArea.X < minX)
+                    minX = obj.CoverableArea.X;
+                if (obj.CoverableArea.X2 > maxX)
+                    maxX = obj.CoverableArea.X2;
+                if (obj.CoverableArea.Y < minY)
+                    minY = obj.CoverableArea.Y;
+                if (obj.CoverableArea.Y2 > maxY)
+                    maxY = obj.CoverableArea.Y2;
+
+                //set before the actual collision check phase
+                obj.SpeedLeft = 1f;
+            }
+            
+            QuadTree quadTree = new QuadTree(new Rectangle(minX, minY, maxX - minX, maxY - minY));
+
+            //maybe if too slow use SortedList and compare using the default comparer
+            List<PhysicalObject> processingObjects = new List<PhysicalObject>(Resources.PhysicalObjects);       
+         
+            //get all first collision speedfractions for all objects and sort the list
+            foreach (PhysicalObject obj in processingObjects)
+                obj.CalculateClosestCollision(quadTree.GetPossibleTargets(obj));
+
+            processingObjects.Sort(ComparePhysicalObjectsByFraction);
+
+            while (processingObjects.Count > 0)            
+            {
+                //get closest collision, process it/the pair of objects
+                PhysicalObject obj = processingObjects[0];
+                obj.PerformClosestCollision();
+
+                //remove/recalculate collisions for the object and all possibly influenced objects
+                if (obj.SpeedLeft == 0f)
+                    processingObjects.Remove(obj);
+                else
+                    obj.CalculateClosestCollision(quadTree.GetPossibleTargets(obj));
+                
+                foreach (PhysicalObject influencedObj in quadTree.GetPossibleTargets(obj))
+                    influencedObj.CalculateClosestCollision(quadTree.GetPossibleTargets(obj));
+
+                //re-sort so closest is up first again
+                processingObjects.Sort(ComparePhysicalObjectsByFraction);
+            }
 
 			Resources.SourceRemoval();
 			Resources.ObjectAdditionAndRemoval();
@@ -129,6 +179,16 @@ namespace HatlessEngine
 			//update input state (push buttonlist) for update before next step
 			Input.PushButtons();
 		}
+
+        private static int ComparePhysicalObjectsByFraction(PhysicalObject obj1, PhysicalObject obj2)
+        {
+            if (obj1.ClosestCollisionSpeedFraction < obj2.ClosestCollisionSpeedFraction)
+                return -1;
+            else if (obj1.ClosestCollisionSpeedFraction > obj2.ClosestCollisionSpeedFraction)
+                return 1;
+            else
+                return 0;
+        }
 
 		private static void Draw(object sender, FrameEventArgs e)
 		{
@@ -168,8 +228,141 @@ namespace HatlessEngine
         {
             Log.CloseAllStreams();
         }
-
+        
 		public static event EventHandler Started;
 	}
+
+    /// <summary>
+    /// Used by Game to quickly discover what objects one object could potentially interact with.
+    /// </summary>
+    internal class QuadTree
+    {
+        private static byte MaxObjects = 10;
+        private static byte MaxLevels = 5;
+
+        private int Level;
+        private Rectangle Bounds;
+        private float CenterX;
+        private float CenterY;
+        private QuadTree[] Children = new QuadTree[4];
+
+        private List<PhysicalObject> Objects = new List<PhysicalObject>();
+
+        /// <summary>
+        /// The mother of all quadtrees.
+        /// </summary>
+        public QuadTree(Rectangle bounds)
+            : this(0, bounds, Resources.PhysicalObjects) { }
+
+        /// <summary>
+        /// A teensy quadtree baby.
+        /// </summary>
+        private QuadTree(int level, Rectangle bounds, List<PhysicalObject> objects)
+        {
+            Level = level;
+            Bounds = bounds;
+            CenterX = Bounds.X + Bounds.Width / 2f;
+            CenterY = Bounds.Y + Bounds.Height / 2f;
+
+            if (objects.Count > MaxObjects)
+            {
+                //decide in what childtree an object would fit and add it there
+                List<PhysicalObject> ChildObjects0 = new List<PhysicalObject>();
+                List<PhysicalObject> ChildObjects1 = new List<PhysicalObject>();
+                List<PhysicalObject> ChildObjects2 = new List<PhysicalObject>();
+                List<PhysicalObject> ChildObjects3 = new List<PhysicalObject>();
+
+                foreach (PhysicalObject obj in objects)
+                {
+                    bool[] fits = FitObject(obj);
+                    if (!fits[4])
+                    {
+                        if (fits[0])
+                            ChildObjects0.Add(obj);
+                        else if (fits[1])
+                            ChildObjects1.Add(obj);
+                        else if (fits[2])
+                            ChildObjects2.Add(obj);
+                        else
+                            ChildObjects3.Add(obj);
+                    }
+                    else
+                        Objects.Add(obj);
+                }
+
+                //create subtrees and add everything that fits inside of em
+                Children[0] = new QuadTree(Level + 1, new Rectangle(Bounds.X, Bounds.Y, CenterX, CenterY), ChildObjects0);
+                Children[1] = new QuadTree(Level + 1, new Rectangle(CenterX, Bounds.Y, CenterX, CenterY), ChildObjects1);
+                Children[2] = new QuadTree(Level + 1, new Rectangle(Bounds.X, CenterY, CenterX, CenterY), ChildObjects2);
+                Children[3] = new QuadTree(Level + 1, new Rectangle(CenterX, CenterY, CenterX, CenterY), ChildObjects3);
+            }
+            else
+                Objects = objects;
+        }
+
+        public List<PhysicalObject> GetPossibleTargets(PhysicalObject obj)
+        {
+            List<PhysicalObject> targets = new List<PhysicalObject>(Objects);
+
+            //check in the child trees this object overlaps with
+            if (Children[0] != null)
+            {
+                bool[] fits = FitObject(obj);
+                if (fits[0])
+                    targets.AddRange(Children[0].GetPossibleTargets(obj));
+                if (fits[1])
+                    targets.AddRange(Children[1].GetPossibleTargets(obj));
+                if (fits[2])
+                    targets.AddRange(Children[2].GetPossibleTargets(obj));
+                if (fits[3])
+                    targets.AddRange(Children[3].GetPossibleTargets(obj));
+            }
+
+            return targets;
+        }
+
+        /// <summary>
+        /// Returns the childtrees the given object fits in.
+        /// 0-3, left-to-right, top-to-bottom.
+        /// 4 is true when the object doesn't fit in just one quadrant.
+        /// </summary>
+        private bool[] FitObject(PhysicalObject obj)
+        {
+            bool[] fits = new bool[5];
+            byte quadrants = 0;
+
+            if (obj.CoverableArea.X <= CenterX)
+            {
+                if (obj.CoverableArea.Y <= CenterY)
+                {
+                    fits[0] = true;
+                    quadrants++;
+                }
+                if (obj.CoverableArea.Y2 >= CenterY)
+                {
+                    fits[2] = true;
+                    quadrants++;
+                }
+            }
+            if (obj.CoverableArea.X2 >= CenterX)
+            {
+                if (obj.CoverableArea.Y <= CenterY)
+                {
+                    fits[1] = true;
+                    quadrants++;
+                }
+                if (obj.CoverableArea.Y2 >= CenterY)
+                {
+                    fits[3] = true;
+                    quadrants++;
+                }
+            }
+
+            if (quadrants > 1)
+                fits[4] = true;
+
+            return fits;
+        }
+    }
 }
 
