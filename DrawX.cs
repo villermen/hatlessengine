@@ -1,4 +1,5 @@
 ﻿using System;
+using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
 namespace HatlessEngine
@@ -9,6 +10,18 @@ namespace HatlessEngine
     /// </summary>
     public static class DrawX
     {
+        private static Color _BackgroundColor = Color.Gray;
+        public static Color BackgroundColor
+        {
+            get { return _BackgroundColor; }
+            set
+            {
+                if (Game.Running)
+                    GL.ClearColor((Color4)value);
+                _BackgroundColor = value;
+            }
+        }
+
 		/// <summary>
 		/// Will be used by functions that have the color argument left out.
 		/// </summary>
@@ -78,10 +91,23 @@ namespace HatlessEngine
 				GL.End();
 			}
 		}
-		public static void Rectangle(Rectangle rect) //at position, ignoring rectangle´s actual position
+		public static void Rectangle(Rectangle rect)
 		{
 			Rectangle(rect, DefaultColor);
 		}
+
+        public static void RectangleBounds(Rectangle rect, Color color, float width = 1f)
+        {
+            Point[] points = rect.Points;
+            Line(new Line(points[0], points[1]), color, width);
+            Line(new Line(points[1], points[2]), color, width);
+            Line(new Line(points[2], points[3]), color, width);
+            Line(new Line(points[3], points[0]), color, width);
+        }
+        public static void RectangleBounds(Rectangle rect, float width = 1f)
+        {
+            RectangleBounds(rect, DefaultColor, width);
+        }
 
 		public static void Text(string str, string fontId, Point pos, Color color)
 		{

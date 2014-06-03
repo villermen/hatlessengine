@@ -18,6 +18,7 @@ namespace HatlessEngine
 		internal static GameWindow Window;
 		internal static AudioContext Audio;
 		internal static Rectangle CurrentDrawArea;
+        internal static QuadTree QuadTree;
 
 		public static bool Running = false;
 
@@ -74,7 +75,7 @@ namespace HatlessEngine
 			GL.Enable(EnableCap.AlphaTest); //sorta hacky fix for glyph transparency
 			GL.AlphaFunc(AlphaFunction.Greater, 0f);
 
-			GL.ClearColor((Color4)Color.Gray);
+			GL.ClearColor((Color4)DrawX.BackgroundColor);
 
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthFunc(DepthFunction.Lequal);
@@ -143,14 +144,14 @@ namespace HatlessEngine
                 obj.SpeedLeft = 1f;
             }
             
-            QuadTree quadTree = new QuadTree(new Rectangle(minX, minY, maxX - minX, maxY - minY));
+            QuadTree = new QuadTree(new Rectangle(minX, minY, maxX - minX, maxY - minY));
 
             //maybe if too slow use SortedList and compare using the default comparer
             List<PhysicalObject> processingObjects = new List<PhysicalObject>(Resources.PhysicalObjects);       
          
             //get all first collision speedfractions for all objects and sort the list
             foreach (PhysicalObject obj in processingObjects)
-                obj.CalculateClosestCollision(quadTree.GetPossibleTargets(obj));
+                obj.CalculateClosestCollision(QuadTree.GetPossibleTargets(obj));
 
             processingObjects.Sort(ComparePhysicalObjectsByFraction);
 
@@ -164,10 +165,10 @@ namespace HatlessEngine
                 if (obj.SpeedLeft == 0f)
                     processingObjects.Remove(obj);
                 else
-                    obj.CalculateClosestCollision(quadTree.GetPossibleTargets(obj));
+                    obj.CalculateClosestCollision(QuadTree.GetPossibleTargets(obj));
                 
-                foreach (PhysicalObject influencedObj in quadTree.GetPossibleTargets(obj))
-                    influencedObj.CalculateClosestCollision(quadTree.GetPossibleTargets(obj));
+                foreach (PhysicalObject influencedObj in QuadTree.GetPossibleTargets(obj))
+                    influencedObj.CalculateClosestCollision(QuadTree.GetPossibleTargets(obj));
 
                 //re-sort so closest is up first again
                 processingObjects.Sort(ComparePhysicalObjectsByFraction);
@@ -206,7 +207,8 @@ namespace HatlessEngine
 				GL.Ortho(view.Area.X, view.Area.X2, view.Area.Y2, view.Area.Y, -1f, 1f);
 
 				GL.MatrixMode(MatrixMode.Modelview);
-				//drawing
+				//actual drawing
+                QuadTree.Draw();
 				foreach (LogicalObject obj in Resources.Objects)
 				{
 					//set view's coords for clipping?
@@ -233,14 +235,14 @@ namespace HatlessEngine
 	}
 
     /// <summary>
-    /// Used by Game to quickly discover what objects one object could potentially interact with.
+    /// Used by Game to quickly discover what objects an object could potentially interact with.
     /// </summary>
     internal class QuadTree
     {
         private static byte MaxObjects = 10;
-        private static byte MaxLevels = 5;
+        //private static byte MaxLevels = 5;
 
-        private int Level;
+        private byte Level;
         private Rectangle Bounds;
         private float CenterX;
         private float CenterY;
@@ -257,7 +259,7 @@ namespace HatlessEngine
         /// <summary>
         /// A teensy quadtree baby.
         /// </summary>
-        private QuadTree(int level, Rectangle bounds, List<PhysicalObject> objects)
+        private QuadTree(byte level, Rectangle bounds, List<PhysicalObject> objects)
         {
             Level = level;
             Bounds = bounds;
@@ -291,10 +293,10 @@ namespace HatlessEngine
                 }
 
                 //create subtrees and add everything that fits inside of em
-                Children[0] = new QuadTree(Level + 1, new Rectangle(Bounds.X, Bounds.Y, CenterX, CenterY), ChildObjects0);
-                Children[1] = new QuadTree(Level + 1, new Rectangle(CenterX, Bounds.Y, CenterX, CenterY), ChildObjects1);
-                Children[2] = new QuadTree(Level + 1, new Rectangle(Bounds.X, CenterY, CenterX, CenterY), ChildObjects2);
-                Children[3] = new QuadTree(Level + 1, new Rectangle(CenterX, CenterY, CenterX, CenterY), ChildObjects3);
+                Children[0] = new QuadTree((byte)(Level + 1), new Rectangle(Bounds.X, Bounds.Y, Bounds.Width / 2f, Bounds.Height / 2f), ChildObjects0);
+                Children[1] = new QuadTree((byte)(Level + 1), new Rectangle(CenterX, Bounds.Y, Bounds.Width / 2f, Bounds.Height / 2f), ChildObjects1);
+                Children[2] = new QuadTree((byte)(Level + 1), new Rectangle(Bounds.X, CenterY, Bounds.Width / 2f, Bounds.Height / 2f), ChildObjects2);
+                Children[3] = new QuadTree((byte)(Level + 1), new Rectangle(CenterX, CenterY, Bounds.Width / 2f, Bounds.Height / 2f), ChildObjects3);
             }
             else
                 Objects = objects;
@@ -362,6 +364,21 @@ namespace HatlessEngine
                 fits[4] = true;
 
             return fits;
+        }
+
+        /// <summary>
+        /// For debugging purposes.
+        /// </summary>
+        public void Draw()
+        {
+            DrawX.RectangleBounds(Bounds, new Color(Level));
+            if (Children[0] != null)
+            {
+                Children[0].Draw();
+                Children[1].Draw();
+                Children[2].Draw();
+                Children[3].Draw();
+            }
         }
     }
 }

@@ -54,9 +54,8 @@ namespace HatlessEngine
 			}
 			set 
 			{ 
-				float direction = Speed.Angle;
-				Speed.X = (float)Math.Cos((direction / 180 - 0.5) * Math.PI) * value;
-				Speed.Y = (float)Math.Sin((direction / 180 - 0.5) * Math.PI) * value;
+				Speed.X = (float)Math.Cos((_SpeedDirection / 180 - 0.5) * Math.PI) * value;
+				Speed.Y = (float)Math.Sin((_SpeedDirection / 180 - 0.5) * Math.PI) * value;
 			}
 		}
 
