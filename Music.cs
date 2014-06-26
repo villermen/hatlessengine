@@ -4,17 +4,17 @@ using OpenTK.Audio.OpenAL;
 namespace HatlessEngine
 {
 	public class Music :  AudioControl, IExternalResource
-    {
-        public string Filename { get; private set; }
-        public string Id { get; private set; }
-        public bool Loaded { get; private set; }
+	{
+		public string Filename { get; private set; }
+		public string ID { get; private set; }
+		public bool Loaded { get; private set; }
 
 		public bool Loop = false; //implement in audiocontrol
 
 		internal bool Streaming = false;
 
-		internal int[] BufferIds;
-		internal byte ActiveBufferId;
+		internal int[] BufferIDs;
+		internal byte ActiveBufferID;
 
 		internal bool JustStartedPlaying = false;
 
@@ -39,18 +39,18 @@ namespace HatlessEngine
 		public string PlayAfterMusic = "";
 
 		internal Music(string id, string filename)
-        {
-            Id = id;
-            Filename = filename;
-            Loaded = false;
-        }
+		{
+			ID = id;
+			Filename = filename;
+			Loaded = false;
+		}
 
-        /// <summary>
-        /// Start playing the music.
-        /// volume and balance will set the Volume and Balance before the music starts. (For convenience.)
-        /// </summary>
-        public void Play(float volume, float balance)
-        {
+		/// <summary>
+		/// Start playing the music.
+		/// volume and balance will set the Volume and Balance before the music starts. (For convenience.)
+		/// </summary>
+		public void Play(float volume, float balance)
+		{
 			if (!Loaded)
 			{
 				if (Resources.JustInTimeLoading)
@@ -61,82 +61,80 @@ namespace HatlessEngine
 
 			if (Streaming)
 			{
-                Stop(); //needs better solution
-                Streaming = false;
+				Stop(); //needs better solution
+				Streaming = false;
 			}
 
 			WaveReader.Rewind();
 
-			SourceId = Resources.GetSource();
+			SourceID = Resources.GetSource();
 
 			//fill first buffer to make sure the music can start playing after this point
 			int readSamples;
 			short[] waveData = WaveReader.ReadSamples(WaveReader.SampleRate / 2 * WaveReader.Channels, out readSamples);
-			AL.BufferData(BufferIds[0], WaveReader.ALFormat, waveData, readSamples * 2, WaveReader.SampleRate);
+			AL.BufferData(BufferIDs[0], WaveReader.ALFormat, waveData, readSamples * 2, WaveReader.SampleRate);
 
 			//attach
-			AL.SourceQueueBuffer(SourceId, BufferIds[0]);
+			AL.SourceQueueBuffer(SourceID, BufferIDs[0]);
 
-            //set volume and balance before playback
-            Volume = volume;
-            Balance = balance;
+			//set volume and balance before playback
+			Volume = volume;
+			Balance = balance;
 
-			AL.SourcePlay(SourceId);
+			AL.SourcePlay(SourceID);
 
 			JustStartedPlaying = true;
-            Streaming = true;
+			Streaming = true;
 
 			MusicStreamer.Launch();
 
-			Resources.AudioSources.Add(SourceId);
-			Resources.AudioControls.Add(SourceId, this);
-        }
-        public void Play(float volume)
-        {
-            Play(volume, _Balance);
-        }
-        public void Play()
-        {
-            Play(_Volume, _Balance);
-        }
+			Resources.AudioSources.Add(SourceID);
+			Resources.AudioControls.Add(SourceID, this);
+		}
+		public void Play(float volume)
+		{
+			Play(volume, _Balance);
+		}
+		public void Play()
+		{
+			Play(_Volume, _Balance);
+		}
 
-        public void Load()
-        {
-            if (!Loaded)
-            {
-                WaveReader = new WaveReader(Resources.GetStream(Filename));
-                if (WaveReader.MetaLoaded)
-                    Loaded = true;
-                else
-                    throw new System.IO.FileLoadException();
-                BufferIds = AL.GenBuffers(3);
-            }
-            else
-                throw new AlreadyLoadedException();
-        }
+		public void Load()
+		{
+			if (!Loaded)
+			{
+				WaveReader = new WaveReader(Resources.GetStream(Filename));
+				if (WaveReader.MetaLoaded)
+					Loaded = true;
+				else
+					throw new System.IO.FileLoadException();
+				BufferIDs = AL.GenBuffers(3);
+			}
+		}
 
-        /// <summary>
-        /// For rearming after AudioContext has been destroyed.
-        /// </summary>
-        internal void LoadForced()
-        {
-            Loaded = false;
-            Load();
+		/// <summary>
+		/// For rearming after AudioContext has been destroyed.
+		/// </summary>
+		internal void LoadForced()
+		{
+			Loaded = false;
+			Load();
 
-            //we don't have the old buffers and source so streaming won't do much. (Don't hog the streamer is what im getting at.)
-            Streaming = false;
-        }
+			//we don't have the old buffers and source so streaming won't do much. (Don't hog the streamer is what im getting at.)
+			Streaming = false;
+		}
 
-        public void Unload()
-        {
+		public void Unload()
+		{
 			if (Loaded)
 			{
 				WaveReader.Dispose();
 				WaveReader = null;
-				AL.DeleteBuffers(BufferIds);
+				AL.DeleteBuffers(BufferIDs);
 				Loaded = false;
 			}
-        }
+		}
 
 		/// <summary>
 		/// Occurs when this music is done playing and it's switching over the source to the given PlayAfterMusic.
@@ -149,12 +147,17 @@ namespace HatlessEngine
 				MusicChanged(this, new MusicChangedEventArgs(this, newMusic));
 		}
 
-        public override string ToString()
-        {
-            if (Loaded)
-                return "'" + Id + "' (" + Filename + ", " + WaveReader.Format.ToString() + ", " + WaveReader.ALFormat.ToString() + ", " + WaveReader.Duration.ToString() + ")";
-            else
-                return "'" + Id + "' (" + Filename + ", Unloaded)";            
-        }
-    }
+		public override string ToString()
+		{
+			if (Loaded)
+				return "'" + ID + "' (" + Filename + ", " + WaveReader.Format.ToString() + ", " + WaveReader.ALFormat.ToString() + ", " + WaveReader.Duration.ToString() + ")";
+			else
+				return "'" + ID + "' (" + Filename + ", Unloaded)";			
+		}
+
+		~Music()
+		{
+			Unload();
+		}
+	}
 }

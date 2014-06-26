@@ -1,385 +1,316 @@
 using System;
-using OpenTK;
-using OpenTK.Graphics.OpenGL;
-using OpenTK.Input;
-using OpenTK.Audio;
+using SDL2;
 using OpenTK.Graphics;
-using OpenTK.Audio.OpenAL;
+using OpenTK.Graphics.OpenGL;
+using OpenTK.Audio;
 using System.Collections.Generic;
-
-//OpenTK 1.1.1420.5205
-//NVorbis 0.7.4 for decoding ogg sound
-//QuickFont 1.0.2 modified and built upon OpenTK 1.1.1420.5205
+using MoreLinq;
+using System.Diagnostics;
+using System.Threading;
 
 namespace HatlessEngine
 {
 	public static class Game
 	{
-		internal static GameWindow Window;
-		internal static AudioContext Audio;
-		internal static Rectangle CurrentDrawArea;
-        internal static QuadTree QuadTree;
+		internal static IntPtr WindowHandle;
+		internal static IntPtr RendererHandle;
+		internal static AudioContext AudioContext;
+		internal static QuadTree QuadTree;
+
+		internal static bool RenderframeReady = false;
 
 		public static bool Running = false;
+
+		private static int TicksPerStep;
+		private static int TicksPerDraw;
 
 		/// <summary>
 		/// Gets or sets the desired amount of steps per second.
 		/// </summary>
-		public static float Speed
-		{ 
-			get { return (float)Window.TargetUpdateFrequency; }
-			set { Window.TargetUpdateFrequency = value; }
-		}
-		/// <summary>
-		/// Gets the actual amount of steps per second.
-		/// </summary>
 		public static float StepsPerSecond
 		{
-			get { return (float)Window.UpdateFrequency; }
+			get { return Stopwatch.Frequency / TicksPerStep; }
+			set 
+			{
+				if (value > 0)
+					TicksPerStep = (int)(Stopwatch.Frequency / value);
+				else
+					throw new ArgumentOutOfRangeException("StepsPerSecond", "StepsPerSecond must be positive and nonzero. (" + value.ToString() + " given)");
+			}
 		}
 
 		/// <summary>
-		/// Gets the actual amount of frames per second.
+		/// Gets or sets the limit of frames per second.
+		/// If 0 no limit is enforced.
 		/// </summary>
-		public static float FramesPerSecond
+		public static float FPSLimit
 		{
-			get { return (float)Window.RenderFrequency; }
+			get 
+			{
+				if (TicksPerDraw == 0)
+					return 0;
+				return Stopwatch.Frequency / TicksPerDraw; 
+			}
+			set
+			{
+				if (value > 0)
+					TicksPerDraw = (int)(Stopwatch.Frequency / value);
+				else if (value == 0)
+					TicksPerDraw = 0;
+				else
+					throw new ArgumentOutOfRangeException("FPSLimit", "FPSLimit must be positive or zero. (" + value.ToString() + " given)");
+			}
 		}
 
+		/// <summary>
+		/// Sets up a window and enters the gameloop. (Code after this call won't run until the game has exited.)
+		/// </summary>
 		public static void Run(float speed = 100f)
 		{
-			GameWindowFlags flags = GameWindowFlags.Default;
-			if (WindowSettings.InitialState == WindowState.Fullscreen)
-				flags = GameWindowFlags.Fullscreen;
-				
-			Window = new GameWindow(WindowSettings.InitialWidth, WindowSettings.InitialHeight, GraphicsMode.Default, WindowSettings.InitialTitle, flags);
-			Running = true;
+			SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
+			SDL_ttf.TTF_Init();
+			SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG);
+			SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_TIF);
+			SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_WEBP);
 
-			//apply remaining settings
-			if (WindowSettings.InitialPosition != Point.Zero)
-				WindowSettings.Position = WindowSettings.InitialPosition;
-			WindowSettings.DesiredFrameRate = WindowSettings.InitialDesiredFrameRate;
-			WindowSettings.VSync = WindowSettings.InitialVSync;
-			WindowSettings.CursorVisible = WindowSettings.InitialCursorVisible;
-			WindowSettings.Visible = WindowSettings.InitialVisible;
-			WindowSettings.State = WindowSettings.InitialState;
-			WindowSettings.Border = WindowSettings.InitialBorder;
-			WindowSettings.Icon = WindowSettings.InitialIcon;
+			SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_VSYNC, "1");
+			SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "2");
 
-			//OpenGL initialization
-			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+			WindowHandle = SDL.SDL_CreateWindow("HatlessEngine", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_INPUT_FOCUS);
+			RendererHandle = SDL.SDL_CreateRenderer(WindowHandle, -1, (uint)SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
+			SDL.SDL_SetRenderDrawBlendMode(RendererHandle, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);			
 
-			GL.Enable(EnableCap.Blend);
-			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-
-			GL.Enable(EnableCap.AlphaTest); //sorta hacky fix for glyph transparency
-			GL.AlphaFunc(AlphaFunction.Greater, 0f);
-
-			GL.ClearColor((Color4)DrawX.BackgroundColor);
-
-			GL.Enable(EnableCap.DepthTest);
-			GL.DepthFunc(DepthFunction.Lequal);
-			GL.ClearDepth(1d);
-			GL.DepthRange(1d, 0d); //does not seem right, but it works (see it as duct-tape)
-
-			Resources.AddView(new Rectangle(new Point(0f, 0f), WindowSettings.Size), new Rectangle(0f, 0f, 1f, 1f));
-
-			Window.UpdateFrame += Step;
-			Window.RenderFrame += Draw;
-            Window.Closed += ExitCleanup;
-
-			//input
-			Window.Mouse.Move += Input.MouseMove;
-			Window.Mouse.ButtonDown += Input.MouseButtonChange;
-			Window.Mouse.ButtonUp += Input.MouseButtonChange;
-			Window.Mouse.WheelChanged += Input.MouseWheelChange;
-			Window.Keyboard.KeyDown += Input.KeyboardKeyDown;
-			Window.Keyboard.KeyUp += Input.KeyboardKeyUp;
-
-			//clear all buttons when window loses focus
-			Window.FocusedChanged += delegate
-			{
-				if (!Window.Focused)
-					Input.CurrentState.Clear();
-			};
+			//add default view that spans the current window
+			Resources.AddView(new SimpleRectangle(Point.Zero, Window.GetSize()), new SimpleRectangle(Point.Zero , new Point(0.5f, 1f)));
+			Resources.AddView(new SimpleRectangle(Point.Zero, Window.GetSize()), new SimpleRectangle(new Point(0.5f, 0f), new Point(0.5f, 0.5f)));
 
 			//OpenAL initialization
-            AudioSettings.SetPlaybackDevice();
+			AudioSettings.SetPlaybackDevice();
+
+			StepsPerSecond = speed;
+
+			Running = true;			
 
 			if (Started != null)
 				Started(null, EventArgs.Empty);
 
-			Window.Run(speed);
+			Stopwatch stopWatch = new Stopwatch();
+			stopWatch.Start();
+
+			//do a step before the first draw can occur
+			Step();
+
+			long lastStepTick = 0;
+			long lastDrawTick = 0;
+
+			while (Running)
+			{
+				//perform step when needed
+				while (stopWatch.ElapsedTicks >= lastStepTick + TicksPerStep)
+				{
+					lastStepTick = lastStepTick + TicksPerStep;
+					Step();
+				}
+
+				//perform draw when ready for a new one
+				if (!RenderframeReady && Running && stopWatch.ElapsedTicks >= lastDrawTick + TicksPerDraw)
+				{
+					lastDrawTick = lastDrawTick + TicksPerDraw;
+					Draw();
+				}
+			}
 		}
 
-		private static void Step(object sender, FrameEventArgs e)
+		private static void Step()
 		{
-			Input.UpdateState();
+			//push input state
+			Input.PushState();
+
+			//process all SDL events
+			SDL.SDL_Event e;
+			while (SDL.SDL_PollEvent(out e) == 1)
+			{
+				switch (e.type)
+				{
+					//let Input handle input related events
+					case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+					case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
+					case SDL.SDL_EventType.SDL_MOUSEWHEEL:
+					case SDL.SDL_EventType.SDL_MOUSEMOTION:
+					case SDL.SDL_EventType.SDL_KEYDOWN:
+					case SDL.SDL_EventType.SDL_KEYUP:
+					case SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED:
+					case SDL.SDL_EventType.SDL_CONTROLLERDEVICEREMOVED:					
+					case SDL.SDL_EventType.SDL_CONTROLLERBUTTONDOWN:
+					case SDL.SDL_EventType.SDL_CONTROLLERBUTTONUP:
+					case SDL.SDL_EventType.SDL_CONTROLLERAXISMOTION:					
+						Input.InputEvent(e);
+						break;
+					
+					//global quit, not only the window's exit button
+					case SDL.SDL_EventType.SDL_QUIT:
+						Exit();
+						break;					
+				}
+			}
+
+			Input.ApplyButtonMaps();
 
 			//update the weakreferences if they still exist
 			Resources.UpdateManagedSprites();
 
 			foreach (LogicalObject obj in Resources.Objects)
-				obj.Step();
-
-            //collision time!
-            float minX = float.PositiveInfinity;
-            float minY = float.PositiveInfinity;
-            float maxX = float.NegativeInfinity;
-            float maxY = float.NegativeInfinity;
-            foreach(PhysicalObject obj in Resources.PhysicalObjects)
-            {
-                obj.UpdateCoverableArea();
-
-                if (obj.CoverableArea.X < minX)
-                    minX = obj.CoverableArea.X;
-                if (obj.CoverableArea.X2 > maxX)
-                    maxX = obj.CoverableArea.X2;
-                if (obj.CoverableArea.Y < minY)
-                    minY = obj.CoverableArea.Y;
-                if (obj.CoverableArea.Y2 > maxY)
-                    maxY = obj.CoverableArea.Y2;
-
-                //set before the actual collision check phase
-                obj.SpeedLeft = 1f;
-            }
-            
-            QuadTree = new QuadTree(new Rectangle(minX, minY, maxX - minX, maxY - minY));
-
-            //maybe if too slow use SortedList and compare using the default comparer
-            List<PhysicalObject> processingObjects = new List<PhysicalObject>(Resources.PhysicalObjects);       
-         
-            //get all first collision speedfractions for all objects and sort the list
-            foreach (PhysicalObject obj in processingObjects)
-                obj.CalculateClosestCollision(QuadTree.GetPossibleTargets(obj));
-
-            processingObjects.Sort(ComparePhysicalObjectsByFraction);
-
-            while (processingObjects.Count > 0)            
-            {
-                //get closest collision, process it/the pair of objects
-                PhysicalObject obj = processingObjects[0];
-                obj.PerformClosestCollision();
-
-                //remove/recalculate collisions for the object and all possibly influenced objects
-                if (obj.SpeedLeft == 0f)
-                    processingObjects.Remove(obj);
-                else
-                    obj.CalculateClosestCollision(QuadTree.GetPossibleTargets(obj));
-                
-                foreach (PhysicalObject influencedObj in QuadTree.GetPossibleTargets(obj))
-                    influencedObj.CalculateClosestCollision(QuadTree.GetPossibleTargets(obj));
-
-                //re-sort so closest is up first again
-                processingObjects.Sort(ComparePhysicalObjectsByFraction);
-            }
-
-			Resources.SourceRemoval();
-			Resources.ObjectAdditionAndRemoval();
-
-			//update input state (push buttonlist) for update before next step
-			Input.PushButtons();
-		}
-
-        private static int ComparePhysicalObjectsByFraction(PhysicalObject obj1, PhysicalObject obj2)
-        {
-            if (obj1.ClosestCollisionSpeedFraction < obj2.ClosestCollisionSpeedFraction)
-                return -1;
-            else if (obj1.ClosestCollisionSpeedFraction > obj2.ClosestCollisionSpeedFraction)
-                return 1;
-            else
-                return 0;
-        }
-
-		private static void Draw(object sender, FrameEventArgs e)
-		{
-			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-			//reset depth and color to be consistent over multiple frames
-			DrawX.Depth = 0;
-			DrawX.DefaultColor = Color.Black;
-
-			foreach(View view in Resources.Views)
 			{
-				CurrentDrawArea = view.Area;
-				GL.Viewport((int)view.Viewport.X * Window.Width, (int)view.Viewport.Y * Window.Height, (int)view.Viewport.X2 * Window.Width, (int)view.Viewport.Y2 * Window.Height);
-				GL.MatrixMode(MatrixMode.Projection);
-				GL.LoadIdentity();
-				GL.Ortho(view.Area.X, view.Area.X2, view.Area.Y2, view.Area.Y, -1f, 1f);
+				if (!Running)
+					return;
+				obj.Step();
+			}
 
-				GL.MatrixMode(MatrixMode.Modelview);
-				//actual drawing
-                QuadTree.Draw();
-				foreach (LogicalObject obj in Resources.Objects)
+			if (!Running) //find better way of doing this
+				return;
+
+			//collision time!
+			float minX = float.PositiveInfinity;
+			float minY = float.PositiveInfinity;
+			float maxX = float.NegativeInfinity;
+			float maxY = float.NegativeInfinity;
+			foreach(PhysicalObject obj in Resources.PhysicalObjects)
+			{
+				obj.UpdateCoverableArea();
+
+				if (obj.CoverableArea.Position1.X < minX)
+					minX = obj.CoverableArea.Position1.X;
+				if (obj.CoverableArea.Position2.X > maxX)
+					maxX = obj.CoverableArea.Position2.X;
+				if (obj.CoverableArea.Position1.Y < minY)
+					minY = obj.CoverableArea.Position1.Y;
+				if (obj.CoverableArea.Position2.Y > maxY)
+					maxY = obj.CoverableArea.Position2.Y;
+
+				//set before the actual collision check phase
+				obj.SpeedLeft = 1f;
+				obj.CollisionCandidates = null;
+			}
+			
+			//create and fill quadtree for this step
+			QuadTree = new QuadTree(new SimpleRectangle(minX, minY, maxX - minX, maxY - minY));
+
+			//maybe if too slow use SortedList and compare using the default comparer
+			List<PhysicalObject> processingObjects = new List<PhysicalObject>(Resources.PhysicalObjects);	   
+		 
+			//get all first collision speedfractions for all objects and sort the list
+			foreach (PhysicalObject obj in processingObjects)
+				obj.CalculateClosestCollision();
+
+			while (processingObjects.Count > 0)			
+			{
+				//get closest collision, process it/the pair of objects
+				PhysicalObject obj = processingObjects.MinBy(MovementForPhysicalObject);
+
+				obj.PerformClosestCollision();
+
+				//remove/recalculate collisions
+				if (obj.SpeedLeft == 0f)
+					processingObjects.Remove(obj);
+				else
+					obj.CalculateClosestCollision();
+
+				//recalculate for all possibly influenced objects (if needed)
+				if (obj.CollisionCandidates != null)
 				{
-					//set view's coords for clipping?
-					obj.Draw();
+					foreach (PhysicalObject influencedObj in obj.CollisionCandidates)
+						influencedObj.CalculateClosestCollision();
 				}
 			}
 
-			GL.Flush();
-			Window.Context.SwapBuffers();
+			Resources.SourceRemoval();
+			Resources.ObjectAdditionAndRemoval();
+			Resources.CleanupFontTextures();
+		}
+
+		private static float MovementForPhysicalObject(PhysicalObject obj)
+		{
+			return obj.ClosestCollisionSpeedFraction * obj.SpeedVelocity;
+		}
+
+		private static void Draw()
+		{
+			//collect drawjobs
+			foreach (LogicalObject obj in Resources.Objects)
+				obj.Draw();
+
+			DrawX.DrawJobs.Sort((j1, j2) => -j1.Depth.CompareTo(j2.Depth));
+
+			SDL.SDL_SetRenderDrawColor(RendererHandle, DrawX.BackgroundColor.R, DrawX.BackgroundColor.G, DrawX.BackgroundColor.B, DrawX.BackgroundColor.A);
+			SDL.SDL_RenderClear(RendererHandle);
+
+			Point windowSize = Window.GetSize();
+
+			foreach (View view in Resources.Views)
+			{
+				Point scale = view.Viewport.Size * windowSize / view.Area.Size;
+				SDL.SDL_RenderSetScale(RendererHandle, scale.X, scale.Y);
+
+				//viewport is affected by scale for whatever reason, correct it
+				SDL.SDL_Rect viewport = (SDL.SDL_Rect)new SimpleRectangle(view.Viewport.Position1 * windowSize / scale, view.Viewport.Size * windowSize / scale);
+				SDL.SDL_RenderSetViewport(RendererHandle, ref viewport);
+
+				//get all jobs that will draw inside this view
+				foreach (IDrawJob job in DrawX.GetDrawJobsByArea(view.Area))
+				{
+					if (job.Type == DrawJobType.Texture) //draw a texture
+					{
+						TextureDrawJob textureDrawJob = (TextureDrawJob)job;
+						SDL.SDL_Rect sourceRect = (SDL.SDL_Rect)textureDrawJob.SourceRect;
+						SDL.SDL_Rect destRect = (SDL.SDL_Rect)new SimpleRectangle(textureDrawJob.DestRect.Position - view.Area.Position1 - textureDrawJob.DestRect.Origin, textureDrawJob.DestRect.Size);
+
+						if (textureDrawJob.DestRect.Rotation == 0f)
+						{
+							SDL.SDL_RenderCopy(RendererHandle, textureDrawJob.Texture, ref sourceRect, ref destRect);
+						}
+						else
+						{
+							SDL.SDL_Point origin = (SDL.SDL_Point)textureDrawJob.DestRect.Origin;
+							SDL.SDL_RenderCopyEx(RendererHandle, textureDrawJob.Texture, ref sourceRect, ref destRect, textureDrawJob.DestRect.Rotation, ref origin, SDL.SDL_RendererFlip.SDL_FLIP_NONE);
+						}
+					}
+					else //draw line(s)
+					{
+						LineDrawJob lineDrawJob = (LineDrawJob)job;
+
+						//transform all points according to view and cast em
+						SDL.SDL_Point[] sdlPoints = Array.ConvertAll<Point, SDL.SDL_Point>(lineDrawJob.Points, p => (SDL.SDL_Point)(p - view.Area.Position1));
+
+						SDL.SDL_SetRenderDrawColor(RendererHandle, lineDrawJob.Color.R, lineDrawJob.Color.G, lineDrawJob.Color.B, lineDrawJob.Color.A);
+						SDL.SDL_RenderDrawLines(RendererHandle, sdlPoints, lineDrawJob.PointCount);
+					}
+				}
+			}
+
+			DrawX.DrawJobs.Clear();
+
+			//threadpool should take care of actually swapping the frames (RenderPresent may wait for things like Fraps or VSync)
+			RenderframeReady = true;
+			Stopwatch v = Stopwatch.StartNew();
+			ThreadPool.QueueUserWorkItem(new WaitCallback(PresentRender), v);
 		}
 		public static void Exit()
 		{
-			Window.Close();
-		}
-        /// <summary>
-        /// Will be fired after the window is closed (so after exiting).
-        /// </summary>
-        private static void ExitCleanup(object sender, EventArgs e)
-        {
-            Log.CloseAllStreams();
-        }
-        
+			Running = false;
+			SDL.SDL_DestroyWindow(WindowHandle);
+			Resources.UnloadAllExternalResources();
+			Log.CloseAllStreams();
+			SDL.SDL_Quit();
+			SDL_ttf.TTF_Quit();
+			SDL_image.IMG_Quit();
+		}		
+		
 		public static event EventHandler Started;
+
+		private static void PresentRender(object o)
+		{
+			SDL.SDL_RenderPresent(RendererHandle);
+			RenderframeReady = false;
+		}
 	}
-
-    /// <summary>
-    /// Used by Game to quickly discover what objects an object could potentially interact with.
-    /// </summary>
-    internal class QuadTree
-    {
-        private static byte MaxObjects = 10;
-        //private static byte MaxLevels = 5;
-
-        private byte Level;
-        private Rectangle Bounds;
-        private float CenterX;
-        private float CenterY;
-        private QuadTree[] Children = new QuadTree[4];
-
-        private List<PhysicalObject> Objects = new List<PhysicalObject>();
-
-        /// <summary>
-        /// The mother of all quadtrees.
-        /// </summary>
-        public QuadTree(Rectangle bounds)
-            : this(0, bounds, Resources.PhysicalObjects) { }
-
-        /// <summary>
-        /// A teensy quadtree baby.
-        /// </summary>
-        private QuadTree(byte level, Rectangle bounds, List<PhysicalObject> objects)
-        {
-            Level = level;
-            Bounds = bounds;
-            CenterX = Bounds.X + Bounds.Width / 2f;
-            CenterY = Bounds.Y + Bounds.Height / 2f;
-
-            if (objects.Count > MaxObjects)
-            {
-                //decide in what childtree an object would fit and add it there
-                List<PhysicalObject> ChildObjects0 = new List<PhysicalObject>();
-                List<PhysicalObject> ChildObjects1 = new List<PhysicalObject>();
-                List<PhysicalObject> ChildObjects2 = new List<PhysicalObject>();
-                List<PhysicalObject> ChildObjects3 = new List<PhysicalObject>();
-
-                foreach (PhysicalObject obj in objects)
-                {
-                    bool[] fits = FitObject(obj);
-                    if (!fits[4])
-                    {
-                        if (fits[0])
-                            ChildObjects0.Add(obj);
-                        else if (fits[1])
-                            ChildObjects1.Add(obj);
-                        else if (fits[2])
-                            ChildObjects2.Add(obj);
-                        else
-                            ChildObjects3.Add(obj);
-                    }
-                    else
-                        Objects.Add(obj);
-                }
-
-                //create subtrees and add everything that fits inside of em
-                Children[0] = new QuadTree((byte)(Level + 1), new Rectangle(Bounds.X, Bounds.Y, Bounds.Width / 2f, Bounds.Height / 2f), ChildObjects0);
-                Children[1] = new QuadTree((byte)(Level + 1), new Rectangle(CenterX, Bounds.Y, Bounds.Width / 2f, Bounds.Height / 2f), ChildObjects1);
-                Children[2] = new QuadTree((byte)(Level + 1), new Rectangle(Bounds.X, CenterY, Bounds.Width / 2f, Bounds.Height / 2f), ChildObjects2);
-                Children[3] = new QuadTree((byte)(Level + 1), new Rectangle(CenterX, CenterY, Bounds.Width / 2f, Bounds.Height / 2f), ChildObjects3);
-            }
-            else
-                Objects = objects;
-        }
-
-        public List<PhysicalObject> GetPossibleTargets(PhysicalObject obj)
-        {
-            List<PhysicalObject> targets = new List<PhysicalObject>(Objects);
-
-            //check in the child trees this object overlaps with
-            if (Children[0] != null)
-            {
-                bool[] fits = FitObject(obj);
-                if (fits[0])
-                    targets.AddRange(Children[0].GetPossibleTargets(obj));
-                if (fits[1])
-                    targets.AddRange(Children[1].GetPossibleTargets(obj));
-                if (fits[2])
-                    targets.AddRange(Children[2].GetPossibleTargets(obj));
-                if (fits[3])
-                    targets.AddRange(Children[3].GetPossibleTargets(obj));
-            }
-
-            return targets;
-        }
-
-        /// <summary>
-        /// Returns the childtrees the given object fits in.
-        /// 0-3, left-to-right, top-to-bottom.
-        /// 4 is true when the object doesn't fit in just one quadrant.
-        /// </summary>
-        private bool[] FitObject(PhysicalObject obj)
-        {
-            bool[] fits = new bool[5];
-            byte quadrants = 0;
-
-            if (obj.CoverableArea.X <= CenterX)
-            {
-                if (obj.CoverableArea.Y <= CenterY)
-                {
-                    fits[0] = true;
-                    quadrants++;
-                }
-                if (obj.CoverableArea.Y2 >= CenterY)
-                {
-                    fits[2] = true;
-                    quadrants++;
-                }
-            }
-            if (obj.CoverableArea.X2 >= CenterX)
-            {
-                if (obj.CoverableArea.Y <= CenterY)
-                {
-                    fits[1] = true;
-                    quadrants++;
-                }
-                if (obj.CoverableArea.Y2 >= CenterY)
-                {
-                    fits[3] = true;
-                    quadrants++;
-                }
-            }
-
-            if (quadrants > 1)
-                fits[4] = true;
-
-            return fits;
-        }
-
-        /// <summary>
-        /// For debugging purposes.
-        /// </summary>
-        public void Draw()
-        {
-            DrawX.RectangleBounds(Bounds, new Color(Level));
-            if (Children[0] != null)
-            {
-                Children[0].Draw();
-                Children[1].Draw();
-                Children[2].Draw();
-                Children[3].Draw();
-            }
-        }
-    }
 }
-

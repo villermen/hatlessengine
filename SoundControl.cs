@@ -11,7 +11,7 @@ namespace HatlessEngine
 		internal SoundControl(int source)
 		{
 			Resources.AudioControls.Add(source, this);
-			SourceId = source;
+			SourceID = source;
 		}
 	}
 }

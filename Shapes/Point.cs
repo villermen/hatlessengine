@@ -10,32 +10,13 @@ namespace HatlessEngine
 
 		public Point Position
 		{
-			get { return new Point(X, Y); }
-			set { X = value.X; Y = value.Y; }
+			get { return this; }
+			set { this = value; }
 		}
-        public float Rotation
-        {
-            get { return 0f; }
-            set { }
-        }
-
-		public Point[] Points
+		public float Rotation
 		{
-			get { return new Point[] { this }; }
-		}
-
-		public Point[] PerpAxes
-		{
-			get { return new Point[0]; }
-		}
-
-		public float Length
-		{
-			get { return DistanceTo(Point.Zero); }
-		}
-		public float Angle
-		{
-			get { return Point.Zero.AngleTo(this); }
+			get { return 0f; }
+			set { }
 		}
 
 		public Point(float x, float y)
@@ -44,19 +25,35 @@ namespace HatlessEngine
 			Y = y;
 		}
 
-		public float DistanceTo(Point point)
+		public Point[] GetPoints()
+		{
+			return new Point[] { this };
+		}
+
+		public Point[] GetPerpAxes()
+		{
+			return new Point[0];
+		}
+
+		public float GetDistanceTo(Point point)
 		{
 			return (float)Math.Sqrt(Math.Pow(point.X - X, 2) + Math.Pow(point.Y - Y, 2));  
 		}
+		public float GetDistanceFromOrigin()
+		{
+			return GetDistanceTo(Point.Zero);
+		}
 
-		public float AngleTo(Point point)
+		public float GetAngleTo(Point point)
 		{
 			float result = (float)(Math.Atan2(point.X - X, Y - point.Y) / Math.PI * 180);
 			if (result < 0)
-			{
 				result += 360;
-			}
 			return result;
+		}
+		public float GetAngleFromOrigin()
+		{
+			return Point.Zero.GetAngleTo(this);
 		}
 
 		/// <summary>
@@ -73,12 +70,20 @@ namespace HatlessEngine
 			T = (float)(origin.X + (X - origin.X) * Math.Cos(angle) - (Y - origin.Y) * Math.Sin(angle));
 			Y = (float)(origin.Y + (X - origin.X) * Math.Sin(angle) + (Y - origin.Y) * Math.Cos(angle));
 			X = T;
-            return this;
+			return this;
 		}
 
 		public bool IntersectsWith(IShape shape)
 		{
 			return Misc.ShapesIntersecting(this, shape);
+		}
+
+		/// <summary>
+		/// Will return a SimpleRectangle with this point as it's Position and no Size.
+		/// </summary>
+		public SimpleRectangle GetEnclosingSimpleRectangle()
+		{
+			return new SimpleRectangle(this, Point.Zero);
 		}
 
 		public static bool operator ==(Point point1, Point point2)
@@ -120,18 +125,19 @@ namespace HatlessEngine
 			return new Point(point1.X / point2.X, point1.Y / point2.Y);
 		}
 
-		public static explicit operator System.Drawing.PointF(Point point)
-		{
-			return new System.Drawing.PointF(point.X, point.Y);
-		}
 		public static implicit operator Point(float f)
 		{
 			return new Point(f, f);
 		}
 
+		public static explicit operator SDL2.SDL.SDL_Point(Point point)
+		{
+			return new SDL2.SDL.SDL_Point { x = (int)point.X, y = (int)point.Y };
+		}
+
 		public override string ToString()
 		{
-			return "(" + X.ToString() + ", " + Y.ToString() + ")";
+			return String.Format("({0}, {1})", X, Y);
 		}
 
 		/// <summary>
@@ -140,4 +146,3 @@ namespace HatlessEngine
 		public static readonly Point Zero = new Point(0f, 0f);
 	}
 }
-

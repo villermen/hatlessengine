@@ -31,7 +31,7 @@ namespace HatlessEngine
 		private BinaryReader Reader;
 		private VorbisReader VorbisReader;
 
-        public TimeSpan Duration;
+		public TimeSpan Duration;
 
 		public WaveReader(Stream stream)
 		{
@@ -87,7 +87,7 @@ namespace HatlessEngine
 									ALFormat = ALFormat.Stereo16;
 							}
 
-                            Duration = new TimeSpan(0, 0, 0, 0, (int)Math.Ceiling((float)WaveTotalSamples / (float)SampleRate / (float)Channels * 1000f));
+							Duration = new TimeSpan(0, 0, 0, 0, (int)Math.Ceiling((float)WaveTotalSamples / (float)SampleRate / (float)Channels * 1000f));
 
 							MetaLoaded = true;
 						}
@@ -109,7 +109,7 @@ namespace HatlessEngine
 				else
 					ALFormat = ALFormat.Stereo16;
 
-                Duration = VorbisReader.TotalTime;
+				Duration = VorbisReader.TotalTime;
 
 				MetaLoaded = true;
 			}
@@ -191,4 +191,3 @@ namespace HatlessEngine
 		}
 	}
 }
-

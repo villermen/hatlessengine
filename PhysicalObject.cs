@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace HatlessEngine
 {
-    /// <summary>
-    /// Object that has physical properties.
-    /// Has built-in support for a sprite, boundbox, collision detection etc.
-    /// </summary>
-    public class PhysicalObject : LogicalObject
-    {
+	/// <summary>
+	/// Object that has physical properties.
+	/// Has built-in support for a sprite, boundbox, collision detection etc.
+	/// </summary>
+	public class PhysicalObject : LogicalObject
+	{
 		/// <summary>
 		/// Change the position of Bounds easily.
 		/// </summary>
@@ -33,11 +33,11 @@ namespace HatlessEngine
 				//get the right direction when it cannot be calculated from the vector components
 				if (Speed.X == 0f && Speed.Y == 0f)
 					return _SpeedDirection;
-				return Speed.Angle;
+				return Speed.GetAngleFromOrigin();
 			}
 			set 
 			{ 
-				float length = Speed.Length;
+				float length = Speed.GetDistanceFromOrigin();
 				Speed.X = (float)Math.Cos((value / 180 - 0.5) * Math.PI) * length;
 				Speed.Y = (float)Math.Sin((value / 180 - 0.5) * Math.PI) * length;
 				_SpeedDirection = value;
@@ -50,7 +50,7 @@ namespace HatlessEngine
 		{
 			get 
 			{
-				return Speed.Length;
+				return Speed.GetDistanceFromOrigin();
 			}
 			set 
 			{ 
@@ -66,233 +66,268 @@ namespace HatlessEngine
 		public IShape Bounds = Point.Zero;
 
 		public PhysicalObject(Point position) : base()
-        {
-            //set position
-            Position = position;
+		{
+			//set position
+			Position = position;
 
-            Resources.PhysicalObjects.Add(this);
+			Resources.PhysicalObjects.Add(this);
 
 			//add object to PhysicalObjectsByType along with each basetype up till PhysicalObject
-            for (Type currentType = this.GetType(); currentType != typeof(LogicalObject); currentType = currentType.BaseType)
-            {
-                if (!Resources.PhysicalObjectsByType.ContainsKey(currentType))
-                    Resources.PhysicalObjectsByType[currentType] = new List<PhysicalObject>();
+			for (Type currentType = this.GetType(); currentType != typeof(LogicalObject); currentType = currentType.BaseType)
+			{
+				if (!Resources.PhysicalObjectsByType.ContainsKey(currentType))
+					Resources.PhysicalObjectsByType[currentType] = new List<PhysicalObject>();
 				Resources.PhysicalObjectsByType[currentType].Add(this);
 			}
-        }
+		}
 
 		#region Collision handling
 
-        public List<CollisionRule> CollisionRules = new List<CollisionRule>();
+		public List<CollisionRule> CollisionRules = new List<CollisionRule>();
 
-        /// <summary>
-        /// The area the bounds can maximally cover given the speed's velocity.
-        /// Per-step, updated after step and before collision handling.
-        /// </summary>
-        internal Rectangle CoverableArea;
+		/// <summary>
+		/// The area the bounds can maximally cover given the speed's velocity.
+		/// Per-step, updated after step and before collision handling.
+		/// </summary>
+		internal SimpleRectangle CoverableArea;
 
-        /// <summary>
-        /// For checking whether collisions are still in range, and whether they should still have to be checked.
-        /// </summary>
-        internal float SpeedLeft;
+		/// <summary>
+		/// All the PhysicalObjects this one could possibly collide with this step.
+		/// </summary>
+		internal List<PhysicalObject> CollisionCandidates;
 
-        internal float ClosestCollisionSpeedFraction = float.PositiveInfinity;
-        private Point ClosestCollisionTouchingAxis;
-        private CollisionRule ClosestCollisionRule;
-        private object ClosestCollisionMethodArg;
-        private CollisionRule IgnoreRule = null;
+		/// <summary>
+		/// For checking whether collisions are still in range, and whether they should still have to be checked.
+		/// </summary>
+		internal float SpeedLeft;
 
-        /// <summary>
-        /// Sets the area the bounds could maximally cover with the current SpeedVelocity (any direction).
-        /// Rectangle on x and y axes.
-        /// </summary>
-        internal void UpdateCoverableArea()
-        {
-            float minX = float.PositiveInfinity;
-            float minY = float.PositiveInfinity;
-            float maxX = float.NegativeInfinity;
-            float maxY = float.NegativeInfinity;
-            float speed = SpeedVelocity;
+		internal float ClosestCollisionSpeedFraction = float.PositiveInfinity;
+		private Point ClosestCollisionTouchingAxis;
+		private CollisionRule ClosestCollisionRule;
+		private object ClosestCollisionMethodArg;
+		private Point ClosestCollisionRelativeSpeed;
 
-            foreach (Point pnt in Bounds.Points)
-            {
-                if (pnt.X < minX)
-                    minX = pnt.X;
-                if (pnt.X > maxX)
-                    maxX = pnt.X;
-                if (pnt.Y < minY)
-                    minY = pnt.Y;
-                if (pnt.Y > maxY)
-                    maxY = pnt.Y;
-            }
+		/// <summary>
+		/// Sets the area the bounds could maximally cover with the current SpeedVelocity (any direction).
+		/// Rectangle on x and y axes.
+		/// </summary>
+		internal void UpdateCoverableArea()
+		{
+			float minX = float.PositiveInfinity;
+			float minY = float.PositiveInfinity;
+			float maxX = float.NegativeInfinity;
+			float maxY = float.NegativeInfinity;
+			float speed = SpeedVelocity;
 
-            CoverableArea = new Rectangle(minX - speed, minY - speed, maxX - minX + speed, maxY - minY + speed);
-        }
+			foreach (Point pnt in Bounds.GetPoints())
+			{
+				if (pnt.X < minX)
+					minX = pnt.X;
+				if (pnt.X > maxX)
+					maxX = pnt.X;
+				if (pnt.Y < minY)
+					minY = pnt.Y;
+				if (pnt.Y > maxY)
+					maxY = pnt.Y;
+			}
 
-        /// <summary>
-        /// Calculates the first occuring collision event on this object's track using the collisionrules.
-        /// </summary>
-        internal float CalculateClosestCollision(List<PhysicalObject> possibleObjectTargets)
-        {
-            if (SpeedLeft == 0f)
-                return -1f;
+			CoverableArea = new SimpleRectangle(minX - speed, minY - speed, maxX - minX + speed, maxY - minY + speed);
+		}
 
-            float touchingSpeedLeftFraction = float.PositiveInfinity;
-            Point intersectionAxis;
+		/// <summary>
+		/// Calculates the first occuring collision event on this object's track using the collisionrules.
+		/// </summary>
+		internal void CalculateClosestCollision()
+		{
+			//no (more) collision checking this step please
+			if (SpeedLeft == 0f || Speed == Point.Zero)
+			{
+				SpeedLeft = 0f;
+				return;
+			}
 
-            ClosestCollisionSpeedFraction = float.PositiveInfinity;
+			ClosestCollisionSpeedFraction = float.PositiveInfinity;
+			float touchingSpeedLeftFraction = float.PositiveInfinity;
+			Point intersectionAxis;
 
-            //decide which target of the rules is closest and within collision range
-            foreach(CollisionRule cRule in CollisionRules)
-            {
-                //skip if this rule doesn't have to be checked anyway
-                if (cRule == IgnoreRule || !cRule.Active)
-                    continue;
+			//decide which target of the rules is closest and within collision range
+			foreach(CollisionRule cRule in CollisionRules)
+			{
+				//skip if this rule doesn't have to be checked anyway
+				if (!cRule.Active)
+					continue;
 
-                switch (cRule.Type)
-                {
-                    case CollisionRuleType.Shape:
-                        if (Misc.ShapesIntersectingBySpeed(Bounds, (IShape)cRule.Target, Speed * SpeedLeft, out touchingSpeedLeftFraction, out intersectionAxis) && touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
-                        {
-                            ClosestCollisionSpeedFraction = touchingSpeedLeftFraction * SpeedLeft;
-                            ClosestCollisionTouchingAxis = intersectionAxis;
-                            ClosestCollisionRule = cRule;
-                            ClosestCollisionMethodArg = cRule.Target;
-                        }
-                        break;
+				//get collision candidates once if they will be checked (JIT)
+				if (CollisionCandidates == null && (cRule.Type == CollisionRuleType.Object || cRule.Type == CollisionRuleType.ObjectType || cRule.Type == CollisionRuleType.Objectmap))
+					CollisionCandidates = Game.QuadTree.GetCollisionCandidates(this);
 
-                    case CollisionRuleType.Object:
-                        if (possibleObjectTargets.Contains((PhysicalObject)cRule.Target) && Misc.ShapesIntersectingBySpeed(Bounds, ((PhysicalObject)cRule.Target).Bounds, (Speed - ((PhysicalObject)cRule.Target).Speed) * SpeedLeft, out touchingSpeedLeftFraction, out intersectionAxis) && touchingSpeedLeftFraction <= ((PhysicalObject)cRule.Target).SpeedLeft && touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
-                        {
-                            ClosestCollisionSpeedFraction = touchingSpeedLeftFraction * SpeedLeft;
-                            ClosestCollisionTouchingAxis = intersectionAxis;
-                            ClosestCollisionRule = cRule;
-                            ClosestCollisionMethodArg = cRule.Target;
-                        }
-                        break;
+				switch (cRule.Type)
+				{
+					case CollisionRuleType.Shape:
+						if (Misc.ShapesIntersectingBySpeed(Bounds, (IShape)cRule.Target, Speed * SpeedLeft, out touchingSpeedLeftFraction, out intersectionAxis) && touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
+						{
+							ClosestCollisionSpeedFraction = touchingSpeedLeftFraction * SpeedLeft;
+							ClosestCollisionTouchingAxis = intersectionAxis;
+							ClosestCollisionRule = cRule;
+							ClosestCollisionMethodArg = cRule.Target;
+							ClosestCollisionRelativeSpeed = Speed;
+						}
+						break;
 
-                    case CollisionRuleType.ObjectType:
-                        foreach (PhysicalObject obj in Resources.PhysicalObjectsByType[(Type)cRule.Target])
-                        {
-                            if (possibleObjectTargets.Contains(obj) && Misc.ShapesIntersectingBySpeed(Bounds, obj.Bounds, (Speed - obj.Speed) * SpeedLeft, out touchingSpeedLeftFraction, out intersectionAxis) && touchingSpeedLeftFraction <= obj.SpeedLeft && touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
-                            {
-                                ClosestCollisionSpeedFraction = touchingSpeedLeftFraction * SpeedLeft;
-                                ClosestCollisionTouchingAxis = intersectionAxis;
-                                ClosestCollisionRule = cRule;
-                                ClosestCollisionMethodArg = obj;
-                            }  
-                        }
-                        break;
+					case CollisionRuleType.Object:
+						if (CollisionCandidates.Contains((PhysicalObject)cRule.Target) && Misc.ShapesIntersectingBySpeed(Bounds, ((PhysicalObject)cRule.Target).Bounds, (Speed - ((PhysicalObject)cRule.Target).Speed) * SpeedLeft, out touchingSpeedLeftFraction, out intersectionAxis) && touchingSpeedLeftFraction <= ((PhysicalObject)cRule.Target).SpeedLeft && touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
+						{
+							ClosestCollisionSpeedFraction = touchingSpeedLeftFraction * SpeedLeft;
+							ClosestCollisionTouchingAxis = intersectionAxis;
+							ClosestCollisionRule = cRule;
+							ClosestCollisionMethodArg = cRule.Target;
+							ClosestCollisionRelativeSpeed = Speed - ((PhysicalObject)cRule.Target).Speed;
+						}
+						break;
 
-                    case CollisionRuleType.Objectmap:
-                        foreach (PhysicalObject obj in ((Objectmap)cRule.Target).ActivePhysicalObjects)
-                        {
-                            //whether the object should be checked if the filter is enabled
-                            if (!cRule.FilterEnabled || cRule.ObjectmapFilter.Contains(obj.GetType())) //account for inheritance
-                            {
-                                if (possibleObjectTargets.Contains(obj) && Misc.ShapesIntersectingBySpeed(Bounds, obj.Bounds, (Speed - obj.Speed) * SpeedLeft, out touchingSpeedLeftFraction, out intersectionAxis) && touchingSpeedLeftFraction <= obj.SpeedLeft && touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
-                                {
-                                    ClosestCollisionSpeedFraction = touchingSpeedLeftFraction * SpeedLeft;
-                                    ClosestCollisionTouchingAxis = intersectionAxis;
-                                    ClosestCollisionRule = cRule;
-                                    ClosestCollisionMethodArg = obj;
-                                }
-                            }
-                        }
-                        break;
+					case CollisionRuleType.ObjectType:
+						foreach (PhysicalObject obj in Resources.PhysicalObjectsByType[(Type)cRule.Target])
+						{
+							if (CollisionCandidates.Contains(obj) && Misc.ShapesIntersectingBySpeed(Bounds, obj.Bounds, (Speed - obj.Speed) * SpeedLeft, out touchingSpeedLeftFraction, out intersectionAxis) && touchingSpeedLeftFraction <= obj.SpeedLeft && touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
+							{
+								ClosestCollisionSpeedFraction = touchingSpeedLeftFraction * SpeedLeft;
+								ClosestCollisionTouchingAxis = intersectionAxis;
+								ClosestCollisionRule = cRule;
+								ClosestCollisionMethodArg = obj;
+								ClosestCollisionRelativeSpeed = Speed - obj.Speed;
+							}  
+						}
+						break;
 
-                    case CollisionRuleType.ManagedSprite:
-                        if (Misc.ShapesIntersectingBySpeed(Bounds, ((ManagedSprite)cRule.Target).SpriteRectangle, Speed, out touchingSpeedLeftFraction, out intersectionAxis) && touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
-                        {
-                            ClosestCollisionSpeedFraction = touchingSpeedLeftFraction;
-                            ClosestCollisionTouchingAxis = intersectionAxis;
-                            ClosestCollisionRule = cRule;
-                            ClosestCollisionMethodArg = cRule.Target;
-                        }
-                        break;
+					case CollisionRuleType.Objectmap:
+						foreach (PhysicalObject obj in ((Objectmap)cRule.Target).ActivePhysicalObjects)
+						{
+							//whether the object should be checked if the filter is enabled
+							if (!cRule.FilterEnabled || cRule.ObjectmapFilter.Contains(obj.GetType())) //account for inheritance
+							{
+								if (CollisionCandidates.Contains(obj) && Misc.ShapesIntersectingBySpeed(Bounds, obj.Bounds, (Speed - obj.Speed) * SpeedLeft, out touchingSpeedLeftFraction, out intersectionAxis) && touchingSpeedLeftFraction <= obj.SpeedLeft && touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
+								{
+									ClosestCollisionSpeedFraction = touchingSpeedLeftFraction * SpeedLeft;
+									ClosestCollisionTouchingAxis = intersectionAxis;
+									ClosestCollisionRule = cRule;
+									ClosestCollisionMethodArg = obj;
+									ClosestCollisionRelativeSpeed = Speed - obj.Speed;
+								}
+							}
+						}
+						break;
 
-                    case CollisionRuleType.Spritemap:
-                        foreach (ManagedSprite sprite in ((Spritemap)cRule.Target).ManagedSprites)
-                        {
-                            //whether the object should be checked if the filter is enabled
-                            if (!cRule.FilterEnabled || cRule.SpritemapFilter.Contains(sprite.TargetSprite)) //account for inheritance
-                            {
-                                Rectangle sRect = sprite.SpriteRectangle; //copy over so it the relative position won't be changed
-                                sRect.Position += cRule.SpritemapOffset;
+					case CollisionRuleType.ManagedSprite:
+						if (Misc.ShapesIntersectingBySpeed(Bounds, ((ManagedSprite)cRule.Target).SpriteRectangle, Speed, out touchingSpeedLeftFraction, out intersectionAxis) && touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
+						{
+							ClosestCollisionSpeedFraction = touchingSpeedLeftFraction;
+							ClosestCollisionTouchingAxis = intersectionAxis;
+							ClosestCollisionRule = cRule;
+							ClosestCollisionMethodArg = cRule.Target;
+							ClosestCollisionRelativeSpeed = Speed;
+						}
+						break;
 
-                                if (Misc.ShapesIntersectingBySpeed(Bounds, sRect, Speed, out touchingSpeedLeftFraction, out intersectionAxis) && touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
-                                {
-                                    ClosestCollisionSpeedFraction = touchingSpeedLeftFraction;
-                                    ClosestCollisionTouchingAxis = intersectionAxis;
-                                    ClosestCollisionRule = cRule;
-                                    ClosestCollisionMethodArg = sprite;
-                                }
-                            }
-                        }
-                        break;
-                }
-            }
+					case CollisionRuleType.Spritemap:
+						foreach (ManagedSprite sprite in ((Spritemap)cRule.Target).ManagedSprites)
+						{
+							//whether the object should be checked if the filter is enabled
+							if (!cRule.FilterEnabled || cRule.SpritemapFilter.Contains(sprite.TargetSprite)) //account for inheritance
+							{
+								Rectangle sRect = sprite.SpriteRectangle; //copy over so it the relative position won't be changed
+								sRect.Position += cRule.SpritemapOffset;
 
-            return ClosestCollisionSpeedFraction;
-        }
+								if (Misc.ShapesIntersectingBySpeed(Bounds, sRect, Speed, out touchingSpeedLeftFraction, out intersectionAxis) && touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
+								{
+									ClosestCollisionSpeedFraction = touchingSpeedLeftFraction;
+									ClosestCollisionTouchingAxis = intersectionAxis;
+									ClosestCollisionRule = cRule;
+									ClosestCollisionMethodArg = sprite;
+									ClosestCollisionRelativeSpeed = Speed;
+								}
+							}
+						}
+						break;
+				}
+			}
+		}
 
-        /// <summary>
-        /// Performs the calculated collision.
-        /// pair determines whether both object's involved (if they are) will be performed, second one will be called with false to prevent loopdeeloops.
-        /// </summary>
-        internal void PerformClosestCollision(bool pair = true)
-        {
-            //if no collision was found move the remaining distance
+		/// <summary>
+		/// Performs the calculated collision.
+		/// pair determines whether both object's involved (if they are) will be performed, second one will be called with false to prevent loopdeeloops.
+		/// </summary>
+		internal void PerformClosestCollision(bool pair = true)
+		{
+			//what do you mean perform?
+			if (SpeedLeft == 0f)
+				return;
+
+			//if no collision was found move the remaining distance
 			if (ClosestCollisionSpeedFraction == float.PositiveInfinity)
-            {
-                Position += Speed * SpeedLeft;
-                SpeedLeft = 0f;
-                return;
-            }
+			{
+				Position += Speed * SpeedLeft;
+				SpeedLeft = 0f;
+				return;
+			}
 
-            //move to touching point
+			//move to touching point
 			Position += Speed * ClosestCollisionSpeedFraction;
 			SpeedLeft -= ClosestCollisionSpeedFraction;
 
-            switch (ClosestCollisionRule.Action)
-            {
-                case CollisionAction.Block:
-                    Speed = 0f;
+			switch (ClosestCollisionRule.Action)
+			{
+				case CollisionAction.Block:
+					Speed = 0f;
 					SpeedLeft = 0f;
-                    break;
+					break;
 
-                case CollisionAction.Bounce:
-                    SpeedDirection = Speed.Angle - 180 + (ClosestCollisionTouchingAxis.Angle - Speed.Angle) * 2;
-                    break;
-            }
+				case CollisionAction.Bounce:
+					float speedAngle = Speed.GetAngleFromOrigin();
+					float angleDifference = ClosestCollisionRelativeSpeed.GetAngleFromOrigin() - speedAngle;
+					
+					if (angleDifference < -180f)
+						angleDifference += 360f;
+					if (angleDifference > 180f)
+						angleDifference -= 360f;
 
-            ClosestCollisionRule.CallMethod(ClosestCollisionMethodArg);
+					//use other objects speed instead of relativespeed... durr no way but what values??!??
 
-            if (ClosestCollisionRule.DeactivateAfterCollision)
-                ClosestCollisionRule.Active = false;
+					//prevent from bouncing if it is getting hit from around the side or back (another object just hit this one)
+					if (angleDifference > -70f && angleDifference < 70f)
+						SpeedDirection = speedAngle - 180f + (ClosestCollisionTouchingAxis.GetAngleFromOrigin() - speedAngle) * 2;
+					break;
+			}
 
-            IgnoreRule = ClosestCollisionRule;
+			ClosestCollisionRule.CallMethod(ClosestCollisionMethodArg);
 
-            //make sure the other object (if any) performs his collision too before it gets rechecked
-            if (pair && (ClosestCollisionRule.Type == CollisionRuleType.Object || ClosestCollisionRule.Type == CollisionRuleType.Objectmap || ClosestCollisionRule.Type == CollisionRuleType.ObjectType))
-            {
-                ((PhysicalObject)ClosestCollisionMethodArg).PerformClosestCollision(false);
-            }
-        }
+			if (ClosestCollisionRule.DeactivateAfterCollision)
+				ClosestCollisionRule.Active = false;
+
+			//IgnoreRule = ClosestCollisionRule;
+
+			//make sure the other object (if any) performs his collision too before it gets rechecked
+			if (pair && (ClosestCollisionRule.Type == CollisionRuleType.Object || ClosestCollisionRule.Type == CollisionRuleType.Objectmap || ClosestCollisionRule.Type == CollisionRuleType.ObjectType))
+			{
+				//do not blindly assume the other object will collide against this one as well
+				PhysicalObject otherObj = ((PhysicalObject)ClosestCollisionMethodArg);
+				if (otherObj.ClosestCollisionRule != null && (otherObj.ClosestCollisionRule.Type == CollisionRuleType.Object || otherObj.ClosestCollisionRule.Type == CollisionRuleType.Objectmap || otherObj.ClosestCollisionRule.Type == CollisionRuleType.ObjectType) && otherObj.ClosestCollisionMethodArg == this)
+					otherObj.PerformClosestCollision(false);
+			}
+		}
 
 		#endregion
 
-        public new void Destroy()
-        {
-            base.Destroy();
+		public new void Destroy()
+		{
+			base.Destroy();
 
-            Resources.PhysicalObjects.Remove(this);
+			Resources.PhysicalObjects.Remove(this);
 
-            //remove from physicalobjectsbytype
-            for (Type currentType = this.GetType(); currentType != typeof(LogicalObject); currentType = currentType.BaseType)
-            {
-                Resources.PhysicalObjectsByType[currentType].Remove(this);
-            }
-        }
-    }
+			//remove from physicalobjectsbytype
+			for (Type currentType = this.GetType(); currentType != typeof(LogicalObject); currentType = currentType.BaseType)
+			{
+				Resources.PhysicalObjectsByType[currentType].Remove(this);
+			}
+		}
+	}
 }

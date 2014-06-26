@@ -1,188 +1,338 @@
 ﻿using System;
 using System.Collections.Generic;
-using OpenTK.Input;
+using SDL2;
 
 namespace HatlessEngine
 {
-    public static class Input
-    {
-        private static List<Button> PreviousState = new List<Button>();
-		internal static List<Button> CurrentState = new List<Button>();
+	public static class Input
+	{
+		private static List<Button> PreviousState = new List<Button>();
+		private static List<Button> CurrentState = new List<Button>();
 
-        /// <summary>
-        /// Buttons mapped to other buttons.
-        /// Use this to manage maps.
-        /// E.g. Add(Button.KB_UP, Button.KB_W) will simulate W and UP pressed when you press UP afterwards.
-        /// </summary>
-        public static Dictionary<Button, Button> ButtonMaps = new Dictionary<Button, Button>();
-        
-		#region Gamepad
-        /// <summary>
-        /// Value between 0 and 1 that the axes of a gamepad must have before triggering the Axes and the corresponding XBOX#_ buttons
-        /// </summary>
-		public static float GamePadDeadZone = 0.2f;
-
-		public static bool[] ConnectedGamepads = new bool[8];
-		private static JoystickCapabilities[] GamepadCapabilities = new JoystickCapabilities[8];
-		private static List<Button>[] GamepadPreviousStates = new List<Button>[8];
-		private static List<Button>[] GamepadCurrentStates = new List<Button>[8];
-		private static float[,] GamepadAxisValues = new float[8,16];
-		#endregion Gamepad
+		/// <summary>
+		/// Buttons mapped to other buttons.
+		/// Use this to manage maps.
+		/// E.g. Add(Button.KeyboardUp, Button.KeyboardW) will simulate KeyboardW pressed when you press keyboardUp afterwards.
+		/// KeyboardW will still function correctly unless KeyboardUp is released when it is held down.
+		/// </summary>
+		public static Dictionary<Button, Button> ButtonMaps = new Dictionary<Button, Button>();
 
 		public static Point MousePosition { get; private set; }
 
-		//to trigger multiple mousewheel presses
-		private static int MouseWheelDelta = 0;
+		/// <summary>
+		/// Value between 0 and 1 that the axes of a gamepad must have before triggering the corresponding Gamepad_ buttons.
+		/// </summary>
+		public static float GamepadDeadZone = 0.2f;
+
+		private static IntPtr[] GamepadHandles = new IntPtr[8];
+		private static Dictionary<int, int> GamepadInstanceIDs = new Dictionary<int, int>();
+
+		private static List<Button>[] GamepadPreviousStates = new List<Button>[8];
+		private static List<Button>[] GamepadCurrentStates = new List<Button>[8];
+		private static float[,] GamepadAxisValues = new float[8,6];
 
 		/// <summary>
 		/// Returns true when the specified button is pressed (one step only).
 		/// Searches the gamepadstate if gamepadNumber is given. (1-8)
 		/// </summary>
-		public static bool IsPressed(Button button, byte gamepadNumber = 0)
-        {
-			if (gamepadNumber == 0)
+		public static bool IsPressed(Button button, int gamepad = 0)
+		{
+			if (gamepad == 0)
 				return (CurrentState.Contains(button) && !PreviousState.Contains(button));
 			else
-				return (GamepadCurrentStates[gamepadNumber - 1].Contains(button) && !GamepadPreviousStates[gamepadNumber - 1].Contains(button));
-        }
+				return (GamepadCurrentStates[gamepad - 1].Contains(button) && !GamepadPreviousStates[gamepad - 1].Contains(button));
+		}
 		/// <summary>
 		/// Returns true when the specified button is being held down (every step).
 		/// Searches the gamepadstate if gamepadNumber is given. (1-8)
 		/// </summary>
-		public static bool IsDown(Button button, byte gamepadNumber = 0)
-        {
-			if (gamepadNumber == 0)
+		public static bool IsDown(Button button, int gamepad = 0)
+		{
+			if (gamepad == 0)
 				return CurrentState.Contains(button);
 			else
-				return (GamepadCurrentStates[gamepadNumber - 1].Contains(button));
-        }
+				return (GamepadCurrentStates[gamepad - 1].Contains(button));
+		}
 		/// <summary>
 		/// Returns true when the specified button is released (one step only).
 		/// Searches the gamepadstate if gamepadNumber is given. (1-8)
 		/// </summary>
-		public static bool IsReleased(Button button, byte gamepadNumber = 0)
-        {
-			if (gamepadNumber == 0)
-            	return (!CurrentState.Contains(button) && PreviousState.Contains(button));
+		public static bool IsReleased(Button button, int gamepad = 0)
+		{
+			if (gamepad == 0)
+				return (!CurrentState.Contains(button) && PreviousState.Contains(button));
 			else
-				return (!GamepadCurrentStates[gamepadNumber - 1].Contains(button) && GamepadPreviousStates[gamepadNumber - 1].Contains(button));
-        }
-
-		/// <summary>
-		/// Get raw gamepad-axis value. This does not respect the deadzone, for that use the axis buttons.
-		/// </summary>
-		public static float GetGamePadAxis(byte gamepad, byte axis)
-		{
-			return GamepadAxisValues[gamepad - 1, axis - 1];
+				return (!GamepadCurrentStates[gamepad - 1].Contains(button) && GamepadPreviousStates[gamepad - 1].Contains(button));
 		}
 
 		/// <summary>
-		/// Adds currently pressed buttons to the state.
+		/// Returns whether the given gamepad is connected
 		/// </summary>
-		internal static void UpdateState()
+		public static bool IsGamepadConnected(int gamepad)
 		{
-			//gamepads
-			for(byte i = 0; i < 8; i++)
-			{
-				JoystickState jState = Joystick.GetState(i);
-				if (jState.IsConnected)
-				{
-					//it just connected, check capabilities
-					if (!ConnectedGamepads[i])
-					{
-						//initialize currentstate
-						GamepadCurrentStates[i] = new List<Button>();
+			if (gamepad < 1 || gamepad > 8)
+				throw new ArgumentOutOfRangeException("gamepad", "gamepad can be 1-8");
 
-						GamepadCapabilities[i] = Joystick.GetCapabilities(i);
-						ConnectedGamepads[i] = true;
-					}
-
-					//push and clear state
-					GamepadPreviousStates[i] = new List<Button>(GamepadCurrentStates[i]);
-					GamepadCurrentStates[i].Clear();
-
-					//update gamepad buttons
-					for(byte j = 0; j < GamepadCapabilities[i].ButtonCount; j++)
-					{
-						if (jState.IsButtonDown((JoystickButton)j))
-						{
-							GamepadCurrentStates[i].Add((Button)(3001 + j));
-						}
-					}
-
-					//update axes
-					for(byte j = 0; j < GamepadCapabilities[i].AxisCount; j++)
-					{
-						float axisValue = jState.GetAxis((JoystickAxis)j);
-
-						GamepadAxisValues[i,j] = axisValue;
-
-						if (axisValue >= GamePadDeadZone)
-							GamepadCurrentStates[i].Add((Button)(3033 + j * 2));
-						if (axisValue <= -GamePadDeadZone)
-							GamepadCurrentStates[i].Add((Button)(3034 + j * 2));
-					}
-
-					//update hats
-					for(byte j = 0; j < GamepadCapabilities[i].HatCount; j++)
-					{
-						int hatValue = (int)jState.GetHat((JoystickHat)j).Position;
-						if (hatValue != 0)
-						{
-							if (hatValue == 1 || hatValue == 2 || hatValue == 8)
-								GamepadCurrentStates[i].Add((Button)3065 + j * 4);
-							if (hatValue == 2 || hatValue == 3 || hatValue == 4)
-								GamepadCurrentStates[i].Add((Button)3065 + j * 4 + 1);
-							if (hatValue == 4 || hatValue == 5 || hatValue == 6)
-								GamepadCurrentStates[i].Add((Button)3065 + j * 4 + 2);
-							if (hatValue == 6 || hatValue == 7 || hatValue == 8)
-								GamepadCurrentStates[i].Add((Button)3065 + j * 4 + 3);
-						}
-					}
-				}
-				else
-				{
-					if (ConnectedGamepads[i]) //just removed -> remove pressed buttons from list
-					{
-						GamepadPreviousStates[i].Clear();
-						GamepadCurrentStates[i].Clear();
-						
-						ConnectedGamepads[i] = false;
-					}
-				}
-			}
-
-			//buttonmaps
-			foreach (KeyValuePair<Button, Button> buttonPair in ButtonMaps)
-			{
-				if (CurrentState.Contains(buttonPair.Key) && !CurrentState.Contains(buttonPair.Value))
-					CurrentState.Add(buttonPair.Value);
-			}
+			return GamepadHandles[gamepad] != IntPtr.Zero;
 		}
 
 		/// <summary>
-		/// Updates buttonstate at end of step to be in time for GameWindow keyboard and mouse events.
-		/// Yes it's a reference.
+		/// Gets the coordinate-system corrected stick position for a gamepad.
 		/// </summary>
-		internal static void PushButtons()
+		public static Point GetGamepadStickPosition(int gamepad, bool leftStick = true, bool respectDeadZone = true)
 		{
-			//remove mousewheel from both states to prevent Released from occuring (pressed has already been detected)
-			CurrentState.Remove(Button.MousewheelUp);
-			CurrentState.Remove(Button.MousewheelDown);
+			if (gamepad < 1 || gamepad > 8)
+				throw new ArgumentOutOfRangeException("gamepad", "gamepad can be 1-8");
 
-			//actually push the state
+			Point position = Point.Zero;
+			byte startAxis = 0;
+			if (!leftStick)
+				startAxis = 2;
+
+			if (!respectDeadZone || GamepadAxisValues[gamepad - 1, startAxis] <= -GamepadDeadZone || GamepadAxisValues[gamepad - 1, startAxis] >= GamepadDeadZone)
+				position.X = GamepadAxisValues[gamepad - 1, startAxis];
+			if (!respectDeadZone || GamepadAxisValues[gamepad - 1, startAxis + 1] <= -GamepadDeadZone || GamepadAxisValues[gamepad - 1, startAxis + 1] >= GamepadDeadZone)
+				position.Y = -GamepadAxisValues[gamepad - 1, startAxis + 1];
+
+			return position;
+		}
+
+		/// <summary>
+		/// Gets a trigger's value for a gamepad.
+		/// </summary>
+		public static float GetTriggerValue(int gamepad, bool leftTrigger = true, bool respectDeadZone = true)
+		{
+			if (gamepad < 1 || gamepad > 8)
+				throw new ArgumentOutOfRangeException("gamepad", "gamepad can be 1-8");
+
+			byte axis = 4;
+			if (!leftTrigger)
+				axis = 5;
+
+			if (!respectDeadZone || GamepadAxisValues[gamepad - 1, axis] >= GamepadDeadZone)
+				return GamepadAxisValues[gamepad - 1, axis];
+			else
+				return 0f;
+		}
+
+		/// <summary>
+		/// Sets PreviousState to the CurrentState and removes any buttons that are only supposed to be pressed.
+		/// </summary>
+		internal static void PushState()
+		{
+			//remove buttons that can technically only be pressed from both states
+			CurrentState.RemoveAll(b => 
+			(
+				b == Button.MousewheelUp || 
+				b == Button.MousewheelDown || 
+				b == Button.MousewheelLeft || 
+				b == Button.MousewheelRight
+			));
+
 			PreviousState = new List<Button>(CurrentState);
 
-			//mousewheel buttons should be pressed multiple steps even though it might've actually been performed in one (delta > 1 or < -1)
-			if (MouseWheelDelta >= 1)
+			for (int i = 0; i < 8; i++)
 			{
-				CurrentState.Add(Button.MousewheelUp);
-				MouseWheelDelta--;
+				if (GamepadHandles[i] != IntPtr.Zero)
+				{
+					GamepadPreviousStates[i] = new List<Button>(GamepadCurrentStates[i]);
+				}
 			}
-			if (MouseWheelDelta <= -1)
+		}
+
+		internal static void InputEvent(SDL.SDL_Event e)
+		{
+			switch (e.type)
 			{
-				CurrentState.Add(Button.MousewheelDown);
-				MouseWheelDelta++;
+				case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+					CurrentState.Add((Button)(1000 + e.button.button));
+					break;
+
+				case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
+					CurrentState.Remove((Button)(1000 + e.button.button));
+					break;
+
+				case SDL.SDL_EventType.SDL_MOUSEWHEEL:
+					if (e.wheel.y > 0)
+						CurrentState.Add(Button.MousewheelUp);
+					if (e.wheel.y < 0)
+						CurrentState.Add(Button.MousewheelDown);
+					if (e.wheel.x < 0)
+						CurrentState.Add(Button.MousewheelLeft);
+					if (e.wheel.x > 0)
+						CurrentState.Add(Button.MousewheelRight);
+					break;
+
+				case SDL.SDL_EventType.SDL_MOUSEMOTION:
+					//resolve absolute to fractional position on window
+					Point positionOnWindow = new Point(e.motion.x, e.motion.y) / Window.GetSize();
+					//decide on which viewport the mouse currently is
+					foreach (View view in Resources.Views)
+					{
+						if (view.Viewport.IntersectsWith(positionOnWindow))
+						{
+							//calculate position on virtual gamespace
+							MousePosition = view.Area.Position1 + (positionOnWindow - view.Viewport.Position1) / view.Viewport.Size * view.Area.Size;
+							break;
+						}
+					}
+					break;		
+
+				case SDL.SDL_EventType.SDL_KEYDOWN:
+					if (e.key.repeat == 0) //we dont do repeats (yet?)
+					{
+						int SDLKeyDown = (int)e.key.keysym.sym;
+						if (SDLKeyDown < 65536)
+							CurrentState.Add((Button)(2000 + SDLKeyDown));
+						else
+							CurrentState.Add((Button)(SDLKeyDown - 1073739381));
+					}
+					break;
+
+				case SDL.SDL_EventType.SDL_KEYUP:
+					int SDLKeyUp = (int)e.key.keysym.sym;
+					if (SDLKeyUp < 65536)
+						CurrentState.Remove((Button)(2000 + SDLKeyUp));
+					else
+						CurrentState.Remove((Button)(SDLKeyUp - 1073739381));
+					break;
+
+				case SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED:
+					//get first free gamepad slot
+					int newGamepadID = -1;
+					while (GamepadHandles[++newGamepadID] != IntPtr.Zero);
+					GamepadHandles[newGamepadID] = SDL.SDL_GameControllerOpen(e.cdevice.which);
+					GamepadInstanceIDs.Add(SDL.SDL_JoystickInstanceID(SDL.SDL_GameControllerGetJoystick(GamepadHandles[newGamepadID])), newGamepadID);
+					GamepadCurrentStates[newGamepadID] = new List<Button>();
+					GamepadPreviousStates[newGamepadID] = new List<Button>();
+					break;
+
+				case SDL.SDL_EventType.SDL_CONTROLLERDEVICEREMOVED:
+					int gamepadID = GamepadInstanceIDs[e.cdevice.which];
+					SDL.SDL_GameControllerClose(GamepadHandles[gamepadID]);
+					GamepadHandles[gamepadID] = IntPtr.Zero;
+					GamepadInstanceIDs.Remove(e.cdevice.which);
+					break;
+
+				case SDL.SDL_EventType.SDL_CONTROLLERBUTTONDOWN:
+					GamepadCurrentStates[GamepadInstanceIDs[e.cbutton.which]].Add((Button)(3000 + e.cbutton.button));
+					break;
+
+				case SDL.SDL_EventType.SDL_CONTROLLERBUTTONUP:
+					GamepadCurrentStates[GamepadInstanceIDs[e.cbutton.which]].Remove((Button)(3000 + e.cbutton.button));
+					break;
+
+				case SDL.SDL_EventType.SDL_CONTROLLERAXISMOTION:
+					int gamepad = GamepadInstanceIDs[e.caxis.which];
+					byte axis = e.caxis.axis;
+					float value = (float)e.caxis.axisValue / short.MaxValue;
+
+					GamepadAxisValues[gamepad, axis] = value;
+
+					if (value <= -GamepadDeadZone)
+					{
+						//add button if it's not added yet
+						Button button = (Button)(3015 + e.caxis.axis * 2);
+						if (!GamepadCurrentStates[gamepad].Contains(button))
+							GamepadCurrentStates[gamepad].Add(button);
+					}
+					else if (value >= GamepadDeadZone)
+					{
+						Button button = (Button)(3016 + e.caxis.axis * 2);
+						if (!GamepadCurrentStates[gamepad].Contains(button))
+							GamepadCurrentStates[gamepad].Add(button);
+						
+					}
+					else
+					{
+						//remove both buttons for this axis if it's not in range
+						if (e.caxis.axis < 4)
+							GamepadCurrentStates[gamepad].Remove((Button)(3015 + e.caxis.axis * 2));
+						GamepadCurrentStates[gamepad].Remove((Button)(3016 + e.caxis.axis * 2));
+					}			   
+					break;
+			}
+		}
+
+		/// <summary>
+		/// Adds all mappings to the currentstates.
+		/// </summary>
+		internal static void ApplyButtonMaps()
+		{
+			foreach (KeyValuePair<Button, Button> buttonPair in ButtonMaps)
+			{
+				if ((int)buttonPair.Key < 3000 && (int)buttonPair.Value < 3000) //non-gamepad to non-gamepad map: add value when currentstate has key and no value
+				{
+					if (IsPressed(buttonPair.Key))
+					{
+						if (!CurrentState.Contains(buttonPair.Value))
+							CurrentState.Add(buttonPair.Value);
+					}
+					else if (IsReleased(buttonPair.Key))
+						CurrentState.Remove(buttonPair.Value);
+				}
+				else if ((int)buttonPair.Key >= 3000 && (int)buttonPair.Value >= 3000) //gamepad to gamepad map: add value for all connected gamepads that have key and no value
+				{
+					for (int i = 0; i < 8; i++)
+					{
+						if (GamepadHandles[i] != IntPtr.Zero)
+						{
+							if (IsPressed(buttonPair.Key, i + 1))
+							{
+								if (!GamepadCurrentStates[i].Contains(buttonPair.Value))
+									GamepadCurrentStates[i].Add(buttonPair.Value);
+							}
+							else if (IsReleased(buttonPair.Key, i + 1))
+								GamepadCurrentStates[i].Remove(buttonPair.Value);
+						}
+					}
+				}
+				else if ((int)buttonPair.Key < 3000 && (int)buttonPair.Value >= 3000) //non-gamepad to gamepad map: add value to all connected gamepads that don't have value
+				{
+					if (IsPressed(buttonPair.Key))
+					{
+						for (int i = 0; i < 8; i++)
+						{
+							if (GamepadHandles[i] != IntPtr.Zero)
+							{
+								if (!GamepadCurrentStates[i].Contains(buttonPair.Value))
+									GamepadCurrentStates[i].Add(buttonPair.Value);
+							}
+						}
+					}
+					else if (IsReleased(buttonPair.Key))
+					{
+						for (int i = 0; i < 8; i++)
+						{
+							if (GamepadHandles[i] != IntPtr.Zero)
+							{
+								GamepadCurrentStates[i].Remove(buttonPair.Value);
+							}
+						}
+					}
+				}
+				else //gamepad to non-gamepad map: add value to currentstate when any of the connected gamepads has key pressed
+				{
+					for (int i = 0; i < 8; i++)
+					{
+						if (GamepadHandles[i] != IntPtr.Zero)
+						{
+							if (IsPressed(buttonPair.Key, i + 1))
+							{
+								if (!CurrentState.Contains(buttonPair.Value))
+								{
+									CurrentState.Add(buttonPair.Value);
+									break;
+								}
+							}
+							else if (IsReleased(buttonPair.Key, i + 1))
+							{
+								CurrentState.Remove(buttonPair.Value);
+								break;
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -190,7 +340,7 @@ namespace HatlessEngine
 		/// Returns a string with all pressed buttons, for debugging purposes only.
 		/// </summary>
 		public static string GetStateInformation()
-        {
+		{
 			//mouse/keyboard info
 			string str = "Pressed buttons: ";
 			if (CurrentState.Count > 0)
@@ -206,7 +356,7 @@ namespace HatlessEngine
 			//gamepad info
 			for(byte i = 0; i < 8; i++)
 			{
-				if (ConnectedGamepads[i])
+				if (GamepadHandles[i] != IntPtr.Zero)
 				{
 					str += "\nGamepad " + (i + 1).ToString() + ": ";
 
@@ -222,68 +372,7 @@ namespace HatlessEngine
 				}
 			}
 				
-            return str;
+			return str;
 		}
-
-		//OpenTK event integration
-		internal static void MouseMove(object sender, MouseMoveEventArgs e)
-		{
-			Point positionOnWindow = new Point((float)e.X / Game.Window.Width, (float)e.Y / Game.Window.Height);
-
-			//decide on which viewport the mouse currently is
-			foreach (View view in Resources.Views)
-			{
-				if (view.Viewport.IntersectsWith(positionOnWindow))
-				{
-					//calculate position on virtual gamespace
-					float x = view.Area.X + (positionOnWindow.X - view.Viewport.X) / view.Viewport.Width * view.Area.Width;
-					float y = view.Area.Y + (positionOnWindow.Y - view.Viewport.Y) / view.Viewport.Height * view.Area.Height;
-					MousePosition = new Point(x, y);
-					break;
-				}
-			}
-		}
-		internal static void MouseButtonChange(object sender, MouseButtonEventArgs e)
-		{
-			Button HEButton = (Button)(1001 + (int)e.Button);
-
-			if (e.IsPressed)
-			{
-				if (!CurrentState.Contains(HEButton))
-					CurrentState.Add(HEButton);
-			}
-			else
-				CurrentState.Remove(HEButton);
-		}
-		internal static void MouseWheelChange(object sender, MouseWheelEventArgs e)
-		{
-			if (e.Delta >= 1)
-			{
-				if (!CurrentState.Contains(Button.MousewheelUp))
-					CurrentState.Add(Button.MousewheelUp);
-
-				//will simulate wheelups every remaining step
-				MouseWheelDelta += e.Delta - 1;
-			}
-			else if (e.Delta <= -1)
-			{
-				if (!CurrentState.Contains(Button.MousewheelDown))
-					CurrentState.Add(Button.MousewheelDown);
-				MouseWheelDelta += e.Delta + 1;
-			}
-		}
-		internal static void KeyboardKeyDown(object sender, KeyboardKeyEventArgs e)
-		{
-			Button HEButton = (Button)(2001 + (int)e.Key);
-			if (!CurrentState.Contains(HEButton))
-				CurrentState.Add(HEButton);
-		}
-		internal static void KeyboardKeyUp(object sender, KeyboardKeyEventArgs e)
-		{
-			Button HEButton = (Button)(2001 + (int)e.Key);
-			CurrentState.Remove(HEButton);
-		}
-
-		//public static event EventHandler<GamepadConnectedEventArgs> GamepadConnected; //dangerous maybe because this class is static
-    }
+	}
 }

@@ -8,14 +8,14 @@ namespace HatlessEngine
 	/// </summary>
 	public class AudioControl
 	{
-		internal int SourceId;
+		internal int SourceID;
 
 		internal AudioControl() { }
 
 		protected float _Volume = 1f;
-        /// <summary>
-        /// [0f,1f]
-        /// </summary>
+		/// <summary>
+		/// [0f,1f]
+		/// </summary>
 		public float Volume
 		{
 			get 
@@ -24,52 +24,52 @@ namespace HatlessEngine
 			}
 			set 
 			{ 
-			    AL.Source(SourceId, ALSourcef.Gain, value);
+				AL.Source(SourceID, ALSourcef.Gain, value);
 				_Volume = value;
 			}
 		}
 
-        protected float _Balance = 0f;
-        /// <summary>
-        /// [-1f,1f], only works for mono audio.
-        /// </summary>
-        public float Balance
-        {
-            get
-            {
-                return _Balance;
-            }
-            set
-            {
-                AL.Source(SourceId, ALSource3f.Position, value, 0f, (float)Math.Sqrt(1 - Math.Pow(value, 2))); //Thanks to Ethan Lee from FNA
-                _Balance = value;
-            }
-        }
+		protected float _Balance = 0f;
+		/// <summary>
+		/// [-1f,1f], only works for mono audio.
+		/// </summary>
+		public float Balance
+		{
+			get
+			{
+				return _Balance;
+			}
+			set
+			{
+				AL.Source(SourceID, ALSource3f.Position, value, 0f, (float)Math.Sqrt(1 - Math.Pow(value, 2))); //Thanks to Ethan Lee from FNA
+				_Balance = value;
+			}
+		}
 
 		public void Pause()
 		{
-			AL.SourcePause(SourceId);
+			AL.SourcePause(SourceID);
 		}
 		public void Resume()
 		{
-			AL.SourcePlay(SourceId);
+			AL.SourcePlay(SourceID);
 		}
 		public void Stop()
 		{
-			AL.SourceStop(SourceId);
+			AL.SourceStop(SourceID);
 		}
 
 		public bool IsPlaying()
 		{
-			return (AL.GetSourceState(SourceId) == ALSourceState.Playing);
+			return (AL.GetSourceState(SourceID) == ALSourceState.Playing);
 		}
 		public bool IsPaused()
 		{
-			return (AL.GetSourceState(SourceId) == ALSourceState.Paused);
+			return (AL.GetSourceState(SourceID) == ALSourceState.Paused);
 		}
 		public bool IsStopped()
 		{
-			return (AL.GetSourceState(SourceId) == ALSourceState.Stopped);
+			return (AL.GetSourceState(SourceID) == ALSourceState.Stopped);
 		}
 
 		public event EventHandler Stopped;

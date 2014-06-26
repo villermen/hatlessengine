@@ -8,46 +8,44 @@
     <RootNamespace>HatlessEngine</RootNamespace>
     <AssemblyName>HatlessEngine</AssemblyName>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\x86\Debug\</OutputPath>
     <DefineConstants>DEBUG;</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-    <CustomCommands>
-      <CustomCommands>
-        <Command type="AfterBuild" name="ddsaf" command="..\packages\ILRepack.1.23.0\tools\ILRepack.exe /out:HatlessEngine.dll HatlessEngine.dll NVorbis.dll OpenTK.dll QuickFont.dll" workingdir="${TargetDir}" externalConsole="True" pauseExternalConsole="True" />
-      </CustomCommands>
-    </CustomCommands>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MoreLinq">
+      <HintPath>..\packages\morelinq.1.0.16006\lib\net35\MoreLinq.dll</HintPath>
+    </Reference>
     <Reference Include="NVorbis, Version=0.8.0.3, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\NVorbis.dll</HintPath>
     </Reference>
-    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\OpenTK.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Drawing" />
     <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AudioSettings.cs" />
     <Compile Include="CollisionRule.cs" />
+    <Compile Include="LineDrawJob.cs" />
+    <Compile Include="TextureDrawJob.cs" />
+    <Compile Include="IDrawJob.cs" />
     <Compile Include="MusicStreamer.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="QuadTree.cs" />
+    <Compile Include="Shapes\SimpleRectangle.cs" />
     <Compile Include="View.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="LogicalObject.cs" />
@@ -70,25 +68,58 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="IExternalResource.cs" />
-    <Compile Include="Rectangle.cs" />
-    <Compile Include="Point.cs" />
+    <Compile Include="Shapes\Rectangle.cs" />
+    <Compile Include="Shapes\Point.cs" />
     <Compile Include="DrawX.cs" />
     <Compile Include="Color.cs" />
-    <Compile Include="Line.cs" />
-    <Compile Include="IShape.cs" />
-    <Compile Include="WindowSettings.cs" />
+    <Compile Include="Shapes\Line.cs" />
+    <Compile Include="Shapes\IShape.cs" />
+    <Compile Include="Window.cs" />
     <Compile Include="ObjectBlueprint.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\QuickFont\QuickFont.csproj">
-      <Project>{bbece6fc-ef63-40f8-a734-a500d1dfc1af}</Project>
-      <Name>QuickFont</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="OpenAL32.dll">
+    <Content Include="libfreetype-6.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="libjpeg-9.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libpng16-16.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libtiff-5.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libwebp-4.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SDL2_image.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SDL2_ttf.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="soft_oal.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SDL2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="zlib1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SDL2-CS\SDL2-CS.csproj">
+      <Project>{85480198-8711-4355-830e-72fd794ad3f6}</Project>
+      <Name>SDL2-CS</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

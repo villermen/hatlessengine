@@ -4,12 +4,12 @@ using System.IO;
 
 namespace HatlessEngine
 {
-    /// <summary>
-    /// Class that contains blueprints for sprites to be drawn in bulk.
-    /// </summary>
-    public class Spritemap
-    {
-        public string Id { get; private set; }
+	/// <summary>
+	/// Class that contains blueprints for sprites to be drawn in bulk.
+	/// </summary>
+	public class Spritemap
+	{
+		public string ID { get; private set; }
 
 		/// <summary>
 		/// protocol version changes on changes to ManagedSprite
@@ -19,14 +19,14 @@ namespace HatlessEngine
 		public List<ManagedSprite> ManagedSprites;
 
 		internal Spritemap(string id, params ManagedSprite[] managedSprites)
-        {
-            Id = id;
+		{
+			ID = id;
 			ManagedSprites = new List<ManagedSprite>(managedSprites);
-        }
+		}
 
-        internal Spritemap(string id, string filename)
-        {
-            Id = id;
+		internal Spritemap(string id, string filename)
+		{
+			ID = id;
 			ManagedSprites = new List<ManagedSprite>();
 
 			BinaryReader reader = new BinaryReader(Resources.GetStream(filename));
@@ -47,16 +47,16 @@ namespace HatlessEngine
 				Point origin = new Point(reader.ReadSingle(), reader.ReadSingle());
 				float rotation = reader.ReadSingle();
 				float rotationSpeed = reader.ReadSingle();
-				string animationId = reader.ReadString();
-				uint startIndex = reader.ReadUInt32();
+				string animationID = reader.ReadString();
+				int startIndex = reader.ReadInt32();
 				float animationSpeed = reader.ReadSingle();
 				sbyte depth = reader.ReadSByte();
 				
-				ManagedSprites.Add(new ManagedSprite(targetSprite, position, scale, origin, rotation, rotationSpeed, animationId, startIndex, animationSpeed, depth));
+				ManagedSprites.Add(new ManagedSprite(targetSprite, position, scale, origin, rotation, rotationSpeed, animationID, startIndex, animationSpeed, depth));
 			}
 
-			reader.Close();            
-        }
+			reader.Close();			
+		}
 
 		/// <summary>
 		/// Draw all the sprites in this spritemap at their absolute positions.
@@ -69,16 +69,16 @@ namespace HatlessEngine
 			}
 		}
 
-        /// <summary>
+		/// <summary>
 		/// Draw all the sprites in this spritemap relative to a position.
-        /// </summary>
+		/// </summary>
 		public void Draw(Point pos)
-        {
+		{
 			foreach (ManagedSprite sprite in ManagedSprites)
-            {
+			{
 				sprite.Draw(new Point(pos.X + sprite.Position.X, pos.Y + sprite.Position.Y));
-            }
-        }
+			}
+		}
 
 		/// <summary>
 		/// Writes current state of all the ManagedSprites to a file.
@@ -86,15 +86,15 @@ namespace HatlessEngine
 		/// If this behavior is undesired use FreezeSprites immediately after creation to keep them in their default position.
 		/// </summary>
 		public void WriteToFile(string filename)
-        {
+		{
 			BinaryWriter writer = new BinaryWriter(new FileStream(filename, FileMode.Truncate, FileAccess.Write, FileShare.None));
 			writer.Write("HESm".ToCharArray());
 			writer.Write(ProtocolVersion);
 			writer.Write((ushort)ManagedSprites.Count);
 			foreach (ManagedSprite sprite in ManagedSprites)
-            {
+			{
 				//writewritewritewrite...
-				writer.Write(sprite.TargetSprite.Id);
+				writer.Write(sprite.TargetSprite.ID);
 				writer.Write(sprite.Position.X);
 				writer.Write(sprite.Position.Y);
 				writer.Write(sprite.Scale.X);
@@ -103,13 +103,13 @@ namespace HatlessEngine
 				writer.Write(sprite.Origin.Y);
 				writer.Write(sprite.Rotation);
 				writer.Write(sprite.RotationSpeed);
-				writer.Write(sprite.AnimationId);
+				writer.Write(sprite.AnimationID);
 				writer.Write(sprite.AnimationIndex);
 				writer.Write(sprite.AnimationSpeed);
 				writer.Write(sprite.Depth);
-            }
-            writer.Close();
-        }
+			}
+			writer.Close();
+		}
 
 		/// <summary>
 		/// Will freeze all sprites in this spritemap, setting their PerformStep to false.
@@ -128,5 +128,5 @@ namespace HatlessEngine
 			foreach(ManagedSprite sprite in ManagedSprites)
 				sprite.PerformStep = true;
 		}
-    }
+	}
 }
