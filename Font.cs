@@ -33,12 +33,7 @@ namespace HatlessEngine
 		public void Draw(string str, Point pos, Color color, Alignment alignment = Alignment.Top | Alignment.Left, int depth = 0)
 		{
 			if (!Loaded)
-			{
-				if (Resources.JustInTimeLoading)
-					Load();
-				else
-					throw new NotLoadedException();
-			}
+				throw new NotLoadedException();
 
 			IntPtr textTexture;
 
@@ -82,17 +77,16 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 			{
-				if (File.Exists(Filename))
+				using (BinaryReader stream = Resources.GetStream(Filename))
 				{
-					Handle = SDL_ttf.TTF_OpenFont(Filename, PointSize);
+					int length = (int)stream.BaseStream.Length;
+					Handle = SDL_ttf.TTF_OpenFontRW(SDL.SDL_RWFromMem(stream.ReadBytes(length), length), 1, PointSize);
 
 					if (Handle != IntPtr.Zero)
 						Loaded = true;
 					else
 						throw new FileLoadException(SDL.SDL_GetError());
 				}
-				else
-					throw new FileNotFoundException(Filename);
 			}
 		}
 

@@ -14,15 +14,12 @@ namespace HatlessEngine
 	public static class Resources
 	{
 		/// <summary>
-		/// If set this (optionally relative) will be checked before the program's location will be checked.
+		/// If set this will be checked before the program's location will be checked.
+		/// It will do relative checks if no drive is supplied.
+		/// It will also work for embedded resources.
+		/// Make sure to add a trailing slash and leave out a leading one. (if relative)
 		/// </summary>
 		public static string RootDirectory = "";
-
-		/// <summary>
-		/// If resource execution (like Music.Play or Sprite.Draw) is requested when the resource is not loaded, instead of throwing an exception load it at that point.
-		/// NOT A GREAT PRACTICE, use this only in very specific situations, if loading fails at this point it will strill try to execute regardless.
-		/// </summary>
-		public static bool JustInTimeLoading = false;
 
 		//resources
 		public static List<View> Views = new List<View>();
@@ -51,33 +48,44 @@ namespace HatlessEngine
 		internal static List<WeakReference> ManagedSprites = new List<WeakReference>();
 
 		/// <summary>
-		/// Gets the FileStream of a (resource) file with the given filename.
+		/// Gets the StreamReader of a (resource) file with the given filename.
 		/// All resources are loaded this way.
 		/// Priority: 
-		/// 1: Embedded Resource in the entry assembly.
-		/// 2: File in the RootDirectory.
-		/// 3: File in the application's directory, or an absolute filepath.
+		/// 1: Embedded Resource in the RootDirectory withing the entry assembly;
+		/// 2: Embedded Resource in the entry assembly.
+		/// 3: File in the RootDirectory.
+		/// 4: File in the application's directory, or an absolute filepath.
 		/// Also, don't work with backslashes, they are nasty and unaccounted for.
 		/// </summary>
-		public static Stream GetStream(string fileName)
+		public static BinaryReader GetStream(string fileName)
 		{
+			Stream stream;
+
 			Assembly entryAssembly = Assembly.GetEntryAssembly();
-			Stream stream = entryAssembly.GetManifestResourceStream(entryAssembly.GetName().Name + "." + fileName.Replace('/', '.'));
+
+			if (RootDirectory != "")
+			{
+				stream = entryAssembly.GetManifestResourceStream(entryAssembly.GetName().Name + "." + (RootDirectory + fileName).Replace('/', '.'));
+				if (stream != null)
+					return new BinaryReader(stream);
+			}
+
+			stream = entryAssembly.GetManifestResourceStream(entryAssembly.GetName().Name + "." + fileName.Replace('/', '.'));
 			if (stream != null)
-				return stream;
+				return new BinaryReader(stream);
 
 			if (RootDirectory != "" && File.Exists(RootDirectory + fileName))
 			{
-				stream = File.Open(RootDirectory + fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+				stream = File.Open(RootDirectory + fileName, FileMode.Open, FileAccess.Read, FileShare.Read);			
 				if (stream != null)
-					return stream;
+					return new BinaryReader(stream);
 			}
 
 			if (File.Exists(fileName))
 			{
 				stream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 				if (stream != null)
-					return stream;
+					return new BinaryReader(stream);
 			}
 
 			throw new FileNotFoundException("The file could not be found in any of the possible locations.");

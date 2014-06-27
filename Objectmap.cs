@@ -33,7 +33,7 @@ namespace HatlessEngine
 		{
 			ID = id;
 
-			BinaryReader reader = new BinaryReader(Resources.GetStream(filename));
+			BinaryReader reader = Resources.GetStream(filename);
 
 			if (new String(reader.ReadChars(4)) != "HEOm")
 				throw new ProtocolMismatchException("The file's magic number is not 'HEOm' (HatlessEngine Objectmap)");

@@ -29,7 +29,7 @@ namespace HatlessEngine
 			ID = id;
 			ManagedSprites = new List<ManagedSprite>();
 
-			BinaryReader reader = new BinaryReader(Resources.GetStream(filename));
+			BinaryReader reader = Resources.GetStream(filename);
 
 			if (new string(reader.ReadChars(4)) != "HESm")
 				throw new ProtocolMismatchException("The file's magic number is not 'HESm' (HatlessEngine Spritemap)");

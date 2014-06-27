@@ -30,12 +30,7 @@ namespace HatlessEngine
 		public SoundControl Play(float volume = 1f, float balance = 0f)
 		{
 			if (!Loaded)
-			{
-				if (Resources.JustInTimeLoading)
-					Load();
-				else
-					throw new NotLoadedException();
-			}
+				throw new NotLoadedException();
 
 			//generate source and reference the buffer
 			int source = Resources.GetSource();

@@ -52,12 +52,7 @@ namespace HatlessEngine
 		public void Play(float volume, float balance)
 		{
 			if (!Loaded)
-			{
-				if (Resources.JustInTimeLoading)
-					Load();
-				else
-					throw new NotLoadedException();
-			}
+				throw new NotLoadedException();
 
 			if (Streaming)
 			{

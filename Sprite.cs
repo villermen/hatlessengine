@@ -37,12 +37,7 @@ namespace HatlessEngine
 		public void Draw(Point pos, Point scale, Point origin, int frameIndex = 0, float rotation = 0f, int depth = 0)
 		{
 			if (!Loaded)
-			{
-				if (Resources.JustInTimeLoading)
-					Load();
-				else
-					throw new NotLoadedException();
-			}
+				throw new NotLoadedException();
 
 			SimpleRectangle sourceRect = new SimpleRectangle(GetIndexLocation(frameIndex), FrameSize);
 			Rectangle destRect = new Rectangle(pos, FrameSize * scale, origin, rotation);
@@ -63,31 +58,37 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 			{
-				if (File.Exists(Filename))
+				using (BinaryReader stream = Resources.GetStream(Filename))
 				{
-					TextureHandle = SDL_image.IMG_LoadTexture(Game.RendererHandle, Filename);
-
-					if (TextureHandle != IntPtr.Zero)
+					int length = (int)stream.BaseStream.Length;
+					IntPtr surface = SDL_image.IMG_Load_RW(SDL.SDL_RWFromMem(stream.ReadBytes(length), length), 1);
+					if (surface != IntPtr.Zero)
 					{
-						uint format;
-						int access, w, h;
-						SDL.SDL_QueryTexture(TextureHandle, out format, out access, out w, out h);
+						TextureHandle = SDL.SDL_CreateTextureFromSurface(Game.RendererHandle, surface);
+						SDL.SDL_FreeSurface(surface);
 
-						if (AutoSize)
+						if (TextureHandle != IntPtr.Zero)
 						{
-							FrameSize = new Point(w, h);
-							IndexSize = new Point(1, 1);
+							uint format;
+							int access, w, h;
+							SDL.SDL_QueryTexture(TextureHandle, out format, out access, out w, out h);
+
+							if (AutoSize)
+							{
+								FrameSize = new Point(w, h);
+								IndexSize = new Point(1, 1);
+							}
+							else
+								IndexSize = new Point(w / FrameSize.X, h / FrameSize.Y);
+
+							Loaded = true;
 						}
 						else
-							IndexSize = new Point(w / FrameSize.X, h / FrameSize.Y);
-
-						Loaded = true;
+							throw new FileLoadException(SDL.SDL_GetError());
 					}
 					else
 						throw new FileLoadException(SDL.SDL_GetError());
 				}
-				else
-					throw new FileNotFoundException(Filename);
 			}
 		}
 

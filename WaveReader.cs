@@ -28,9 +28,10 @@ namespace HatlessEngine
 
 		public TimeSpan Duration;
 
-		public WaveReader(Stream stream)
+		public WaveReader(BinaryReader stream)
 		{
-			Reader = new BinaryReader(stream);
+			Reader = stream;
+
 			string signature = new string(Reader.ReadChars(4));
 
 			if (signature == "RIFF") //Wave
