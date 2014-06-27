@@ -35,6 +35,14 @@ namespace HatlessEngine
 			return new Point[0];
 		}
 
+		/// <summary>
+		/// Will return a SimpleRectangle with this point as it's Position and no Size.
+		/// </summary>
+		public SimpleRectangle GetEnclosingRectangle()
+		{
+			return new SimpleRectangle(this, Point.Zero);
+		}
+
 		public float GetDistanceTo(Point point)
 		{
 			return (float)Math.Sqrt(Math.Pow(point.X - X, 2) + Math.Pow(point.Y - Y, 2));  
@@ -76,14 +84,6 @@ namespace HatlessEngine
 		public bool IntersectsWith(IShape shape)
 		{
 			return Misc.ShapesIntersecting(this, shape);
-		}
-
-		/// <summary>
-		/// Will return a SimpleRectangle with this point as it's Position and no Size.
-		/// </summary>
-		public SimpleRectangle GetEnclosingSimpleRectangle()
-		{
-			return new SimpleRectangle(this, Point.Zero);
 		}
 
 		public static bool operator ==(Point point1, Point point2)

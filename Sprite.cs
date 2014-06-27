@@ -47,7 +47,7 @@ namespace HatlessEngine
 			SimpleRectangle sourceRect = new SimpleRectangle(GetIndexLocation(frameIndex), FrameSize);
 			Rectangle destRect = new Rectangle(pos, FrameSize * scale, origin, rotation);
 
-			DrawX.DrawJobs.Add(new TextureDrawJob(depth, destRect.GetEnclosingSimpleRectangle(), TextureHandle, sourceRect, destRect));
+			DrawX.DrawJobs.Add(new TextureDrawJob(depth, destRect.GetEnclosingRectangle(), TextureHandle, sourceRect, destRect));
 		}
 		public void Draw(Point pos, int frameIndex = 0, float rotation = 0f, int depth = 0)
 		{

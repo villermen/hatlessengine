@@ -18,11 +18,11 @@ namespace HatlessEngine
 
 		public static void Draw(Point point, Color color, int depth = 0)
 		{
-			DrawJobs.Add(new LineDrawJob(depth, point.GetEnclosingSimpleRectangle(), new Point[] { point, point }, color));
+			DrawJobs.Add(new LineDrawJob(depth, point.GetEnclosingRectangle(), new Point[] { point, point }, color));
 		}
 		public static void Draw(Line line, Color color, int depth = 0)
 		{
-			DrawJobs.Add(new LineDrawJob(depth, line.GetEnclosingSimpleRectangle(), line.GetPoints(), color));
+			DrawJobs.Add(new LineDrawJob(depth, line.GetEnclosingRectangle(), line.GetPoints(), color));
 		}
 		public static void Draw(SimpleRectangle rect, Color color, int depth = 0)
 		{

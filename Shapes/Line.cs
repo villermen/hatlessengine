@@ -11,9 +11,10 @@ namespace HatlessEngine
 		private Point _Point1;
 		private Point _Point2;
 
-		private bool PointsChanged;
+		private bool Changed;
 		private Point[] Points;
 		private Point[] PerpAxes;
+		private SimpleRectangle EnclosingRectangle;
 
 		/// <summary>
 		/// Changes this line's position, setting Point1 to Position and moving Point2 with it equally.
@@ -25,7 +26,7 @@ namespace HatlessEngine
 			{ 
 				_Point2 = value + _Point2 - _Point1;
 				_Point1 = value;
-				PointsChanged = true;
+				Changed = true;
 			}
 		}
 		/// <summary>
@@ -38,7 +39,7 @@ namespace HatlessEngine
 			set
 			{
 				_Point1 = value;
-				PointsChanged = true;
+				Changed = true;
 			}
 		}
 		/// <summary>
@@ -50,7 +51,7 @@ namespace HatlessEngine
 			set
 			{
 				_Point2 = value;
-				PointsChanged = true;
+				Changed = true;
 			}
 		}
 
@@ -63,7 +64,7 @@ namespace HatlessEngine
 			set 
 			{
 				_Point2 = _Point2.RotateOverOrigin(_Point1, value - Rotation);
-				PointsChanged = true;
+				Changed = true;
 			}
 		}
 
@@ -78,7 +79,7 @@ namespace HatlessEngine
 			{
 				//multiply point2 by difference factor
 				_Point2 = (_Point2 - _Point1) * (value / Length);
-				PointsChanged = true;
+				Changed = true;
 			}
 		}
 
@@ -87,51 +88,46 @@ namespace HatlessEngine
 			_Point1 = point1;
 			_Point2 = point2;
 
-			PointsChanged = true;
+			Changed = true;
 			Points = new Point[2];
 			PerpAxes = new Point[1];
+			EnclosingRectangle = SimpleRectangle.Zero;
 		}
 		public Line(float x1, float y1, float x2, float y2)
 			: this(new Point(x1, y1), new Point(x2, y2)) { }
 
 		public Point[] GetPoints()
 		{
-			if (PointsChanged)
-				UpdatePointsAndPerpAxes();
+			if (Changed)
+				Recalculate();
 
 			return Points;
 		}
 
 		public Point[] GetPerpAxes()
 		{
-			if (PointsChanged)
-				UpdatePointsAndPerpAxes();
+			if (Changed)
+				Recalculate();
 
 			return PerpAxes;
 		}
 
-		private void UpdatePointsAndPerpAxes()
+		public SimpleRectangle GetEnclosingRectangle()
+		{
+			if (Changed)
+				Recalculate();
+
+			return EnclosingRectangle;
+		}
+
+		private void Recalculate()
 		{
 			Points[0] = _Point1;
 			Points[1] = _Point2;
 
 			PerpAxes[0] = new Point((-_Point2.Y + _Point1.Y) / Length, (_Point2.X - _Point1.X) / Length);
 
-			PointsChanged = false;
-		}
-		
-		public bool IntersectsWith(IShape shape)
-		{
-			return Misc.ShapesIntersecting(this, shape);
-		}
-
-		public SimpleRectangle GetEnclosingSimpleRectangle()
-		{
-			if (PointsChanged)
-				UpdatePointsAndPerpAxes();
-
 			float minX = float.PositiveInfinity, minY = float.PositiveInfinity, maxX = float.NegativeInfinity, maxY = float.NegativeInfinity;
-
 			foreach (Point p in Points)
 			{
 				if (p.X < minX)
@@ -143,8 +139,14 @@ namespace HatlessEngine
 				if (p.Y > maxY)
 					maxY = p.Y;
 			}
+			EnclosingRectangle = new SimpleRectangle(minX, minY, maxX, maxY);
 
-			return new SimpleRectangle(minX, minY, maxX, maxY);
+			Changed = false;
+		}
+		
+		public bool IntersectsWith(IShape shape)
+		{
+			return Misc.ShapesIntersecting(this, shape);
 		}
 
 		/// <summary>

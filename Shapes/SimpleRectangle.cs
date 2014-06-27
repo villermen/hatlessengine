@@ -12,7 +12,7 @@ namespace HatlessEngine
 		private Point _Position;
 		private Point _Size;
 
-		private bool PointsChanged;
+		private bool Changed;
 		private Point[] Points;
 		private static Point[] PerpAxes = new Point[] { new Point(0f, 1f), new Point(1f, 0f) }; //should not be possible
  
@@ -27,7 +27,7 @@ namespace HatlessEngine
 			set
 			{
 				_Position = value;
-				PointsChanged = true;
+				Changed = true;
 			}
 		}
 		/// <summary>
@@ -39,7 +39,7 @@ namespace HatlessEngine
 			set
 			{
 				_Size = value;
-				PointsChanged = true;
+				Changed = true;
 			}
 		}
 		/// <summary>
@@ -53,7 +53,7 @@ namespace HatlessEngine
 			{
 				_Size += _Position - value;
 				_Position = value;
-				PointsChanged = true;
+				Changed = true;
 			}
 		}
 		/// <summary>
@@ -66,7 +66,7 @@ namespace HatlessEngine
 			set 
 			{ 
 				_Size = value - _Position;
-				PointsChanged = true;
+				Changed = true;
 			}
 		}
 
@@ -92,7 +92,7 @@ namespace HatlessEngine
 			_Position = position;
 			_Size = size;
 
-			PointsChanged = true;
+			Changed = true;
 			Points = new Point[4];
 		}
 		public SimpleRectangle(float x, float y, float width, float height)
@@ -100,8 +100,8 @@ namespace HatlessEngine
 
 		public Point[] GetPoints()
 		{
-			if (PointsChanged)
-				UpdatePoints();
+			if (Changed)
+				Recalculate();
 
 			return Points;
 		}
@@ -111,14 +111,22 @@ namespace HatlessEngine
 			return PerpAxes;
 		}
 
-		private void UpdatePoints()
+		/// <summary>
+		/// Why? =(
+		/// </summary>
+		public SimpleRectangle GetEnclosingRectangle()
+		{
+			return this;
+		}
+
+		private void Recalculate()
 		{
 			Points[0] = _Position;
 			Points[1] = _Position + new Point(_Size.X, 0f);
 			Points[2] = _Position + _Size;
 			Points[3] = _Position + new Point(0f, _Size.Y);
 
-			PointsChanged = false;
+			Changed = false;
 		}
 
 		public bool IntersectsWith(IShape shape)
@@ -127,20 +135,12 @@ namespace HatlessEngine
 		}
 
 		/// <summary>
-		/// Why? =(
-		/// </summary>
-		public SimpleRectangle GetEnclosingSimpleRectangle()
-		{
-			return this;
-		}
-
-		/// <summary>
 		/// Returns the 4 lines representing the sides of this rectangle.
 		/// </summary>
 		public Line[] GetBoundLines()
 		{
-			if (PointsChanged)
-				UpdatePoints();
+			if (Changed)
+				Recalculate();
 
 			return new Line[]
 			{
