@@ -8,15 +8,10 @@ namespace HatlessEngine
 	/// <summary>
 	/// Reads OpenAL compatible wavedata from audiofiles.
 	/// </summary>
-	internal class WaveReader
+	internal class WaveReader : IDisposable
 	{
-		public enum SoundFormat { 
-			Unsupported = 0,
-			Wave = 1,
-			Vorbis = 2 }
-
 		public bool MetaLoaded = false;
-		public SoundFormat Format;
+		public SoundDataFormat Format;
 
 		public int BitsPerSample;
 
@@ -47,7 +42,7 @@ namespace HatlessEngine
 
 				if (signature == "WAVE")
 				{
-					Format = SoundFormat.Wave;
+					Format = SoundDataFormat.Wave;
 
 					signature = new string(Reader.ReadChars(4));
 					if (signature == "fmt ")
@@ -96,7 +91,7 @@ namespace HatlessEngine
 			} 
 			else if (signature == "OggS") //Vorbis / Ogg Sound
 			{
-				Format = SoundFormat.Vorbis;
+				Format = SoundDataFormat.Vorbis;
 
 				VorbisReader = new VorbisReader(Reader.BaseStream, true);
 
@@ -114,16 +109,16 @@ namespace HatlessEngine
 				MetaLoaded = true;
 			}
 			else
-				Format = SoundFormat.Unsupported;
+				Format = SoundDataFormat.Unsupported;
 		}
 
 		public short[] ReadAll(out int readSamples)
 		{
-			if (Format == SoundFormat.Wave)
+			if (Format == SoundDataFormat.Wave)
 			{
 				return ReadSamples(WaveTotalSamples, out readSamples);
 			}
-			else if (Format == SoundFormat.Vorbis)
+			else if (Format == SoundDataFormat.Vorbis)
 			{
 				return ReadSamples((int)VorbisReader.TotalSamples, out readSamples);
 			}
@@ -133,7 +128,7 @@ namespace HatlessEngine
 
 		public short[] ReadSamples(int samples, out int readSamples)
 		{
-			if (Format == SoundFormat.Wave)
+			if (Format == SoundDataFormat.Wave)
 			{
 				byte[] byteBuffer = Reader.ReadBytes(BitsPerSample / 8 * samples);
 				readSamples = byteBuffer.Length / 2;
@@ -144,8 +139,8 @@ namespace HatlessEngine
 					waveData[i] = BitConverter.ToInt16(byteBuffer, i * 2);
 				}
 				return waveData;
-			} 
-			else if (Format == SoundFormat.Vorbis)
+			}
+			else if (Format == SoundDataFormat.Vorbis)
 			{
 				float[] floatBuffer = new float[samples];
 				readSamples = VorbisReader.ReadSamples(floatBuffer, 0, samples);
@@ -170,24 +165,44 @@ namespace HatlessEngine
 		{
 			if (MetaLoaded)
 			{
-				if (Format == SoundFormat.Wave)
+				if (Format == SoundDataFormat.Wave)
 					Reader.BaseStream.Position = WaveSampleStartPosition + BitsPerSample / 8 * samples * Channels;
-				else if (Format == SoundFormat.Vorbis)
+				else if (Format == SoundDataFormat.Vorbis)
 					VorbisReader.DecodedPosition = samples;
 			}
 		}
 
 		~WaveReader()
 		{
-			Dispose();
+			Dispose(false);
 		}
-
 		public void Dispose()
 		{
-			if (Reader != null)
-				Reader.Dispose();
-			if (VorbisReader != null)
-				VorbisReader.Dispose();
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
+		private void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				if (Reader != null)
+				{
+					Reader.Dispose();
+					Reader = null;
+				}
+				if (VorbisReader != null)
+				{
+					VorbisReader.Dispose();
+					VorbisReader = null;
+				}
+			}
+		}
+	}
+
+	internal enum SoundDataFormat
+	{
+		Unsupported = 0,
+		Wave = 1,
+		Vorbis = 2
 	}
 }

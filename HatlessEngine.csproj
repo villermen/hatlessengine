@@ -39,9 +39,9 @@
   <ItemGroup>
     <Compile Include="AudioSettings.cs" />
     <Compile Include="CollisionRule.cs" />
-    <Compile Include="LineDrawJob.cs" />
-    <Compile Include="TextureDrawJob.cs" />
-    <Compile Include="IDrawJob.cs" />
+    <Compile Include="DrawJobs\LineDrawJob.cs" />
+    <Compile Include="DrawJobs\TextureDrawJob.cs" />
+    <Compile Include="DrawJobs\IDrawJob.cs" />
     <Compile Include="MusicStreamer.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="QuadTree.cs" />

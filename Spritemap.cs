@@ -7,7 +7,7 @@ namespace HatlessEngine
 	/// <summary>
 	/// Class that contains blueprints for sprites to be drawn in bulk.
 	/// </summary>
-	public class Spritemap
+	public sealed class Spritemap
 	{
 		public string ID { get; private set; }
 

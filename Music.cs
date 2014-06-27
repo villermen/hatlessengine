@@ -3,7 +3,7 @@ using OpenTK.Audio.OpenAL;
 
 namespace HatlessEngine
 {
-	public class Music :  AudioControl, IExternalResource
+	public sealed class Music : AudioControl, IExternalResource
 	{
 		public string Filename { get; private set; }
 		public string ID { get; private set; }
@@ -76,6 +76,7 @@ namespace HatlessEngine
 
 			//attach
 			AL.SourceQueueBuffer(SourceID, BufferIDs[0]);
+			ActiveBufferID = 0;
 
 			//set volume and balance before playback
 			Volume = volume;
@@ -132,6 +133,9 @@ namespace HatlessEngine
 				WaveReader.Dispose();
 				WaveReader = null;
 				AL.DeleteBuffers(BufferIDs);
+				BufferIDs = null;
+				Streaming = false;
+
 				Loaded = false;
 			}
 		}
@@ -156,6 +160,15 @@ namespace HatlessEngine
 		}
 
 		~Music()
+		{
+			Dispose(false);
+		}
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+		private void Dispose(bool disposing)
 		{
 			Unload();
 		}

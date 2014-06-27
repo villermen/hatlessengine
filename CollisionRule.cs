@@ -3,35 +3,7 @@ using System.Collections.Generic;
 
 namespace HatlessEngine
 {
-	public enum CollisionRuleType
-	{
-		Shape = 0,
-		Object = 1,
-		ObjectType = 2,
-		Objectmap = 3,
-		ManagedSprite = 4,
-		Spritemap = 5,
-		//Shapemap = 6
-	}
-
-	public enum CollisionAction
-	{
-		/// <summary>
-		/// Do nothing. For triggering a method only.
-		/// </summary>
-		None = 0,
-		/// <summary>
-		/// Set object's speed to 0 at touching point.
-		/// </summary>
-		Block = 1,
-		/// <summary>
-		/// Bounce perfectly off the surface changing the SpeedDirection only.
-		/// </summary>
-		Bounce = 2,
-		//Slide = 4, keep distance left or only distance on unlocked axis left?			
-	}
-
-	public class CollisionRule
+	public sealed class CollisionRule
 	{
 		public bool Active = true;
 		internal CollisionRuleType Type;
@@ -137,5 +109,33 @@ namespace HatlessEngine
 				return sprites;
 			}
 		}
+	}
+
+	public enum CollisionRuleType
+	{
+		Shape = 0,
+		Object = 1,
+		ObjectType = 2,
+		Objectmap = 3,
+		ManagedSprite = 4,
+		Spritemap = 5,
+		//Shapemap = 6
+	}
+
+	public enum CollisionAction
+	{
+		/// <summary>
+		/// Do nothing. For triggering a method only.
+		/// </summary>
+		None = 0,
+		/// <summary>
+		/// Set object's speed to 0 at touching point.
+		/// </summary>
+		Block = 1,
+		/// <summary>
+		/// Bounce perfectly off the surface changing the SpeedDirection only.
+		/// </summary>
+		Bounce = 2,
+		//Slide = 4, keep distance left or only distance on unlocked axis left?			
 	}
 }

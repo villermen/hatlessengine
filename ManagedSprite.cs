@@ -6,7 +6,7 @@ namespace HatlessEngine
 	/// Holds parameters for drawing a sprite so you don't have to store those for yourself for the sprite.
 	/// See it as an instance of a sprite that can be drawn.
 	/// </summary>
-	public class ManagedSprite
+	public sealed class ManagedSprite
 	{
 		public Sprite TargetSprite { get; private set; }
 

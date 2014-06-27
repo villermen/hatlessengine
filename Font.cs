@@ -101,11 +101,21 @@ namespace HatlessEngine
 			if (Loaded)
 			{
 				SDL_ttf.TTF_CloseFont(Handle);
+				Handle = IntPtr.Zero;
 				Loaded = false;
 			}
 		}
 
 		~Font()
+		{
+			Dispose(false);
+		}
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+		private void Dispose(bool disposing)
 		{
 			Unload();
 		}

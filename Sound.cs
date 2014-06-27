@@ -6,7 +6,7 @@ using OpenTK.Audio.OpenAL;
 
 namespace HatlessEngine
 {
-	public class Sound : IExternalResource
+	public sealed class Sound : IExternalResource
 	{
 		public string Filename { get; private set; }
 		public string ID { get; private set; }
@@ -16,7 +16,7 @@ namespace HatlessEngine
 
 		private int OpenALBufferID;
 
-		private WaveReader.SoundFormat SoundFormat;
+		private SoundDataFormat SoundDataFormat;
 		private ALFormat ALFormat;
 		private TimeSpan Duration;
 
@@ -54,22 +54,24 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 			{
-				WaveReader waveReader = new WaveReader(Resources.GetStream(Filename));
-				if (waveReader.MetaLoaded)
+				using (WaveReader waveReader = new WaveReader(Resources.GetStream(Filename)))
 				{
-					OpenALBufferID = AL.GenBuffer();
-					int readSamples;
-					short[] waveData = waveReader.ReadAll(out readSamples);
-					AL.BufferData(OpenALBufferID, waveReader.ALFormat, waveData, waveData.Length * 2, waveReader.SampleRate);
+					if (waveReader.MetaLoaded)
+					{
+						OpenALBufferID = AL.GenBuffer();
+						int readSamples;
+						short[] waveData = waveReader.ReadAll(out readSamples);
+						AL.BufferData(OpenALBufferID, waveReader.ALFormat, waveData, waveData.Length * 2, waveReader.SampleRate);
 
-					SoundFormat = waveReader.Format;
-					ALFormat = waveReader.ALFormat;
-					Duration = waveReader.Duration;
+						SoundDataFormat = waveReader.Format;
+						ALFormat = waveReader.ALFormat;
+						Duration = waveReader.Duration;
 
-					Loaded = true;
+						Loaded = true;
+					}
+					else
+						throw new FileLoadException();
 				}
-				else
-					throw new FileLoadException();
 			}
 		}
 
@@ -87,6 +89,7 @@ namespace HatlessEngine
 			if (Loaded)
 			{
 				AL.DeleteBuffer(OpenALBufferID);
+				OpenALBufferID = 0;
 				Loaded = false;
 			}
 		}
@@ -94,12 +97,21 @@ namespace HatlessEngine
 		public override string ToString()
 		{
 			if (Loaded)
-				return "'" + ID + "' (" + Filename + ", " + SoundFormat.ToString() + ", " + ALFormat.ToString() + ", " + Duration.ToString() + ")";
+				return "'" + ID + "' (" + Filename + ", " + SoundDataFormat.ToString() + ", " + ALFormat.ToString() + ", " + Duration.ToString() + ")";
 			else
 				return "'" + ID + "' (" + Filename + ", Unloaded)";			
 		}
 
 		~Sound()
+		{
+			Dispose(false);
+		}
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+		private void Dispose(bool disposing)
 		{
 			Unload();
 		}

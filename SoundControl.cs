@@ -6,7 +6,7 @@ namespace HatlessEngine
 	/// <summary>
 	/// Provides methods and events for controlling a specific instance of a sound playing.
 	/// </summary>
-	public class SoundControl : AudioControl
+	public sealed class SoundControl : AudioControl
 	{
 		internal SoundControl(int source)
 		{

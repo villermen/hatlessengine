@@ -4,16 +4,6 @@ using System.IO;
 
 namespace HatlessEngine
 {
-	public enum LogLevel
-	{
-		None = 0,
-		Debug = 1,
-		Notice = 2,
-		Warning = 3,
-		Critical = 4,
-		Fatal = 5
-	}
-
 	/// <summary>
 	/// Contains methods to write (log) messages in a standardized way.
 	/// A
@@ -61,6 +51,7 @@ namespace HatlessEngine
 			if (ConsoleEnabled)
 			{
 				ConsoleWriter.Close();
+				ConsoleWriter = null;
 				ConsoleEnabled = false;
 			}
 		}
@@ -78,6 +69,7 @@ namespace HatlessEngine
 			if (FileEnabled)
 			{
 				FileWriter.Close();
+				FileWriter = null;
 				FileEnabled = false;
 			}
 		}
@@ -91,6 +83,17 @@ namespace HatlessEngine
 			DisableFile();
 			foreach (StreamWriter stream in CustomStreams)
 				stream.Close();
+			CustomStreams.Clear();
 		}
+	}
+
+	public enum LogLevel
+	{
+		None = 0,
+		Debug = 1,
+		Notice = 2,
+		Warning = 3,
+		Critical = 4,
+		Fatal = 5
 	}
 }

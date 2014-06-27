@@ -5,7 +5,7 @@ using System.IO;
 
 namespace HatlessEngine
 {
-	public class Sprite : IExternalResource
+	public sealed class Sprite : IExternalResource
 	{   
 		public string Filename { get; private set; }
 		public string ID { get; private set; }
@@ -96,6 +96,7 @@ namespace HatlessEngine
 			if (Loaded)
 			{
 				SDL.SDL_DestroyTexture(TextureHandle);
+				TextureHandle = IntPtr.Zero;
 				Loaded = false;
 			}
 		}
@@ -118,6 +119,15 @@ namespace HatlessEngine
 		}
 
 		~Sprite()
+		{
+			Dispose(false);
+		}
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+		private void Dispose(bool disposing)
 		{
 			Unload();
 		}

@@ -19,7 +19,7 @@ namespace HatlessEngine
 
 		internal static bool RenderframeReady = false;
 
-		public static bool Running = false;
+		private static bool Running = false;
 
 		private static int TicksPerStep;
 		private static int TicksPerDraw;
@@ -119,6 +119,22 @@ namespace HatlessEngine
 					Draw();
 				}
 			}
+
+
+			//cleanup and uninitialization
+			Resources.UnloadAllExternalResources();
+			Log.CloseAllStreams();
+
+			SDL.SDL_DestroyWindow(WindowHandle);
+			WindowHandle = IntPtr.Zero;
+			SDL.SDL_DestroyRenderer(RendererHandle);
+			RendererHandle = IntPtr.Zero;
+			AudioContext.Dispose();
+			AudioContext = null;
+
+			SDL.SDL_Quit();
+			SDL_ttf.TTF_Quit();
+			SDL_image.IMG_Quit();
 		}
 
 		private static void Step()
@@ -161,13 +177,9 @@ namespace HatlessEngine
 
 			foreach (LogicalObject obj in Resources.Objects)
 			{
-				if (!Running)
-					return;
+				if (!obj.Destroyed)
 				obj.Step();
 			}
-
-			if (!Running) //find better way of doing this
-				return;
 
 			//collision time!
 			float minX = float.PositiveInfinity;
@@ -237,7 +249,10 @@ namespace HatlessEngine
 		{
 			//collect drawjobs
 			foreach (LogicalObject obj in Resources.Objects)
-				obj.Draw();
+			{
+				if (!obj.Destroyed)
+					obj.Draw();
+			}
 
 			DrawX.DrawJobs.Sort((j1, j2) => -j1.Depth.CompareTo(j2.Depth));
 
@@ -294,16 +309,14 @@ namespace HatlessEngine
 			Stopwatch v = Stopwatch.StartNew();
 			ThreadPool.QueueUserWorkItem(new WaitCallback(PresentRender), v);
 		}
+
+		/// <summary>
+		/// Game will finish it's current loop (Step or Draw) and exit the Running method.
+		/// </summary>
 		public static void Exit()
 		{
 			Running = false;
-			SDL.SDL_DestroyWindow(WindowHandle);
-			Resources.UnloadAllExternalResources();
-			Log.CloseAllStreams();
-			SDL.SDL_Quit();
-			SDL_ttf.TTF_Quit();
-			SDL_image.IMG_Quit();
-		}		
+		}
 		
 		public static event EventHandler Started;
 

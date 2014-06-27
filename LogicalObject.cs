@@ -4,30 +4,22 @@ namespace HatlessEngine
 {
 	public class LogicalObject
 	{
-		private bool _Destroyed = false;
-		public bool Destroyed
-		{ 
-			get { return _Destroyed; }
-			private set { _Destroyed = value; }
-		}
+		public bool Destroyed { get; private set; }
 
 		public LogicalObject()
 		{
 			//add object to Resource's objectlist
 			Resources.AddObjects.Add(this);
 		}
-			
+
 		public virtual void Step() { }
-		/// <summary>
-		/// Runs directly after Step for each object.
-		/// </summary>
 
 		public virtual void Draw() { }
 
 		public void Destroy()
 		{
 			OnDestroy();
-			//add for removal from Resources.Objects (cant be done now because of iteration)
+			//add for removal from Resources.Objects (cant be done now because Game is looping through it at the moment)
 			Resources.RemoveObjects.Add(this);
 			Destroyed = true;
 		}

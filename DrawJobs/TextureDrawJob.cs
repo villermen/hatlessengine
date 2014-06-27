@@ -1,5 +1,6 @@
 ﻿using System;
 using SDL2;
+
 namespace HatlessEngine
 {
 	internal struct TextureDrawJob : IDrawJob

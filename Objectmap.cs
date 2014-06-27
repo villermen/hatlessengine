@@ -10,7 +10,7 @@ namespace HatlessEngine
 	/// Stores a list of objects, that can be mass-created and removed.
 	/// Convenient way of creating levels or maps in general.
 	/// </summary>
-	public class Objectmap
+	public sealed class Objectmap
 	{
 		public string ID { get; private set; }
 
