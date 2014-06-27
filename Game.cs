@@ -81,8 +81,7 @@ namespace HatlessEngine
 			SDL.SDL_SetRenderDrawBlendMode(RendererHandle, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);			
 
 			//add default view that spans the current window
-			Resources.AddView(new SimpleRectangle(Point.Zero, Window.GetSize()), new SimpleRectangle(Point.Zero , new Point(0.5f, 1f)));
-			Resources.AddView(new SimpleRectangle(Point.Zero, Window.GetSize()), new SimpleRectangle(new Point(0.5f, 0f), new Point(0.5f, 0.5f)));
+			Resources.AddView(new SimpleRectangle(Point.Zero, Window.GetSize()), new SimpleRectangle(Point.Zero , new Point(1f, 1f)));
 
 			//OpenAL initialization
 			AudioSettings.SetPlaybackDevice();
