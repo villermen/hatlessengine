@@ -123,6 +123,7 @@ namespace HatlessEngine
 			//cleanup and uninitialization
 			Resources.UnloadAllExternalResources();
 			Log.CloseAllStreams();
+			Input.CloseGamepads();
 
 			SDL.SDL_DestroyWindow(WindowHandle);
 			WindowHandle = IntPtr.Zero;

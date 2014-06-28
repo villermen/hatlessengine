@@ -26,6 +26,7 @@ namespace HatlessEngine
 
 		private static IntPtr[] GamepadHandles = new IntPtr[8];
 		private static Dictionary<int, int> GamepadInstanceIDs = new Dictionary<int, int>();
+		private static IntPtr[] GamepadHapticHandles = new IntPtr[8];
 
 		private static List<Button>[] GamepadPreviousStates = new List<Button>[8];
 		private static List<Button>[] GamepadCurrentStates = new List<Button>[8];
@@ -92,7 +93,7 @@ namespace HatlessEngine
 			if (!respectDeadZone || GamepadAxisValues[gamepad - 1, startAxis] <= -GamepadDeadZone || GamepadAxisValues[gamepad - 1, startAxis] >= GamepadDeadZone)
 				position.X = GamepadAxisValues[gamepad - 1, startAxis];
 			if (!respectDeadZone || GamepadAxisValues[gamepad - 1, startAxis + 1] <= -GamepadDeadZone || GamepadAxisValues[gamepad - 1, startAxis + 1] >= GamepadDeadZone)
-				position.Y = -GamepadAxisValues[gamepad - 1, startAxis + 1];
+				position.Y = GamepadAxisValues[gamepad - 1, startAxis + 1];
 
 			return position;
 		}
@@ -113,6 +114,23 @@ namespace HatlessEngine
 				return GamepadAxisValues[gamepad - 1, axis];
 			else
 				return 0f;
+		}
+
+		/// <summary>
+		/// Will make the specified controller rumble if it supports it.
+		/// Duration is in seconds.
+		/// </summary>
+		public static void Rumble(int gamepad, float strength = 1f, float duration = 1f)
+		{
+			if (gamepad < 1 || gamepad > 8)
+				throw new ArgumentOutOfRangeException("gamepad", "gamepad can be 1-8");
+			if (strength < 0 || strength > 1)
+				throw new ArgumentOutOfRangeException("strength", "strength can be 0f-1f");
+			if (duration < 0)
+				throw new ArgumentOutOfRangeException("duration", "duration can't be negative");
+
+			if (GamepadHapticHandles[gamepad - 1] != IntPtr.Zero)
+				SDL.SDL_HapticRumblePlay(GamepadHapticHandles[gamepad - 1], strength, (uint)(1000 * duration));
 		}
 
 		/// <summary>
@@ -202,9 +220,24 @@ namespace HatlessEngine
 					int newGamepadID = -1;
 					while (GamepadHandles[++newGamepadID] != IntPtr.Zero);
 					GamepadHandles[newGamepadID] = SDL.SDL_GameControllerOpen(e.cdevice.which);
-					GamepadInstanceIDs.Add(SDL.SDL_JoystickInstanceID(SDL.SDL_GameControllerGetJoystick(GamepadHandles[newGamepadID])), newGamepadID);
+
+					IntPtr joystick = SDL.SDL_GameControllerGetJoystick(GamepadHandles[newGamepadID]);
+					GamepadInstanceIDs.Add(SDL.SDL_JoystickInstanceID(joystick), newGamepadID);
 					GamepadCurrentStates[newGamepadID] = new List<Button>();
 					GamepadPreviousStates[newGamepadID] = new List<Button>();
+
+					//init rumble if supported
+					if (SDL.SDL_JoystickIsHaptic(joystick) == 1)
+					{
+						IntPtr hapticHandle = SDL.SDL_HapticOpenFromJoystick(joystick);
+						if (SDL.SDL_HapticRumbleSupported(hapticHandle) == 1)
+						{
+							SDL.SDL_HapticRumbleInit(hapticHandle);
+							GamepadHapticHandles[newGamepadID] = hapticHandle;
+						}
+						else
+							SDL.SDL_HapticClose(hapticHandle);
+					}
 					break;
 
 				case SDL.SDL_EventType.SDL_CONTROLLERDEVICEREMOVED:
@@ -212,6 +245,12 @@ namespace HatlessEngine
 					SDL.SDL_GameControllerClose(GamepadHandles[gamepadID]);
 					GamepadHandles[gamepadID] = IntPtr.Zero;
 					GamepadInstanceIDs.Remove(e.cdevice.which);
+
+					if (GamepadHapticHandles[gamepadID] != IntPtr.Zero)
+					{
+						SDL.SDL_HapticClose(GamepadHapticHandles[gamepadID]);
+						GamepadHapticHandles[gamepadID] = IntPtr.Zero;
+					}
 					break;
 
 				case SDL.SDL_EventType.SDL_CONTROLLERBUTTONDOWN:
@@ -373,6 +412,28 @@ namespace HatlessEngine
 			}
 				
 			return str;
+		}
+
+		/// <summary>
+		/// Cleanup.
+		/// </summary>
+		internal static void CloseGamepads()
+		{
+			for (int i = 0; i < 8; i++)
+			{
+				if (GamepadHandles[i] != IntPtr.Zero)
+				{
+					SDL.SDL_GameControllerClose(GamepadHandles[i]);
+					GamepadHandles[i] = IntPtr.Zero;
+
+					if (GamepadHapticHandles[i] != IntPtr.Zero)
+					{
+						SDL.SDL_HapticClose(GamepadHapticHandles[i]);
+						GamepadHapticHandles[i] = IntPtr.Zero;
+					}
+				}				
+			}
+			GamepadInstanceIDs.Clear();
 		}
 	}
 }
