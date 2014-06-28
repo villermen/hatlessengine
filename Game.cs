@@ -105,7 +105,7 @@ namespace HatlessEngine
 			while (Running)
 			{
 				//perform step when needed
-				while (stopWatch.ElapsedTicks >= lastStepTick + TicksPerStep)
+				if (stopWatch.ElapsedTicks >= lastStepTick + TicksPerStep)
 				{
 					lastStepTick = lastStepTick + TicksPerStep;
 					Step();
@@ -118,7 +118,6 @@ namespace HatlessEngine
 					Draw();
 				}
 			}
-
 
 			//cleanup and uninitialization
 			Resources.UnloadAllExternalResources();
