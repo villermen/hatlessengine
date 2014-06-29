@@ -6,7 +6,6 @@ namespace HatlessEngine
 {
 	/// <summary>
 	/// Contains methods to write (log) messages in a standardized way.
-	/// A
 	/// </summary>
 	public static class Log
 	{
