@@ -23,6 +23,8 @@ namespace HatlessEngine
 
 		private static int TicksPerStep;
 		private static int TicksPerDraw;
+		private static int _ActualSPS;
+		private static int _ActualFPS;
 
 		/// <summary>
 		/// Gets or sets the desired amount of steps per second.
@@ -63,6 +65,21 @@ namespace HatlessEngine
 		}
 
 		/// <summary>
+		/// Returns the actual number of Steps Per Second, calculated from one step interval.
+		/// </summary>
+		public static int ActualSPS
+		{
+			get { return _ActualSPS; }
+		}
+		/// <summary>
+		/// Returns the actual number of Frames Per Second, calculated from one draw interval.
+		/// </summary>
+		public static int ActualFPS
+		{
+			get { return _ActualFPS; }
+		}
+
+		/// <summary>
 		/// Sets up a window and enters the gameloop. (Code after this call won't run until the game has exited.)
 		/// </summary>
 		public static void Run(float speed = 100f)
@@ -74,7 +91,7 @@ namespace HatlessEngine
 			SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_WEBP);
 
 			SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_VSYNC, "1");
-			SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "2");
+			SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
 			WindowHandle = SDL.SDL_CreateWindow("HatlessEngine", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_INPUT_FOCUS);
 			RendererHandle = SDL.SDL_CreateRenderer(WindowHandle, -1, (uint)SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
@@ -101,6 +118,8 @@ namespace HatlessEngine
 
 			long lastStepTick = 0;
 			long lastDrawTick = 0;
+			long lastStepTime = 0;
+			long lastDrawTime = 0;
 
 			while (Running)
 			{
@@ -109,6 +128,9 @@ namespace HatlessEngine
 				{
 					lastStepTick = lastStepTick + TicksPerStep;
 					Step();
+
+					_ActualSPS = (int)(Stopwatch.Frequency / (stopWatch.ElapsedTicks - lastStepTime));
+					lastStepTime = stopWatch.ElapsedTicks;
 				}
 
 				//perform draw when ready for a new one
@@ -116,6 +138,9 @@ namespace HatlessEngine
 				{
 					lastDrawTick = lastDrawTick + TicksPerDraw;
 					Draw();
+
+					_ActualFPS = (int)(Stopwatch.Frequency / (stopWatch.ElapsedTicks - lastDrawTime));
+					lastDrawTime = stopWatch.ElapsedTicks;
 				}
 			}
 
