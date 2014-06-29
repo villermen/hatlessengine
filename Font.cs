@@ -13,6 +13,8 @@ namespace HatlessEngine
 
 		internal IntPtr Handle;
 
+		private int LineHeight;
+
 		public int PointSize { get; private set; }
 
 		internal Dictionary<Tuple<string, Color>, IntPtr> Textures = new Dictionary<Tuple<string, Color>, IntPtr>();
@@ -35,42 +37,61 @@ namespace HatlessEngine
 			if (!Loaded)
 				throw new NotLoadedException();
 
-			IntPtr textTexture;
+			string[] rows = str.Split('\n');
+			IntPtr[] rowTextures = new IntPtr[rows.Length];
 
-			Tuple<string, Color> key = new Tuple<string, Color>(str, color);
-			if (Textures.ContainsKey(key)) //use an already rendered texture
+			//add independent drawjob for each line
+			for (int i = 0; i < rows.Length; i++)
 			{
-				textTexture = Textures[key];
-				TexturesDrawsUnused[key] = 0;
+				//leave blank if there's no use for a texture there (whitespace)
+				if (String.IsNullOrWhiteSpace(rows[i]))
+				{
+					rowTextures[i] = IntPtr.Zero;
+					continue;
+				}
+
+				Tuple<string, Color> key = new Tuple<string, Color>(rows[i], color);
+				if (Textures.ContainsKey(key)) //use an already rendered texture
+				{
+					rowTextures[i] = Textures[key];
+					TexturesDrawsUnused[key] = 0;
+				}
+				else //generate a new texture
+				{
+					IntPtr textSurface = SDL_ttf.TTF_RenderText_Blended(Handle, rows[i], color);
+					rowTextures[i] = SDL.SDL_CreateTextureFromSurface(Game.RendererHandle, textSurface);
+					SDL.SDL_FreeSurface(textSurface);
+
+					Textures.Add(key, rowTextures[i]);
+					TexturesDrawsUnused.Add(key, 0);
+				}
+
+				uint format;
+				int access, w, h;
+				SDL.SDL_QueryTexture(rowTextures[i], out format, out access, out w, out h);
+
+				float horizontalOffset = 0f;
+				float verticalOffset = 0f;
+
+				//horizontal alignment
+				if (alignment.HasFlag(Alignment.Center))
+					horizontalOffset = -w / 2f;
+				if (alignment.HasFlag(Alignment.Right))
+					horizontalOffset = -w;
+
+				//vertical alignment
+				if (alignment.HasFlag(Alignment.Top))
+					verticalOffset = i * LineHeight;
+				if (alignment.HasFlag(Alignment.Middle))
+					verticalOffset = -rows.Length * LineHeight / 2f + i * LineHeight;
+				if (alignment.HasFlag(Alignment.Bottom))
+					verticalOffset = -rows.Length * LineHeight + i * LineHeight;
+
+				Point texturePos = pos + new Point(horizontalOffset, verticalOffset);
+				Point textureSize = new Point(w, h);
+
+				DrawX.DrawJobs.Add(new TextureDrawJob(depth, new SimpleRectangle(texturePos, textureSize), rowTextures[i], new SimpleRectangle(Point.Zero, new Point(w, h)), new Rectangle(texturePos, textureSize)));
 			}
-			else //generate a new texture
-			{
-				IntPtr textSurface = SDL_ttf.TTF_RenderText_Blended(Handle, str, color);
-				textTexture = SDL.SDL_CreateTextureFromSurface(Game.RendererHandle, textSurface);
-				SDL.SDL_FreeSurface(textSurface);
-
-				Textures.Add(key, textTexture);
-				TexturesDrawsUnused.Add(key, 0);
-			}
-
-			uint format;
-			int access, w, h;
-			SDL.SDL_QueryTexture(textTexture, out format, out access, out w, out h);
-
-			Rectangle destRect = new Rectangle(pos, new Point(w, h));
-
-			//alignment
-			if (alignment.HasFlag(Alignment.Center))
-				destRect.Origin = new Point(destRect.Size.X / 2f, destRect.Origin.Y);
-			if (alignment.HasFlag(Alignment.Right))
-				destRect.Origin = new Point(destRect.Size.X, destRect.Origin.Y);
-
-			if (alignment.HasFlag(Alignment.Middle))
-				destRect.Origin = new Point(destRect.Origin.X, destRect.Size.Y / 2f);
-			if (alignment.HasFlag(Alignment.Bottom))
-				destRect.Origin = new Point(destRect.Origin.X, destRect.Size.Y);
-
-			DrawX.DrawJobs.Add(new TextureDrawJob(depth, new SimpleRectangle(pos, new Point(w, h)), textTexture, new SimpleRectangle(Point.Zero, new Point(w, h)), destRect));
 		}
 
 		public void Load()
@@ -83,7 +104,10 @@ namespace HatlessEngine
 					Handle = SDL_ttf.TTF_OpenFontRW(SDL.SDL_RWFromMem(stream.ReadBytes(length), length), 1, PointSize);
 
 					if (Handle != IntPtr.Zero)
+					{
+						LineHeight = SDL_ttf.TTF_FontLineSkip(Handle);
 						Loaded = true;
+					}
 					else
 						throw new FileLoadException(SDL.SDL_GetError());
 				}
