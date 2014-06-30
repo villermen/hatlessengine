@@ -21,31 +21,34 @@ namespace HatlessEngine
 		/// </summary>
 		public static string RootDirectory = "";
 
-		//resources
-		public static List<View> Views = new List<View>();
-		public static Dictionary<string, Sprite> Sprites = new Dictionary<string, Sprite>();
+		//external
+		internal static List<IExternalResource> ExternalResources = new List<IExternalResource>();
 		public static Dictionary<string, Font> Fonts = new Dictionary<string, Font>();
 		public static Dictionary<string, Music> Music = new Dictionary<string, Music>();
 		public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
+		public static Dictionary<string, Sprite> Sprites = new Dictionary<string, Sprite>();
+
+		//logical
+		public static Dictionary<string, View> Views = new Dictionary<string, View>();
 
 		//collections
 		public static Dictionary<string, Objectmap> Objectmaps = new Dictionary<string, Objectmap>();
 		public static Dictionary<string, Spritemap> Spritemaps = new Dictionary<string, Spritemap>();
-		//public static Dictionary<string, CombinedMap> CombinedMaps = new Dictionary<string, CombinedMap>();
 
 		//objects
 		public static List<LogicalObject> Objects = new List<LogicalObject>();
 		public static List<PhysicalObject> PhysicalObjects = new List<PhysicalObject>();
 		public static Dictionary<Type, List<PhysicalObject>> PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
 
-		internal static List<int> AudioSources = new List<int>();
-		internal static Dictionary<int, AudioControl> AudioControls = new Dictionary<int, AudioControl>();
-
 		//addition/removal (has to be done after looping)
 		internal static List<LogicalObject> AddObjects = new List<LogicalObject>();
 		internal static List<LogicalObject> RemoveObjects = new List<LogicalObject>();
 
 		internal static List<WeakReference> ManagedSprites = new List<WeakReference>();
+
+		//audio helpers
+		internal static List<int> AudioSources = new List<int>();
+		internal static Dictionary<int, AudioControl> AudioControls = new Dictionary<int, AudioControl>();
 
 		/// <summary>
 		/// Gets the StreamReader of a (resource) file with the given filename.
@@ -91,98 +94,15 @@ namespace HatlessEngine
 			throw new FileNotFoundException("The file could not be found in any of the possible locations.");
 		}
 
-		public static View AddView(SimpleRectangle area, SimpleRectangle viewport)
-		{
-			View view = new View(area, viewport);
-			Views.Add(view);
-			return view;
-		}
-		public static Sprite AddSprite(string id, string filename, Point size)
-		{
-			Sprite sprite;
-			if (size == new Point(0f, 0f))
-				sprite = new Sprite(id, filename);
-			else
-				sprite = new Sprite(id, filename, size);
-
-			Sprites.Add(id, sprite);
-
-			return sprite;
-		}
-		public static Sprite AddSprite(string id, string filename)
-		{
-			return AddSprite(id, filename, new Point(0f, 0f));
-		}
-		public static Font AddFont(string id, string filename, int pointSize)
-		{
-			Font font = new Font(id, filename, pointSize);
-			Fonts.Add(id, font);
-			return font;
-		}
-		public static Music AddMusic(string id, string filename)
-		{
-			Music music = new Music(id, filename);
-			Music.Add(id, music);
-			return music;
-		}
-		public static Sound AddSound(string id, string filename)
-		{
-			Sound sound = new Sound(id, filename);
-			Sounds.Add(id, sound);
-			return sound;
-		}
-		public static Objectmap AddObjectmap(string id, params ObjectBlueprint[] objectmapBlueprints)
-		{
-			Objectmap objectmap = new Objectmap(id, objectmapBlueprints);
-			Objectmaps.Add(id, objectmap);
-			return objectmap;
-		}
-		/// <summary>
-		/// Add an Objectmap from file (saved by Objectmap.WriteToFile)
-		/// </summary>
-		public static Objectmap AddObjectmap(string id, string filename)
-		{
-			Objectmap objectmap = new Objectmap(id, filename);
-			Objectmaps.Add(id, objectmap);
-			return objectmap;
-		}
-		public static Spritemap AddSpritemap(string id, params ManagedSprite[] managedSprites)
-		{
-			Spritemap spritemap = new Spritemap(id, managedSprites);
-			Spritemaps.Add(id, spritemap);
-			return spritemap;
-		}
-		/// <summary>
-		/// Add a Spritemap from file (saved by Spritemap.WriteToFile)
-		/// </summary>
-		public static Spritemap AddSpritemap(string id, string filename)
-		{
-			Spritemap spritemap = new Spritemap(id, filename);
-			Spritemaps.Add(id, spritemap);
-			return spritemap;
-		}
-
 		public static void LoadAllExternalResources()
 		{
-			foreach(KeyValuePair<string, Sprite> pair in Sprites)
-				pair.Value.Load();
-			foreach(KeyValuePair<string, Font> pair in Fonts)
-				pair.Value.Load();
-			foreach(KeyValuePair<string, Sound> pair in Sounds)
-				pair.Value.Load();
-			foreach(KeyValuePair<string, Music> pair in Music)
-				pair.Value.Load();
+			foreach (IExternalResource resource in ExternalResources)
+				resource.Load();
 		}
 		public static void UnloadAllExternalResources()
 		{
-			foreach (KeyValuePair<string, Sprite> pair in Sprites)
-				pair.Value.Unload();
-			foreach (KeyValuePair<string, Font> pair in Fonts)
-				pair.Value.Unload();
-			foreach (KeyValuePair<string, Sound> pair in Sounds)
-				pair.Value.Unload();
-			foreach (KeyValuePair<string, Music> pair in Music)
-				pair.Value.Unload();
+			foreach (IExternalResource resource in ExternalResources)
+				resource.Unload();
 		}
 
 		internal static void ObjectAdditionAndRemoval()
@@ -256,26 +176,26 @@ namespace HatlessEngine
 
 		internal static void CleanupFontTextures()
 		{
-			foreach (KeyValuePair<string, Font> font in Fonts)
+			foreach (Font font in Fonts.Values)
 			{
 				List<Tuple<string, Color>> removeTextures = new List<Tuple<string, Color>>();
 
-				foreach(KeyValuePair<Tuple<string, Color>, IntPtr> texture in font.Value.Textures)
+				foreach(KeyValuePair<Tuple<string, Color>, IntPtr> texture in font.Textures)
 				{
-					//delete texture if it hasn't been used for 3 draw steps
-					if (font.Value.TexturesDrawsUnused[texture.Key] == 3)
+					//delete texture if it hasn't been used for 10 steps
+					if (font.TexturesDrawsUnused[texture.Key] == 10)
 					{
 						SDL.SDL_DestroyTexture(texture.Value);
 						removeTextures.Add(texture.Key);
 					}
 
-					font.Value.TexturesDrawsUnused[texture.Key]++;
+					font.TexturesDrawsUnused[texture.Key]++;
 				}
 
 				foreach (Tuple<string, Color> texture in removeTextures)
 				{
-					font.Value.Textures.Remove(texture);
-					font.Value.TexturesDrawsUnused.Remove(texture);
+					font.Textures.Remove(texture);
+					font.TexturesDrawsUnused.Remove(texture);
 				}
 			}
 		}

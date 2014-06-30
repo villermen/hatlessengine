@@ -10,7 +10,7 @@ namespace HatlessEngine
 	/// Stores a list of objects, that can be mass-created and removed.
 	/// Convenient way of creating levels or maps in general.
 	/// </summary>
-	public sealed class Objectmap
+	public class Objectmap : IResource
 	{
 		public string ID { get; private set; }
 
@@ -23,16 +23,21 @@ namespace HatlessEngine
 		public List<LogicalObject> ActiveObjects = new List<LogicalObject>();
 		internal List<PhysicalObject> ActivePhysicalObjects = new List<PhysicalObject>();
 
-		internal Objectmap(string id, params ObjectBlueprint[] blueprints)
+		private Objectmap(string id)
 		{
 			ID = id;
+			Resources.Objectmaps.Add(ID, this);
+		}
+
+		public Objectmap(string id, params ObjectBlueprint[] blueprints)
+			: this(id)
+		{
 			Blueprints = new List<ObjectBlueprint>(blueprints);
 		}
 			
-		internal Objectmap(string id, string filename)
+		public Objectmap(string id, string filename)
+			: this(id)
 		{
-			ID = id;
-
 			BinaryReader reader = Resources.GetStream(filename);
 
 			if (new String(reader.ReadChars(4)) != "HEOm")
@@ -84,6 +89,11 @@ namespace HatlessEngine
 			}
 			ActiveObjects.Clear();
 			ActivePhysicalObjects.Clear();
+		}
+
+		public void Destroy()
+		{
+			Resources.Objectmaps.Remove(ID);
 		}
 	}
 }

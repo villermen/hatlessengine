@@ -7,7 +7,7 @@ namespace HatlessEngine
 	/// <summary>
 	/// Class that contains blueprints for sprites to be drawn in bulk.
 	/// </summary>
-	public sealed class Spritemap
+	public sealed class Spritemap : IResource
 	{
 		public string ID { get; private set; }
 
@@ -18,15 +18,21 @@ namespace HatlessEngine
 
 		public List<ManagedSprite> ManagedSprites;
 
-		internal Spritemap(string id, params ManagedSprite[] managedSprites)
+		private Spritemap(string id)
 		{
 			ID = id;
+			Resources.Spritemaps.Add(ID, this);
+		}
+
+		public Spritemap(string id, params ManagedSprite[] managedSprites)
+			: this(id)
+		{
 			ManagedSprites = new List<ManagedSprite>(managedSprites);
 		}
 
-		internal Spritemap(string id, string filename)
+		public Spritemap(string id, string filename)
+			: this(id)
 		{
-			ID = id;
 			ManagedSprites = new List<ManagedSprite>();
 
 			BinaryReader reader = Resources.GetStream(filename);
@@ -127,6 +133,11 @@ namespace HatlessEngine
 		{
 			foreach(ManagedSprite sprite in ManagedSprites)
 				sprite.PerformStep = true;
+		}
+
+		public void Destroy()
+		{
+			Resources.Spritemaps.Remove(ID);
 		}
 	}
 }

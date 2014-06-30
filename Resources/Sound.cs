@@ -8,8 +8,8 @@ namespace HatlessEngine
 {
 	public sealed class Sound : IExternalResource
 	{
-		public string Filename { get; private set; }
 		public string ID { get; private set; }
+		public string Filename { get; private set; }
 		public bool Loaded { get; private set; }
 
 		//default balance/volume?
@@ -20,11 +20,14 @@ namespace HatlessEngine
 		private ALFormat ALFormat;
 		private TimeSpan Duration;
 
-		internal Sound(string id, string filename)
+		public Sound(string id, string filename)
 		{
 			ID = id;
 			Filename = filename;
 			Loaded = false;
+
+			Resources.Sounds.Add(ID, this);
+			Resources.ExternalResources.Add(this);
 		}
 
 		public SoundControl Play(float volume = 1f, float balance = 0f)
@@ -97,18 +100,12 @@ namespace HatlessEngine
 				return "'" + ID + "' (" + Filename + ", Unloaded)";			
 		}
 
-		~Sound()
-		{
-			Dispose(false);
-		}
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-		private void Dispose(bool disposing)
+		public void Destroy()
 		{
 			Unload();
+
+			Resources.Sounds.Remove(ID);
+			Resources.ExternalResources.Remove(this);
 		}
 	}
 }

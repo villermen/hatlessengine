@@ -5,8 +5,8 @@ namespace HatlessEngine
 {
 	public sealed class Music : AudioControl, IExternalResource
 	{
-		public string Filename { get; private set; }
 		public string ID { get; private set; }
+		public string Filename { get; private set; }
 		public bool Loaded { get; private set; }
 
 		public bool Loop = false; //implement in audiocontrol
@@ -38,11 +38,14 @@ namespace HatlessEngine
 		/// </summary>
 		public string PlayAfterMusic = "";
 
-		internal Music(string id, string filename)
+		public Music(string id, string filename)
 		{
 			ID = id;
 			Filename = filename;
 			Loaded = false;
+
+			Resources.Music.Add(ID, this);
+			Resources.ExternalResources.Add(this);
 		}
 
 		/// <summary>
@@ -154,18 +157,12 @@ namespace HatlessEngine
 				return "'" + ID + "' (" + Filename + ", Unloaded)";			
 		}
 
-		~Music()
-		{
-			Dispose(false);
-		}
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-		private void Dispose(bool disposing)
+		public void Destroy()
 		{
 			Unload();
+
+			Resources.Music.Remove(ID);
+			Resources.ExternalResources.Remove(this);
 		}
 	}
 }

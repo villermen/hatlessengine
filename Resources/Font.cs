@@ -5,10 +5,10 @@ using System.IO;
 
 namespace HatlessEngine
 {
-	public sealed class Font : IExternalResource
+	public class Font : IExternalResource
 	{
-		public string Filename { get; private set; }
 		public string ID { get; private set; }
+		public string Filename { get; private set; }
 		public bool Loaded { get; private set; }
 
 		internal IntPtr Handle;
@@ -20,16 +20,19 @@ namespace HatlessEngine
 		internal Dictionary<Tuple<string, Color>, IntPtr> Textures = new Dictionary<Tuple<string, Color>, IntPtr>();
 		internal Dictionary<Tuple<string, Color>, int> TexturesDrawsUnused = new Dictionary<Tuple<string, Color>, int>();
 
-		internal Font(string id, string filename, int pointSize)
+		public Font(string id, string filename, int pointSize)
 		{
+			if (pointSize < 1)
+				throw new ArgumentOutOfRangeException("pointSize", "pointSize must be bigger than zero.");
+
 			ID = id;
 			Filename = filename;
 			Loaded = false;
 
-			if (pointSize < 1)
-				throw new ArgumentOutOfRangeException("pointSize", "pointSize must be bigger than zero.");
-
 			PointSize = pointSize;
+
+			Resources.Fonts.Add(ID, this);
+			Resources.ExternalResources.Add(this);
 		}
 
 		public void Draw(string str, Point pos, Color color, Alignment alignment = Alignment.Top | Alignment.Left, int depth = 0)
@@ -124,18 +127,12 @@ namespace HatlessEngine
 			}
 		}
 
-		~Font()
-		{
-			Dispose(false);
-		}
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-		private void Dispose(bool disposing)
+		public void Destroy()
 		{
 			Unload();
+
+			Resources.Fonts.Remove(ID);
+			Resources.ExternalResources.Remove(this);
 		}
 	}
 

@@ -185,7 +185,7 @@ namespace HatlessEngine
 					//resolve absolute to fractional position on window
 					Point positionOnWindow = new Point(e.motion.x, e.motion.y) / Window.GetSize();
 					//decide on which viewport the mouse currently is
-					foreach (View view in Resources.Views)
+					foreach (View view in Resources.Views.Values)
 					{
 						if (view.Viewport.IntersectsWith(positionOnWindow))
 						{

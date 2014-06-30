@@ -5,7 +5,7 @@ using System.IO;
 
 namespace HatlessEngine
 {
-	public sealed class Sprite : IExternalResource
+	public class Sprite : IExternalResource
 	{   
 		public string Filename { get; private set; }
 		public string ID { get; private set; }
@@ -19,12 +19,12 @@ namespace HatlessEngine
 		public Point FrameSize { get; private set; }
 		public Point IndexSize { get; private set; }
 		
-		internal Sprite(string id, string filename) 
+		public Sprite(string id, string filename) 
 			: this(id, filename, new Point(1f, 1f))
 		{
 			AutoSize = true;
 		}
-		internal Sprite(string id, string filename, Point frameSize)
+		public Sprite(string id, string filename, Point frameSize)
 		{
 			ID = id;
 			Filename = filename;
@@ -32,6 +32,9 @@ namespace HatlessEngine
 
 			FrameSize = frameSize;
 			IndexSize = new Point(1f, 1f);
+
+			Resources.Sprites.Add(ID, this);
+			Resources.ExternalResources.Add(this);
 		}
 
 		public void Draw(Point pos, Point scale, Point origin, int frameIndex = 0, float rotation = 0f, int depth = 0)
@@ -49,7 +52,7 @@ namespace HatlessEngine
 			Draw(pos, new Point(1f, 1f), new Point(0f, 0f), frameIndex, rotation, depth);
 		}
 
-		internal Point GetIndexLocation(int frameIndex)
+		private Point GetIndexLocation(int frameIndex)
 		{
 			return new Point(frameIndex % IndexSize.X * FrameSize.X, (float)(Math.Floor(frameIndex / IndexSize.X) % IndexSize.Y * FrameSize.Y));
 		}
@@ -119,18 +122,12 @@ namespace HatlessEngine
 			Animations.Add(id, animationArray);
 		}
 
-		~Sprite()
-		{
-			Dispose(false);
-		}
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-		private void Dispose(bool disposing)
+		public void Destroy()
 		{
 			Unload();
+
+			Resources.Sprites.Remove(ID);
+			Resources.ExternalResources.Remove(this);
 		}
 	}
 }
