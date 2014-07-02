@@ -1,6 +1,5 @@
 # HatlessEngine
 
-
 ## Decription
 HatlessEngine is a simple and easy to use 2D engine for C#.
 I designed it with efficiency and easy of use in mind.
@@ -12,17 +11,15 @@ I've put it on github to have a backup and an easy way to show it to the people 
  - Easy object and resource management.
  - Logging to file and/or console.
  - Built-in collision support.
- - Flatfile or code-based object and sprite collections.
+ - Flatfile or code-based collections for easy setup of levels.
  - Support for vorbis and wave sound.
  - Streaming music.
  - A central way of checking for input, and full gamepad support.
  - Multiple views.
+ - Nothing more than 'using HatlessEngine' required to get started on a game.
 
 HatlessEngine makes use of the following libraries:
- - [OpenTK](http://www.opentk.com/) (OpenGL, OpenAL & OpenCL)
- - [QuickFont](http://www.opentk.com/project/QuickFont) for font loading and text drawing.
- - [NVorbis](https://nvorbis.codeplex.com/) for ogg decoding.
+ - [SDL2#](https://github.com/flibitijibibo/SDL2-CS) (A C# binding of the popular multimedia library [SDL](https://www.libsdl.org/index.php)).
+ - [NVorbis](https://nvorbis.codeplex.com/) for ogg sound decoding.
 
-For suggestions, issues and questions please refer to the Issues tab, or contact me.
-
-### [Documentation](https://github.com/Villermen/HatlessEngine/wiki/Documentation) (TODO)
+For suggestions, issues and questions please refer to the [Issues tab](https://github.com/Villermen/HatlessEngine/issues?state=open), or [contact me](http://villermen.com/).

@@ -375,7 +375,7 @@ namespace HatlessEngine
 
 			if (Misc.ExceptionErrorMessageEnabled)
 			{
-				string message = "The game encountered an unhandled " + eTypeString + " and has to close.";
+				string message = "The game encountered an unhandled " + eTypeString + " and has to exit.";
 				message += "\nA crashlog has been written to latestcrashlog.txt.";
 
 				SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "Game Crash", message, WindowHandle);
