@@ -50,11 +50,14 @@ namespace HatlessEngine
 		internal static List<int> AudioSources = new List<int>();
 		internal static Dictionary<int, AudioControl> AudioControls = new Dictionary<int, AudioControl>();
 
+		private static Assembly EntryAssembly = Assembly.GetEntryAssembly();
+		private static Assembly HatlessEngineAssembly = Assembly.GetExecutingAssembly();
+
 		/// <summary>
 		/// Gets the BinaryReader of a file with the given filename.
 		/// All resources are loaded this way.
 		/// Priority: 
-		/// 1: Embedded Resource in the RootDirectory withing the entry assembly;
+		/// 1: Embedded Resource in the RootDirectory within the entry assembly.
 		/// 2: Embedded Resource in the entry assembly.
 		/// 3: File in the RootDirectory.
 		/// 4: File in the application's directory, or an absolute filepath.
@@ -64,16 +67,19 @@ namespace HatlessEngine
 		{
 			Stream stream;
 
-			Assembly entryAssembly = Assembly.GetEntryAssembly();
+			//sneaky extra option: embedded resource in hatlessengine
+			stream = HatlessEngineAssembly.GetManifestResourceStream(HatlessEngineAssembly.GetName().Name + "." + filename);
+			if (stream != null)
+				return new BinaryReader(stream);
 
 			if (RootDirectory != "")
 			{
-				stream = entryAssembly.GetManifestResourceStream(entryAssembly.GetName().Name + "." + (RootDirectory + filename).Replace('/', '.'));
+				stream = EntryAssembly.GetManifestResourceStream(EntryAssembly.GetName().Name + "." + (RootDirectory + filename).Replace('/', '.'));
 				if (stream != null)
 					return new BinaryReader(stream);
 			}
 
-			stream = entryAssembly.GetManifestResourceStream(entryAssembly.GetName().Name + "." + filename.Replace('/', '.'));
+			stream = EntryAssembly.GetManifestResourceStream(EntryAssembly.GetName().Name + "." + filename.Replace('/', '.'));
 			if (stream != null)
 				return new BinaryReader(stream);
 

@@ -83,6 +83,7 @@
     <Compile Include="ObjectBlueprint.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="defaultwindowicon.png" />
     <Content Include="libfreetype-6.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
