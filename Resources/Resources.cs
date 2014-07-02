@@ -51,7 +51,7 @@ namespace HatlessEngine
 		internal static Dictionary<int, AudioControl> AudioControls = new Dictionary<int, AudioControl>();
 
 		/// <summary>
-		/// Gets the StreamReader of a (resource) file with the given filename.
+		/// Gets the BinaryReader of a file with the given filename.
 		/// All resources are loaded this way.
 		/// Priority: 
 		/// 1: Embedded Resource in the RootDirectory withing the entry assembly;
@@ -60,7 +60,7 @@ namespace HatlessEngine
 		/// 4: File in the application's directory, or an absolute filepath.
 		/// Also, don't work with backslashes, they are nasty and unaccounted for.
 		/// </summary>
-		public static BinaryReader GetStream(string fileName)
+		public static BinaryReader GetStream(string filename)
 		{
 			Stream stream;
 
@@ -68,30 +68,42 @@ namespace HatlessEngine
 
 			if (RootDirectory != "")
 			{
-				stream = entryAssembly.GetManifestResourceStream(entryAssembly.GetName().Name + "." + (RootDirectory + fileName).Replace('/', '.'));
+				stream = entryAssembly.GetManifestResourceStream(entryAssembly.GetName().Name + "." + (RootDirectory + filename).Replace('/', '.'));
 				if (stream != null)
 					return new BinaryReader(stream);
 			}
 
-			stream = entryAssembly.GetManifestResourceStream(entryAssembly.GetName().Name + "." + fileName.Replace('/', '.'));
+			stream = entryAssembly.GetManifestResourceStream(entryAssembly.GetName().Name + "." + filename.Replace('/', '.'));
 			if (stream != null)
 				return new BinaryReader(stream);
 
-			if (RootDirectory != "" && File.Exists(RootDirectory + fileName))
+			if (RootDirectory != "" && File.Exists(RootDirectory + filename))
 			{
-				stream = File.Open(RootDirectory + fileName, FileMode.Open, FileAccess.Read, FileShare.Read);			
+				stream = File.Open(RootDirectory + filename, FileMode.Open, FileAccess.Read, FileShare.Read);			
 				if (stream != null)
 					return new BinaryReader(stream);
 			}
 
-			if (File.Exists(fileName))
+			if (File.Exists(filename))
 			{
-				stream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+				stream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
 				if (stream != null)
 					return new BinaryReader(stream);
 			}
 
 			throw new FileNotFoundException("The file could not be found in any of the possible locations.");
+		}
+
+		/// <summary>
+		/// Creates an SDL RW resource from the entire file, using GetStream to resolve the file.
+		/// </summary>
+		internal static IntPtr CreateRWFromFile(string filename)
+		{
+			using (BinaryReader reader = GetStream(filename))
+			{
+				int length = (int)reader.BaseStream.Length;
+				return SDL.SDL_RWFromMem(reader.ReadBytes(length), length);
+			}
 		}
 
 		public static void LoadAllExternalResources()

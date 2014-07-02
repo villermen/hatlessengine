@@ -61,37 +61,33 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 			{
-				using (BinaryReader stream = Resources.GetStream(Filename))
+				IntPtr surface = SDL_image.IMG_Load_RW(Resources.CreateRWFromFile(Filename), 1);
+				if (surface != IntPtr.Zero)
 				{
-					int length = (int)stream.BaseStream.Length;
-					IntPtr surface = SDL_image.IMG_Load_RW(SDL.SDL_RWFromMem(stream.ReadBytes(length), length), 1);
-					if (surface != IntPtr.Zero)
+					TextureHandle = SDL.SDL_CreateTextureFromSurface(Game.RendererHandle, surface);
+					SDL.SDL_FreeSurface(surface);
+
+					if (TextureHandle != IntPtr.Zero)
 					{
-						TextureHandle = SDL.SDL_CreateTextureFromSurface(Game.RendererHandle, surface);
-						SDL.SDL_FreeSurface(surface);
+						uint format;
+						int access, w, h;
+						SDL.SDL_QueryTexture(TextureHandle, out format, out access, out w, out h);
 
-						if (TextureHandle != IntPtr.Zero)
+						if (AutoSize)
 						{
-							uint format;
-							int access, w, h;
-							SDL.SDL_QueryTexture(TextureHandle, out format, out access, out w, out h);
-
-							if (AutoSize)
-							{
-								FrameSize = new Point(w, h);
-								IndexSize = new Point(1, 1);
-							}
-							else
-								IndexSize = new Point(w / FrameSize.X, h / FrameSize.Y);
-
-							Loaded = true;
+							FrameSize = new Point(w, h);
+							IndexSize = new Point(1, 1);
 						}
 						else
-							throw new FileLoadException(SDL.SDL_GetError());
+							IndexSize = new Point(w / FrameSize.X, h / FrameSize.Y);
+
+						Loaded = true;
 					}
 					else
 						throw new FileLoadException(SDL.SDL_GetError());
 				}
+				else
+					throw new FileLoadException(SDL.SDL_GetError());
 			}
 		}
 

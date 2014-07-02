@@ -101,19 +101,15 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 			{
-				using (BinaryReader stream = Resources.GetStream(Filename))
-				{
-					int length = (int)stream.BaseStream.Length;
-					Handle = SDL_ttf.TTF_OpenFontRW(SDL.SDL_RWFromMem(stream.ReadBytes(length), length), 1, PointSize);
+				Handle = SDL_ttf.TTF_OpenFontRW(Resources.CreateRWFromFile(Filename), 1, PointSize);
 
-					if (Handle != IntPtr.Zero)
-					{
-						LineHeight = SDL_ttf.TTF_FontLineSkip(Handle);
-						Loaded = true;
-					}
-					else
-						throw new FileLoadException(SDL.SDL_GetError());
+				if (Handle != IntPtr.Zero)
+				{
+					LineHeight = SDL_ttf.TTF_FontLineSkip(Handle);
+					Loaded = true;
 				}
+				else
+					throw new FileLoadException(SDL.SDL_GetError());
 			}
 		}
 
