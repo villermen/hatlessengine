@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using MoreLinq;
 using System.Diagnostics;
 using System.Threading;
+using System.IO;
 
 namespace HatlessEngine
 {
@@ -77,6 +78,11 @@ namespace HatlessEngine
 		public static int ActualFPS
 		{
 			get { return _ActualFPS; }
+		}
+
+		static Game()
+		{
+			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandler);
 		}
 
 		/// <summary>
@@ -353,6 +359,27 @@ namespace HatlessEngine
 		{
 			SDL.SDL_RenderPresent(RendererHandle);
 			RenderframeReady = false;
+		}
+
+		private static void ExceptionHandler(object sender, UnhandledExceptionEventArgs args)
+		{
+			Exception e = (Exception)args.ExceptionObject;
+			string eTypeString = e.GetType().ToString();
+
+			StreamWriter writer = new StreamWriter(File.Open("latestcrashlog.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
+			writer.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm zzz"));
+			writer.WriteLine(eTypeString);
+			writer.WriteLine(e.Message);
+			writer.WriteLine(e.StackTrace);
+			writer.Close();
+
+			if (Misc.ExceptionErrorMessageEnabled)
+			{
+				string message = "The game encountered an unhandled " + eTypeString + " and has to close.";
+				message += "\nA crashlog has been written to latestcrashlog.txt.";
+
+				SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "Game Crash", message, WindowHandle);
+			}
 		}
 	}
 }

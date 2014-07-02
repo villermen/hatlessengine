@@ -6,6 +6,18 @@ namespace HatlessEngine
 	public static class Misc
 	{
 		/// <summary>
+		/// Whether to show a messagebox when an unhandled exception is thrown.
+		/// Crashlog will be written regardless of this setting.
+		/// This is disabled by default when DEBUG is defined, but can be changed at will.
+		/// </summary>
+#if DEBUG
+		public static bool ExceptionErrorMessageEnabled = false;
+#else
+		public static bool ExceptionErrorMessageEnabled = true;
+#endif
+
+
+		/// <summary>
 		/// Returns whether a random chance is met.
 		/// Explained: chance in values (1 in 100) chance of returning true
 		/// </summary>
