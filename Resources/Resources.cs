@@ -23,6 +23,7 @@ namespace HatlessEngine
 
 		//external
 		internal static List<IExternalResource> ExternalResources = new List<IExternalResource>();
+		public static Dictionary<string, Cursor> Cursors = new Dictionary<string, Cursor>();
 		public static Dictionary<string, Font> Fonts = new Dictionary<string, Font>();
 		public static Dictionary<string, Music> Music = new Dictionary<string, Music>();
 		public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
@@ -101,7 +102,7 @@ namespace HatlessEngine
 		}
 
 		/// <summary>
-		/// Creates an SDL RW resource from the entire file, using GetStream to resolve the file.
+		/// Creates an SDL RW resource from the entire file, using GetStream to resolve the filename.
 		/// </summary>
 		internal static IntPtr CreateRWFromFile(string filename)
 		{

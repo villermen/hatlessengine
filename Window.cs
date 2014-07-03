@@ -151,6 +151,18 @@ namespace HatlessEngine
 			SDL.SDL_SetWindowIcon(Game.WindowHandle, SDL_image.IMG_Load_RW(Resources.CreateRWFromFile("defaultwindowicon.png"), 1));
 		}
 
+		/// <summary>
+		/// Same as calling Cursor.Set()
+		/// </summary>
+		public static void SetCursor(Cursor cursor)
+		{
+			cursor.Set();
+		}
+		public static void SetCursor(string cursorID)
+		{
+			SetCursor(Resources.Cursors[cursorID]);
+		}
+
 		//left to do: cursorimage & maximizing/minimizing
 	}
 

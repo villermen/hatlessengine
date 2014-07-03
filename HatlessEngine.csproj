@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="AudioSettings.cs" />
     <Compile Include="CollisionRule.cs" />
+    <Compile Include="Cursor.cs" />
     <Compile Include="DrawJobs\LineDrawJob.cs" />
     <Compile Include="DrawJobs\TextureDrawJob.cs" />
     <Compile Include="DrawJobs\IDrawJob.cs" />
