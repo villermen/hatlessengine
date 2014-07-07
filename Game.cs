@@ -94,8 +94,7 @@ namespace HatlessEngine
 			Mix.Init(Mix.InitFlags.EVERYTHING);
 			TTF.Init();
 
-			//Mix.OpenAudio(22050,  )
-
+			//open window
 			SDL.SetHint(SDL.HINT_RENDER_VSYNC, "1");
 			SDL.SetHint(SDL.HINT_RENDER_SCALE_QUALITY, "1");
 
@@ -108,6 +107,13 @@ namespace HatlessEngine
 			//add default view that spans the current window
 			new View("default", new SimpleRectangle(Point.Zero, Window.GetSize()), new SimpleRectangle(Point.Zero , new Point(1f, 1f)));
 
+			//initialize audio system and let Resources handle sound expiration
+			Mix.OpenAudio(44100, SDL.AUDIO_S16SYS, 2, 4096);
+			Mix.AllocateChannels((int)(speed * 2)); //might want to dynamically create and remove channels during runtime
+			Mix.ChannelFinished(new Mix.ChannelFinishedDelegate(Resources.SoundChannelFinished));
+			Mix.HookMusicFinished(new Mix.MusicFinishedDelegate(Resources.MusicFinished));
+
+			//initialize loop
 			StepsPerSecond = speed;
 
 			Running = true;			
@@ -158,6 +164,8 @@ namespace HatlessEngine
 			WindowHandle = IntPtr.Zero;
 			SDL.DestroyRenderer(RendererHandle);
 			RendererHandle = IntPtr.Zero;
+
+			Mix.CloseAudio();
 
 			SDL.Quit();
 			IMG.Quit();

@@ -1,28 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using SDL2_mixer;
 
 namespace HatlessEngine
-{/*
-	public sealed class Sound : IExternalResource
+{
+	/// <summary>
+	/// A sound effect that can be played multiple times simultaneously and is loaded into memory in it's entirity.
+	/// Supports the following file formats taken from SDL_mixer: WAVE, AIFF, RIFF, OGG, and VOC.
+	/// </summary>
+	public class Sound : IExternalResource
 	{
 		public string ID { get; private set; }
 		public string Filename { get; private set; }
 		public bool Loaded { get; private set; }
 
-		//default balance/volume?
+		public float BaseVolume { get; private set; }
 
-		private int OpenALBufferID;
+		private IntPtr ChunkHandle;
 
-		private SoundDataFormat SoundDataFormat;
-		private ALFormat ALFormat;
-		private TimeSpan Duration;
-
-		public Sound(string id, string filename)
+		public Sound(string id, string filename, float baseVolume = 1f)
 		{
 			ID = id;
 			Filename = filename;
 			Loaded = false;
+
+			BaseVolume = baseVolume;
 
 			Resources.Sounds.Add(ID, this);
 			Resources.ExternalResources.Add(this);
@@ -33,69 +36,39 @@ namespace HatlessEngine
 			if (!Loaded)
 				throw new NotLoadedException();
 
-			//generate source and reference the buffer
-			int source = Resources.GetSource();
-			AL.Source(source, ALSourcei.Buffer, OpenALBufferID);
+			int channel = Mix.PlayChannelTimed(-1, ChunkHandle, 0, -1);
+			Mix.Volume(channel, (int)(128 * volume));
+			balance = balance / 2f + 0.5f; //0-1
+			Mix.SetPanning(channel, (byte)(255 - 255 * balance), (byte)(0 + 255 * balance));
 
-			SoundControl soundControl = new SoundControl(source);
-			soundControl.Volume = volume;
-			soundControl.Balance = balance;
-
-			AL.SourcePlay(source);
-
-			return soundControl;
+			return new SoundControl(channel);
 		}
 
 		public void Load()
 		{
-			if (!Loaded)
+			if (Loaded)
+				return;
+
+			ChunkHandle = Mix.LoadWAV_RW(Resources.CreateRWFromFile(Filename), 1);
+
+			if (ChunkHandle != IntPtr.Zero)
 			{
-				using (WaveReader waveReader = new WaveReader(Resources.GetStream(Filename)))
-				{
-					if (waveReader.MetaLoaded)
-					{
-						OpenALBufferID = AL.GenBuffer();
-						int readSamples;
-						short[] waveData = waveReader.ReadAll(out readSamples);
-						AL.BufferData(OpenALBufferID, waveReader.ALFormat, waveData, waveData.Length * 2, waveReader.SampleRate);
-
-						SoundDataFormat = waveReader.Format;
-						ALFormat = waveReader.ALFormat;
-						Duration = waveReader.Duration;
-
-						Loaded = true;
-					}
-					else
-						throw new FileLoadException();
-				}
+				Mix.VolumeChunk(ChunkHandle, (int)(128 * BaseVolume));
+				Loaded = true;
 			}
-		}
-
-		/// <summary>
-		/// For rearming after AudioContext has been destroyed.
-		/// </summary>
-		internal void LoadForced()
-		{
-			Loaded = false;
-			Load();
+			else
+				throw new FileLoadException();
 		}
 
 		public void Unload()
 		{
-			if (Loaded)
-			{
-				AL.DeleteBuffer(OpenALBufferID);
-				OpenALBufferID = 0;
-				Loaded = false;
-			}
-		}
+			if (!Loaded)
+				return;
 
-		public override string ToString()
-		{
-			if (Loaded)
-				return "'" + ID + "' (" + Filename + ", " + SoundDataFormat.ToString() + ", " + ALFormat.ToString() + ", " + Duration.ToString() + ")";
-			else
-				return "'" + ID + "' (" + Filename + ", Unloaded)";			
+			Mix.FreeChunk(ChunkHandle);
+			ChunkHandle = IntPtr.Zero;
+
+			Loaded = false;
 		}
 
 		public void Destroy()
@@ -105,5 +78,5 @@ namespace HatlessEngine
 			Resources.Sounds.Remove(ID);
 			Resources.ExternalResources.Remove(this);
 		}
-	}*/
+	}
 }

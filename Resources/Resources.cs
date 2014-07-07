@@ -24,8 +24,8 @@ namespace HatlessEngine
 		internal static List<IExternalResource> ExternalResources = new List<IExternalResource>();
 		public static Dictionary<string, Cursor> Cursors = new Dictionary<string, Cursor>();
 		public static Dictionary<string, Font> Fonts = new Dictionary<string, Font>();
-		//public static Dictionary<string, Music> Music = new Dictionary<string, Music>();
-		//public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
+		public static Dictionary<string, Music> Music = new Dictionary<string, Music>();
+		public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
 		public static Dictionary<string, Sprite> Sprites = new Dictionary<string, Sprite>();
 
 		//logical
@@ -47,8 +47,8 @@ namespace HatlessEngine
 		internal static List<WeakReference> ManagedSprites = new List<WeakReference>();
 
 		//audio helpers
-		//internal static List<int> AudioSources = new List<int>();
-		//internal static Dictionary<int, AudioControl> AudioControls = new Dictionary<int, AudioControl>();
+		internal static Dictionary<int, SoundControl> SoundControls = new Dictionary<int, SoundControl>();
+		internal static Music CurrentlyPlayingMusic;
 
 		private static Assembly EntryAssembly = Assembly.GetEntryAssembly();
 		private static Assembly HatlessEngineAssembly = Assembly.GetExecutingAssembly();
@@ -135,41 +135,24 @@ namespace HatlessEngine
 			RemoveObjects.Clear();
 		}
 
-		/*/// <summary>
-		/// Gets an OpenAL source identifier.
-		/// Source will be managed by HatlessEngine to prevent not playing of sound after all device channels are occupied.
+		/// <summary>
+		/// Destroys a SoundControl when it's no longer supposed to exist.
 		/// </summary>
-		internal static int GetSource()
+		internal static void SoundChannelFinished(int channel)
 		{
-			int source;
-			//will execute multiple times if cleanup has not removed the source from AudioControls yet
-			while (AudioControls.ContainsKey(source = AL.GenSource())) { }
-			AudioSources.Add(source);
-			return source;
-		}*/
+			SoundControls[channel].Destroy();
+		}
 
-		/*/// <summary>
-		/// Removes all stopped sources.
-		/// </summary>
-		internal static void SourceRemoval()
+		internal static void MusicFinished()
 		{
-			List<int> removeSources = new List<int>();
-			foreach(int source in AudioSources)
+			if (CurrentlyPlayingMusic != null)
 			{
-				if (AL.GetSourceState(source) == ALSourceState.Stopped)
-				{
-					AL.DeleteSource(source);
-					removeSources.Add(source);
-				}
+				//CurrentlyPlayMusic.PerformStopped might change CurrentlyPlayingMusic itself, so use a temp value
+				Music tempCurrentlyPlayingMusic = CurrentlyPlayingMusic;
+				CurrentlyPlayingMusic = null;
+				tempCurrentlyPlayingMusic.PerformStopped();
 			}
-
-			foreach(int source in removeSources)
-			{
-				AudioSources.Remove(source);
-				AudioControls[source].PerformStopped();
-				AudioControls.Remove(source);
-			}
-		}*/
+		}
 
 		internal static void UpdateManagedSprites()
 		{

@@ -1,47 +1,28 @@
 ﻿using System;
+using SDL2_mixer;
+using System.IO;
 
 namespace HatlessEngine
-{/*
-	public sealed class Music : AudioControl, IExternalResource
+{
+	public sealed class Music : IExternalResource
 	{
 		public string ID { get; private set; }
 		public string Filename { get; private set; }
 		public bool Loaded { get; private set; }
 
-		public bool Loop = false; //implement in audiocontrol
+		public float BaseVolume { get; private set; }
+		public bool Paused { get; private set; }
 
-		internal bool Streaming = false;
+		private IntPtr MusicHandle;
 
-		internal int[] BufferIDs;
-		internal byte ActiveBufferID;
-
-		internal bool JustStartedPlaying = false;
-
-		//for triggering event in old music when this one is set as the PlayAfter one (needs to be triggered on a delay)
-		internal byte PerformMusicChangedEventDelay = 3;
-		internal Music PerformMusicChangedEventMusic = null;
-
-		internal WaveReader WaveReader;
-
-		/// <summary>
-		/// Sample to start after when this music is looped.
-		/// One sample is both channels for stereo. 
-		/// Audacity is a good way to find out what sample you need.
-		/// Just split the files into an intro and loop region if you don't want to use this.
-		/// </summary>
-		public uint LoopStartSample = 0;
-
-		/// <summary>
-		/// Music to play directly after this one ends.
-		/// Of course this doesn't work when this one's in looping mode.
-		/// </summary>
-		public string PlayAfterMusic = "";
-
-		public Music(string id, string filename)
+		public Music(string id, string filename, float baseVolume = 1f)
 		{
 			ID = id;
 			Filename = filename;
 			Loaded = false;
+
+			BaseVolume = baseVolume;
+			Paused = false;
 
 			Resources.Music.Add(ID, this);
 			Resources.ExternalResources.Add(this);
@@ -51,109 +32,80 @@ namespace HatlessEngine
 		/// Start playing the music.
 		/// volume and balance will set the Volume and Balance before the music starts. (For convenience.)
 		/// </summary>
-		public void Play(float volume, float balance)
+		public void Play(bool looping = false, float volume = 1f, float balance = 0f)
 		{
 			if (!Loaded)
 				throw new NotLoadedException();
 
-			if (Streaming)
+			Paused = false;
+
+			Mix.VolumeMusic((int)(128 * BaseVolume * volume));
+
+			if (looping)
+				Mix.PlayMusic(MusicHandle, -1);
+			else
+				Mix.PlayMusic(MusicHandle, 0);
+
+			Resources.CurrentlyPlayingMusic = this;
+		}
+
+		public void Pause()
+		{
+			if (IsPlaying())
 			{
-				Stop(); //needs better solution
-				Streaming = false;
+				Mix.PauseMusic();
+				Paused = true;
 			}
-
-			WaveReader.Rewind();
-
-			SourceID = Resources.GetSource();
-
-			//fill first buffer to make sure the music can start playing after this point
-			int readSamples;
-			short[] waveData = WaveReader.ReadSamples(WaveReader.SampleRate / 2 * WaveReader.Channels, out readSamples);
-			AL.BufferData(BufferIDs[0], WaveReader.ALFormat, waveData, readSamples * 2, WaveReader.SampleRate);
-
-			//attach
-			AL.SourceQueueBuffer(SourceID, BufferIDs[0]);
-			ActiveBufferID = 0;
-
-			//set volume and balance before playback
-			Volume = volume;
-			Balance = balance;
-
-			AL.SourcePlay(SourceID);
-
-			JustStartedPlaying = true;
-			Streaming = true;
-
-			MusicStreamer.Launch();
-
-			Resources.AudioSources.Add(SourceID);
-			Resources.AudioControls.Add(SourceID, this);
 		}
-		public void Play(float volume)
+
+		public void Resume()
 		{
-			Play(volume, _Balance);
+			if (Paused && IsPlaying())
+			{
+				Mix.ResumeMusic();
+				Paused = false;
+			}
 		}
-		public void Play()
+
+		public void Stop()
 		{
-			Play(_Volume, _Balance);
+			if (IsPlaying())
+				Mix.HaltMusic();
+		}
+
+		public bool IsPlaying()
+		{
+			return (Resources.CurrentlyPlayingMusic == this);
 		}
 
 		public void Load()
 		{
-			if (!Loaded)
-			{
-				WaveReader = new WaveReader(Resources.GetStream(Filename));
-				if (WaveReader.MetaLoaded)
-					Loaded = true;
-				else
-					throw new System.IO.FileLoadException();
-				BufferIDs = AL.GenBuffers(3);
-			}
-		}
+			if (Loaded)
+				return;
 
-		/// <summary>
-		/// For rearming after AudioContext has been destroyed.
-		/// </summary>
-		internal void LoadForced()
-		{
-			Loaded = false;
-			Load();
+			MusicHandle = Mix.LoadMUS(Filename);
 
-			//we don't have the old buffers and source so streaming won't do much. (Don't hog the streamer is what im getting at.)
-			Streaming = false;
+			if (MusicHandle != IntPtr.Zero)
+				Loaded = true;
+			else
+				throw new FileLoadException();
 		}
 
 		public void Unload()
 		{
-			if (Loaded)
-			{
-				WaveReader.Dispose();
-				WaveReader = null;
-				AL.DeleteBuffers(BufferIDs);
-				BufferIDs = null;
-				Streaming = false;
+			if (!Loaded)
+				return;
 
-				Loaded = false;
-			}
+			Mix.FreeMusic(MusicHandle);
+			Loaded = false;
 		}
 
-		/// <summary>
-		/// Occurs when this music is done playing and it's switching over the source to the given PlayAfterMusic.
-		/// </summary>
-		public event EventHandler<MusicChangedEventArgs> MusicChanged;
+		public event EventHandler Stopped;
 
-		internal void PerformMusicChanged(Music newMusic)
+		internal void PerformStopped()
 		{
-			if (MusicChanged != null)
-				MusicChanged(this, new MusicChangedEventArgs(this, newMusic));
-		}
-
-		public override string ToString()
-		{
-			if (Loaded)
-				return "'" + ID + "' (" + Filename + ", " + WaveReader.Format.ToString() + ", " + WaveReader.ALFormat.ToString() + ", " + WaveReader.Duration.ToString() + ")";
-			else
-				return "'" + ID + "' (" + Filename + ", Unloaded)";			
+			if (Stopped != null)
+				Stopped(this, EventArgs.Empty);
 		}
 
 		public void Destroy()
@@ -163,5 +115,5 @@ namespace HatlessEngine
 			Resources.Music.Remove(ID);
 			Resources.ExternalResources.Remove(this);
 		}
-	}*/
+	}
 }

@@ -37,14 +37,12 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AudioSettings.cs" />
     <Compile Include="CollisionRule.cs" />
     <Compile Include="Cursor.cs" />
     <Compile Include="DrawJobs\LineDrawJob.cs" />
     <Compile Include="DrawJobs\TextureDrawJob.cs" />
     <Compile Include="DrawJobs\IDrawJob.cs" />
     <Compile Include="Resources\IResource.cs" />
-    <Compile Include="Resources\MusicStreamer.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="QuadTree.cs" />
     <Compile Include="Shapes\SimpleRectangle.cs" />
@@ -62,8 +60,6 @@
     <Compile Include="Log.cs" />
     <Compile Include="Resources\Sound.cs" />
     <Compile Include="Resources\SoundControl.cs" />
-    <Compile Include="Resources\AudioControl.cs" />
-    <Compile Include="Resources\WaveReader.cs" />
     <Compile Include="Resources\Font.cs" />
     <Compile Include="Resources\ButtonObject.cs" />
     <Compile Include="Resources\ManagedSprite.cs" />
@@ -124,9 +120,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="smpeg2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="soft_oal.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SDL2.dll">
