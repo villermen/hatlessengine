@@ -345,8 +345,7 @@ namespace HatlessEngine
 
 			//threadpool should take care of actually swapping the frames (RenderPresent may wait for things like Fraps or VSync)
 			RenderframeReady = true;
-			Stopwatch v = Stopwatch.StartNew();
-			ThreadPool.QueueUserWorkItem(new WaitCallback(PresentRender), v);
+			ThreadPool.QueueUserWorkItem(new WaitCallback(PresentRender));
 		}
 
 		/// <summary>
