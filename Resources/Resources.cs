@@ -1,9 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using SDL2;
+using System;
 using System.Collections.Generic;
-using OpenTK.Audio.OpenAL;
+using System.IO;
 using System.Reflection;
-using SDL2;
 
 namespace HatlessEngine
 {
@@ -25,8 +24,8 @@ namespace HatlessEngine
 		internal static List<IExternalResource> ExternalResources = new List<IExternalResource>();
 		public static Dictionary<string, Cursor> Cursors = new Dictionary<string, Cursor>();
 		public static Dictionary<string, Font> Fonts = new Dictionary<string, Font>();
-		public static Dictionary<string, Music> Music = new Dictionary<string, Music>();
-		public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
+		//public static Dictionary<string, Music> Music = new Dictionary<string, Music>();
+		//public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
 		public static Dictionary<string, Sprite> Sprites = new Dictionary<string, Sprite>();
 
 		//logical
@@ -48,8 +47,8 @@ namespace HatlessEngine
 		internal static List<WeakReference> ManagedSprites = new List<WeakReference>();
 
 		//audio helpers
-		internal static List<int> AudioSources = new List<int>();
-		internal static Dictionary<int, AudioControl> AudioControls = new Dictionary<int, AudioControl>();
+		//internal static List<int> AudioSources = new List<int>();
+		//internal static Dictionary<int, AudioControl> AudioControls = new Dictionary<int, AudioControl>();
 
 		private static Assembly EntryAssembly = Assembly.GetEntryAssembly();
 		private static Assembly HatlessEngineAssembly = Assembly.GetExecutingAssembly();
@@ -109,7 +108,7 @@ namespace HatlessEngine
 			using (BinaryReader reader = GetStream(filename))
 			{
 				int length = (int)reader.BaseStream.Length;
-				return SDL.SDL_RWFromMem(reader.ReadBytes(length), length);
+				return SDL.RWFromMem(reader.ReadBytes(length), length);
 			}
 		}
 
@@ -136,7 +135,7 @@ namespace HatlessEngine
 			RemoveObjects.Clear();
 		}
 
-		/// <summary>
+		/*/// <summary>
 		/// Gets an OpenAL source identifier.
 		/// Source will be managed by HatlessEngine to prevent not playing of sound after all device channels are occupied.
 		/// </summary>
@@ -147,9 +146,9 @@ namespace HatlessEngine
 			while (AudioControls.ContainsKey(source = AL.GenSource())) { }
 			AudioSources.Add(source);
 			return source;
-		}
+		}*/
 
-		/// <summary>
+		/*/// <summary>
 		/// Removes all stopped sources.
 		/// </summary>
 		internal static void SourceRemoval()
@@ -170,7 +169,7 @@ namespace HatlessEngine
 				AudioControls[source].PerformStopped();
 				AudioControls.Remove(source);
 			}
-		}
+		}*/
 
 		internal static void UpdateManagedSprites()
 		{
@@ -204,7 +203,7 @@ namespace HatlessEngine
 					//delete texture if it hasn't been used for 10 steps
 					if (font.TexturesDrawsUnused[texture.Key] == 10)
 					{
-						SDL.SDL_DestroyTexture(texture.Value);
+						SDL.DestroyTexture(texture.Value);
 						removeTextures.Add(texture.Key);
 					}
 

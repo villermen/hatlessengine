@@ -1,13 +1,11 @@
 ﻿using System;
-using OpenTK.Audio;
-using OpenTK.Audio.OpenAL;
 using System.Collections.Generic;
 
 namespace HatlessEngine
 {
 	public static class AudioSettings
 	{
-		private static string _CurrentPlaybackDevice = AudioContext.DefaultDevice;
+		/*private static string _CurrentPlaybackDevice = AudioContext.DefaultDevice;
 		public static string CurrentPlaybackDevice 
 		{ 
 			get { return _CurrentPlaybackDevice; }
@@ -57,6 +55,6 @@ namespace HatlessEngine
 		public static void SetPlaybackDevice()
 		{
 			SetPlaybackDevice(AudioContext.DefaultDevice);
-		}
+		}*/
 	}
 }

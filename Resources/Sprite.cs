@@ -1,6 +1,7 @@
-﻿using System;
+﻿using SDL2;
+using SDL2_image;
+using System;
 using System.Collections.Generic;
-using SDL2;
 using System.IO;
 
 namespace HatlessEngine
@@ -61,17 +62,17 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 			{
-				IntPtr surface = SDL_image.IMG_Load_RW(Resources.CreateRWFromFile(Filename), 1);
+				IntPtr surface = IMG.Load_RW(Resources.CreateRWFromFile(Filename), 1);
 				if (surface != IntPtr.Zero)
 				{
-					TextureHandle = SDL.SDL_CreateTextureFromSurface(Game.RendererHandle, surface);
-					SDL.SDL_FreeSurface(surface);
+					TextureHandle = SDL.CreateTextureFromSurface(Game.RendererHandle, surface);
+					SDL.FreeSurface(surface);
 
 					if (TextureHandle != IntPtr.Zero)
 					{
 						uint format;
 						int access, w, h;
-						SDL.SDL_QueryTexture(TextureHandle, out format, out access, out w, out h);
+						SDL.QueryTexture(TextureHandle, out format, out access, out w, out h);
 
 						if (AutoSize)
 						{
@@ -84,10 +85,10 @@ namespace HatlessEngine
 						Loaded = true;
 					}
 					else
-						throw new FileLoadException(SDL.SDL_GetError());
+						throw new FileLoadException(SDL.GetError());
 				}
 				else
-					throw new FileLoadException(SDL.SDL_GetError());
+					throw new FileLoadException(SDL.GetError());
 			}
 		}
 
@@ -95,7 +96,7 @@ namespace HatlessEngine
 		{
 			if (Loaded)
 			{
-				SDL.SDL_DestroyTexture(TextureHandle);
+				SDL.DestroyTexture(TextureHandle);
 				TextureHandle = IntPtr.Zero;
 				Loaded = false;
 			}

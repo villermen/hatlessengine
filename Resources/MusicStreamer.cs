@@ -1,10 +1,10 @@
-﻿using OpenTK.Audio.OpenAL;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 
 namespace HatlessEngine
 {
+	/*
 	internal static class MusicStreamer
 	{
 		public static bool Running = false;
@@ -118,5 +118,5 @@ namespace HatlessEngine
 			}
 			Running = false;
 		}
-	}
+	}*/
 }

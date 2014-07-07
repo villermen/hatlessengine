@@ -130,9 +130,9 @@ namespace HatlessEngine
 			return new Point(f, f);
 		}
 
-		public static explicit operator SDL2.SDL.SDL_Point(Point point)
+		public static explicit operator SDL2.SDL.Point(Point point)
 		{
-			return new SDL2.SDL.SDL_Point { x = (int)point.X, y = (int)point.Y };
+			return new SDL2.SDL.Point { x = (int)point.X, y = (int)point.Y };
 		}
 
 		public override string ToString()

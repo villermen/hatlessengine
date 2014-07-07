@@ -1,4 +1,5 @@
 ﻿using SDL2;
+using SDL2_image;
 using System;
 using System.IO;
 
@@ -50,7 +51,7 @@ namespace HatlessEngine
 		public void Set()
 		{
 			if (Loaded)
-				SDL.SDL_SetCursor(CursorHandle);
+				SDL.SetCursor(CursorHandle);
 			else
 				throw new NotLoadedException();
 		}
@@ -61,9 +62,9 @@ namespace HatlessEngine
 				return;
 
 			if (IsSystemCursor)
-				CursorHandle = SDL.SDL_CreateSystemCursor((SDL.SDL_SystemCursor)SystemCursor);
+				CursorHandle = SDL.CreateSystemCursor((SDL.SystemCursor)SystemCursor);
 			else
-				CursorHandle = SDL.SDL_CreateColorCursor(SDL_image.IMG_Load_RW(Resources.CreateRWFromFile(Filename), 1), (int)Origin.X, (int)Origin.Y);
+				CursorHandle = SDL.CreateColorCursor(IMG.Load_RW(Resources.CreateRWFromFile(Filename), 1), (int)Origin.X, (int)Origin.Y);
 			
 			if (CursorHandle != IntPtr.Zero)
 				Loaded = true;
@@ -76,7 +77,7 @@ namespace HatlessEngine
 			if (!Loaded)
 				return;
 
-			SDL.SDL_FreeCursor(CursorHandle);
+			SDL.FreeCursor(CursorHandle);
 			CursorHandle = IntPtr.Zero;
 			Loaded = false;
 

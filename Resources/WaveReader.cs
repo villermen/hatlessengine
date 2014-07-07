@@ -1,10 +1,9 @@
 using System;
-using NVorbis;
 using System.IO;
-using OpenTK.Audio.OpenAL;
 
 namespace HatlessEngine
 {
+	/*
 	/// <summary>
 	/// Reads OpenAL compatible wavedata from audiofiles.
 	/// </summary>
@@ -206,4 +205,5 @@ namespace HatlessEngine
 		Wave = 1,
 		Vorbis = 2
 	}
+	*/
 }

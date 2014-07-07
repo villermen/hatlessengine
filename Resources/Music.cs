@@ -1,8 +1,7 @@
 ﻿using System;
-using OpenTK.Audio.OpenAL;
 
 namespace HatlessEngine
-{
+{/*
 	public sealed class Music : AudioControl, IExternalResource
 	{
 		public string ID { get; private set; }
@@ -164,5 +163,5 @@ namespace HatlessEngine
 			Resources.Music.Remove(ID);
 			Resources.ExternalResources.Remove(this);
 		}
-	}
+	}*/
 }

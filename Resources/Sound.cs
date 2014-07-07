@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using OpenTK;
-using OpenTK.Audio.OpenAL;
 
 namespace HatlessEngine
-{
+{/*
 	public sealed class Sound : IExternalResource
 	{
 		public string ID { get; private set; }
@@ -107,5 +105,5 @@ namespace HatlessEngine
 			Resources.Sounds.Remove(ID);
 			Resources.ExternalResources.Remove(this);
 		}
-	}
+	}*/
 }

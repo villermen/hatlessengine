@@ -1,8 +1,4 @@
-﻿using System;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
-using SDL2;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace HatlessEngine
 {

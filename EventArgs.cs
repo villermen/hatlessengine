@@ -2,7 +2,7 @@ using System;
 
 namespace HatlessEngine
 {
-	public class MusicChangedEventArgs : EventArgs
+	/*public class MusicChangedEventArgs : EventArgs
 	{
 		public Music OldMusic;
 		public Music NewMusic;
@@ -12,5 +12,5 @@ namespace HatlessEngine
 			OldMusic = oldMusic;
 			NewMusic = newMusic;
 		}
-	}
+	}*/
 }

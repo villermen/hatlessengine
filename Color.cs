@@ -102,9 +102,9 @@ namespace HatlessEngine
 		public static readonly Color Yellow = new Color(255, 255, 0);
 		public static readonly Color White = new Color(255, 255, 255);
 		
-		public static implicit operator SDL2.SDL.SDL_Color(Color color)
+		public static implicit operator SDL2.SDL.Color(Color color)
 		{
-			return new SDL2.SDL.SDL_Color { r = color.R, g = color.G, b = color.B, a = color.A };
+			return new SDL2.SDL.Color { r = color.R, g = color.G, b = color.B, a = color.A };
 		}
 
 		public override string ToString()

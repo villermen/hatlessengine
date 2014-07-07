@@ -1,5 +1,6 @@
-﻿using System;
-using SDL2;
+﻿using SDL2;
+using SDL2_ttf;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -61,9 +62,9 @@ namespace HatlessEngine
 				}
 				else //generate a new texture
 				{
-					IntPtr textSurface = SDL_ttf.TTF_RenderText_Blended(Handle, rows[i], color);
-					rowTextures[i] = SDL.SDL_CreateTextureFromSurface(Game.RendererHandle, textSurface);
-					SDL.SDL_FreeSurface(textSurface);
+					IntPtr textSurface = TTF.RenderText_Blended(Handle, rows[i], color);
+					rowTextures[i] = SDL.CreateTextureFromSurface(Game.RendererHandle, textSurface);
+					SDL.FreeSurface(textSurface);
 
 					Textures.Add(key, rowTextures[i]);
 					TexturesDrawsUnused.Add(key, 0);
@@ -71,7 +72,7 @@ namespace HatlessEngine
 
 				uint format;
 				int access, w, h;
-				SDL.SDL_QueryTexture(rowTextures[i], out format, out access, out w, out h);
+				SDL.QueryTexture(rowTextures[i], out format, out access, out w, out h);
 
 				float horizontalOffset = 0f;
 				float verticalOffset = 0f;
@@ -101,15 +102,15 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 			{
-				Handle = SDL_ttf.TTF_OpenFontRW(Resources.CreateRWFromFile(Filename), 1, PointSize);
+				Handle = TTF.OpenFontRW(Resources.CreateRWFromFile(Filename), 1, PointSize);
 
 				if (Handle != IntPtr.Zero)
 				{
-					LineHeight = SDL_ttf.TTF_FontLineSkip(Handle);
+					LineHeight = TTF.FontLineSkip(Handle);
 					Loaded = true;
 				}
 				else
-					throw new FileLoadException(SDL.SDL_GetError());
+					throw new FileLoadException(SDL.GetError());
 			}
 		}
 
@@ -117,7 +118,7 @@ namespace HatlessEngine
 		{
 			if (Loaded)
 			{
-				SDL_ttf.TTF_CloseFont(Handle);
+				TTF.CloseFont(Handle);
 				Handle = IntPtr.Zero;
 				Loaded = false;
 			}

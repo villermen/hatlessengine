@@ -1,8 +1,8 @@
 using System;
-using OpenTK.Audio.OpenAL;
 
 namespace HatlessEngine
 {
+	/*
 	/// <summary>
 	/// Manipulates playing audio. Inherited by SoundControl and Music.
 	/// </summary>
@@ -78,5 +78,5 @@ namespace HatlessEngine
 			if (Stopped != null)
 				Stopped(this, EventArgs.Empty);
 		}
-	}
+	}*/
 }
