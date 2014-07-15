@@ -74,21 +74,21 @@ namespace HatlessEngine
 
 				return true;
 			}
-			else if (shape1Type == typeof(Point) && shape2Type == typeof(SimpleRectangle) || shape1Type == typeof(SimpleRectangle) && shape2Type == typeof(Point)) //point vs AABB
+			else if (shape1Type == typeof(Point) && shape2Type == typeof(Rectangle) || shape1Type == typeof(Rectangle) && shape2Type == typeof(Point)) //point vs AABB
 			{
 				Point point;
-				SimpleRectangle rect;
+				Rectangle rect;
 				float xTouchingFraction, yTouchingFraction;
 
 				if (shape1Type == typeof(Point))
 				{
 					point = (Point)shape1;
-					rect = (SimpleRectangle)shape2;
+					rect = (Rectangle)shape2;
 				}
 				else
 				{
 					point = (Point)shape2;
-					rect = (SimpleRectangle)shape1;
+					rect = (Rectangle)shape1;
 
 					relativeSpeed = -relativeSpeed;
 				}
@@ -144,10 +144,10 @@ namespace HatlessEngine
 
 				return true;
 			}
-			else if (shape1Type == typeof(SimpleRectangle) && shape2Type == typeof(SimpleRectangle)) //2 AABB's
+			else if (shape1Type == typeof(Rectangle) && shape2Type == typeof(Rectangle)) //2 AABB's
 			{
-				SimpleRectangle rect1 = (SimpleRectangle)shape1;
-				SimpleRectangle rect2 = (SimpleRectangle)shape2;
+				Rectangle rect1 = (Rectangle)shape1;
+				Rectangle rect2 = (Rectangle)shape2;
 				float xTouchingFraction, yTouchingFraction;
 
 				if (relativeSpeed.X >= 0f)

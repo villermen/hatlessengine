@@ -45,7 +45,7 @@
     <Compile Include="Resources\IResource.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="QuadTree.cs" />
-    <Compile Include="Shapes\SimpleRectangle.cs" />
+    <Compile Include="Shapes\Rectangle.cs" />
     <Compile Include="Resources\View.cs" />
     <Compile Include="Resources\Resources.cs" />
     <Compile Include="Resources\LogicalObject.cs" />
@@ -66,7 +66,7 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="Resources\IExternalResource.cs" />
-    <Compile Include="Shapes\Rectangle.cs" />
+    <Compile Include="Shapes\ComplexRectangle.cs" />
     <Compile Include="Shapes\Point.cs" />
     <Compile Include="DrawX.cs" />
     <Compile Include="Color.cs" />

@@ -23,7 +23,7 @@ namespace HatlessEngine
 		public ButtonObject(Point position, Sprite sprite) : base(position)
 		{
 			Sprite = sprite;
-			Bounds = new Rectangle(position, sprite.FrameSize);
+			Bounds = new ComplexRectangle(position, sprite.FrameSize);
 		}
 
 		public sealed override void Step()

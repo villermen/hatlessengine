@@ -6,11 +6,11 @@ namespace HatlessEngine
 	public class View : IResource
 	{
 		public string ID { get; private set; }
-		public SimpleRectangle Area;
-		public SimpleRectangle Viewport;
+		public Rectangle Area;
+		public Rectangle Viewport;
 		public bool Active;
 
-		public View(string id, SimpleRectangle area, SimpleRectangle viewport, bool active = true)
+		public View(string id, Rectangle area, Rectangle viewport, bool active = true)
 		{
 			//validate if viewport is entirely within the window
 			if (viewport.Position1.X < 0f || viewport.Position1.Y < 0f || viewport.Position2.X > 1f || viewport.Position2.Y > 1f)

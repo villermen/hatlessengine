@@ -7,16 +7,16 @@ namespace HatlessEngine
 	{
 		public DrawJobType Type { get; set; }
 		public int Depth { get; set; }
-		public SimpleRectangle Area { get; set; }
+		public Rectangle Area { get; set; }
 
 		public IntPtr Texture;
-		public SimpleRectangle SourceRect;
-		public Rectangle DestRect;
+		public Rectangle SourceRect;
+		public ComplexRectangle DestRect;
 
 		/// <summary>
 		/// Texture job.
 		/// </summary>
-		public TextureDrawJob(int depth, SimpleRectangle area, IntPtr texture, SimpleRectangle sourceRect, Rectangle destRect)
+		public TextureDrawJob(int depth, Rectangle area, IntPtr texture, Rectangle sourceRect, ComplexRectangle destRect)
 			: this()
 		{
 			Texture = texture;

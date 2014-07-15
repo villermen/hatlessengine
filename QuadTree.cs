@@ -12,7 +12,7 @@ namespace HatlessEngine
 		//private static byte MaxLevels = 5;
 
 		private byte Level;
-		private SimpleRectangle Bounds;
+		private Rectangle Bounds;
 		private Point Center;
 		private Point ChildSize;
 		private QuadTree[] Children = new QuadTree[4];
@@ -22,13 +22,13 @@ namespace HatlessEngine
 		/// <summary>
 		/// The mother of all quadtrees.
 		/// </summary>
-		public QuadTree(SimpleRectangle bounds)
+		public QuadTree(Rectangle bounds)
 			: this(0, bounds, Resources.PhysicalObjects) { }
 
 		/// <summary>
 		/// A teensy quadtree baby.
 		/// </summary>
-		private QuadTree(byte level, SimpleRectangle bounds, List<PhysicalObject> objects)
+		private QuadTree(byte level, Rectangle bounds, List<PhysicalObject> objects)
 		{
 			Level = level;
 			Bounds = bounds;
@@ -62,10 +62,10 @@ namespace HatlessEngine
 				}
 
 				//create subtrees and add everything that fits inside of em
-				Children[0] = new QuadTree((byte)(Level + 1), new SimpleRectangle(Bounds.Position1, ChildSize), ChildObjects0);
-				Children[1] = new QuadTree((byte)(Level + 1), new SimpleRectangle(new Point(Center.X, Bounds.Position1.Y), ChildSize), ChildObjects1);
-				Children[2] = new QuadTree((byte)(Level + 1), new SimpleRectangle(new Point(Bounds.Position1.X, Center.Y), ChildSize), ChildObjects2);
-				Children[3] = new QuadTree((byte)(Level + 1), new SimpleRectangle(Center, ChildSize), ChildObjects3);
+				Children[0] = new QuadTree((byte)(Level + 1), new Rectangle(Bounds.Position1, ChildSize), ChildObjects0);
+				Children[1] = new QuadTree((byte)(Level + 1), new Rectangle(new Point(Center.X, Bounds.Position1.Y), ChildSize), ChildObjects1);
+				Children[2] = new QuadTree((byte)(Level + 1), new Rectangle(new Point(Bounds.Position1.X, Center.Y), ChildSize), ChildObjects2);
+				Children[3] = new QuadTree((byte)(Level + 1), new Rectangle(Center, ChildSize), ChildObjects3);
 			}
 			else
 				Objects = objects;

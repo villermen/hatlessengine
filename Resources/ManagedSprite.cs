@@ -44,9 +44,9 @@ namespace HatlessEngine
 		/// </summary>
 		public bool PerformStep = true;
 
-		public Rectangle SpriteRectangle 
+		public ComplexRectangle SpriteRectangle 
 		{
-			get { return new Rectangle(Position, Scale * TargetSprite.FrameSize, Origin, Rotation); }
+			get { return new ComplexRectangle(Position, Scale * TargetSprite.FrameSize, Origin, Rotation); }
 			set
 			{
 				Position = value.Position;

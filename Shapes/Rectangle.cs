@@ -4,25 +4,22 @@ using System.Collections.Generic;
 namespace HatlessEngine
 {
 	/// <summary>
-	/// Represents a complex rectangle that can be rotated over an origin.
+	/// Represents a simple axis-aligned rectangle.
 	/// </summary>
 	[Serializable]
 	public struct Rectangle : IShape
 	{
 		private Point _Position;
 		private Point _Size;
-		private Point _Origin;
-		private float _Rotation;
 
 		private bool Changed;
 		private Point[] Points;
-		private Point[] PerpAxes;
-		private Line[] BoundLines;
-		private SimpleRectangle EnclosingRectangle;
+		private static Point[] PerpAxes = new Point[] { new Point(0f, 1f), new Point(1f, 0f) };
  
 		/// <summary>
-		/// Rectangle's position.
-		/// Don't read as 'topleft point' as it will not be if rotation or origin is nonzero.
+		/// Coordinates of the position of the rectangle.
+		/// If this is changed Position2 will change with it (moving the rectangle).
+		/// Use Position1 to change the topleft position without altering Position2.
 		/// </summary>
 		public Point Position
 		{
@@ -33,6 +30,9 @@ namespace HatlessEngine
 				Changed = true;
 			}
 		}
+		/// <summary>
+		/// The size of the rectangle.
+		/// </summary>
 		public Point Size
 		{
 			get { return _Size; }
@@ -43,77 +43,90 @@ namespace HatlessEngine
 			}
 		}
 		/// <summary>
-		/// Origin is the offset from the topleft-most corner to the position before rotation is applied.
+		/// Coordinates of the topleft point of the rectangle.
+		/// If this is changed Position2 will remain, thus altering the Size.
 		/// </summary>
-		public Point Origin
+		public Point Position1
 		{
-			get { return _Origin; }
-			set 
-			{ 
-				_Origin = value;
+			get { return _Position; }
+			set
+			{
+				_Size += _Position - value;
+				_Position = value;
 				Changed = true;
 			}
 		}
 		/// <summary>
-		/// Rotation of the rectangle around it's origin point.
+		/// Coordinates of the bottomright point of the rectangle.
+		/// X + Width &amp; Y + Height.
+		/// </summary>
+		public Point Position2
+		{
+			get { return _Position + _Size; }
+			set 
+			{ 
+				_Size = value - _Position;
+				Changed = true;
+			}
+		}
+
+		///// <summary>
+		///// Coordinates of the exact center of the rectangle.
+		///// </summary>
+		//public Point Center
+		//{
+		//	get { return _Position + _Size / 2f; }
+		//}
+
+		/// <summary>
+		/// Does nothing, rotation of a simplerectangle is not possible.
 		/// </summary>
 		public float Rotation
 		{
-			get { return _Rotation; }
-			set 
-			{ 
-				_Rotation = value;
-				Changed = true;
-			}
+			get { return 0f; }
+			set { }
 		}
 
-		public Rectangle(Point position, Point size, Point origin, float rotation = 0)
+		public Rectangle(Point position, Point size)
 		{
 			_Position = position;
 			_Size = size;
-			_Origin = origin;
-			_Rotation = rotation;
 
 			Changed = true;
 			Points = new Point[4];
-			PerpAxes = new Point[2];
-			BoundLines = new Line[4];
-			EnclosingRectangle = SimpleRectangle.Zero;
 		}
-		public Rectangle(Point position, Point size, float rotation = 0)
-			: this(position, size, Point.Zero, rotation) { }
-		public Rectangle(float x, float y, float width, float height, float originX, float originY, float rotation = 0)
-			: this(new Point(x, y), new Point(width, height), new Point(originX, originY), rotation) { }
-		public Rectangle(float x, float y, float width, float height, float rotation = 0)
-			: this(new Point(x, y), new Point(width, height), Point.Zero, rotation) { }
+		public Rectangle(float x, float y, float width, float height)
+			: this(new Point(x, y), new Point(width, height)) { }
 
-		/// <summary>
-		/// Returns an array with the 4 points of the rectangle.
-		/// </summary>
 		public Point[] GetPoints()
 		{
 			if (Changed)
 				Recalculate();
-			
+
 			return Points;
 		}
-		/// <summary>
-		/// Returns an array with the 2 perpendicular axes.
-		/// </summary>
+
 		public Point[] GetPerpAxes()
 		{
-			if (Changed)
-				Recalculate();
-			
 			return PerpAxes;
 		}
 
-		public SimpleRectangle GetEnclosingRectangle()
+		/// <summary>
+		/// Why? =(
+		/// </summary>
+		public Rectangle GetEnclosingRectangle()
 		{
-			if (Changed)
-				Recalculate();
+			return this;
+		}
 
-			return EnclosingRectangle;
+		private void Recalculate()
+		{
+			Points[0] = _Position;
+			Points[1] = _Position + new Point(_Size.X, 0f);
+			Points[2] = _Position + _Size;
+			Points[3] = _Position + new Point(0f, _Size.Y);
+
+			Changed = false;
 		}
 
 		/// <summary>
@@ -124,52 +137,64 @@ namespace HatlessEngine
 			if (Changed)
 				Recalculate();
 
-			return BoundLines;
-		}
-
-		private void Recalculate()
-		{
-			Points[0] = new Point(_Position.X - _Origin.X, _Position.Y - _Origin.Y).RotateOverOrigin(_Position, _Rotation);
-			Points[1] = new Point(_Position.X - _Origin.X + _Size.X, _Position.Y - _Origin.Y).RotateOverOrigin(_Position, _Rotation);
-			Points[2] = new Point(_Position.X - _Origin.X + _Size.X, _Position.Y - _Origin.Y + _Size.Y).RotateOverOrigin(_Position, _Rotation);
-			Points[3] = new Point(_Position.X - _Origin.X, _Position.Y - _Origin.Y + _Size.Y).RotateOverOrigin(_Position, _Rotation);
-
-			PerpAxes[0] = new Point((-Points[1].Y + Points[0].Y) / _Size.X, (Points[1].X - Points[0].X) / _Size.X);
-			PerpAxes[1] = new Point((-Points[2].Y + Points[1].Y) / _Size.Y, (Points[2].X - Points[1].X) / _Size.Y);
-
-			float minX = float.PositiveInfinity, minY = float.PositiveInfinity, maxX = float.NegativeInfinity, maxY = float.NegativeInfinity;
-			foreach (Point p in Points)
-			{
-				if (p.X < minX)
-					minX = p.X;
-				if (p.Y < minY)
-					minY = p.Y;
-				if (p.X > maxX)
-					maxX = p.X;
-				if (p.Y > maxY)
-					maxY = p.Y;
-			}
-			EnclosingRectangle = new SimpleRectangle(minX, minY, maxX, maxY);
-
-			BoundLines =  new Line[4]
+			return new Line[]
 			{
 				new Line(Points[0], Points[1]),
 				new Line(Points[1], Points[2]),
 				new Line(Points[2], Points[3]),
 				new Line(Points[3], Points[0])
 			};
+		}
 
-			Changed = false;
+		public static bool operator ==(Rectangle rect1, Rectangle rect2)
+		{
+			return (rect1._Position == rect2._Position && rect1._Size == rect2._Size);
+		}
+		public static bool operator !=(Rectangle rect1, Rectangle rect2)
+		{
+			return (rect1._Position != rect2._Position || rect1._Size != rect2._Size);
+		}
+		public override bool Equals(object obj)
+		{
+			if (!(obj is Rectangle))
+				return false;
+
+			Rectangle rect = (Rectangle)obj;
+			return this == rect;
+		}
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		public static Rectangle operator +(Rectangle rect, Point point)
+		{
+			return new Rectangle(rect._Position + point, rect._Size);
+		}
+		public static Rectangle operator -(Rectangle rect, Point point)
+		{
+			return new Rectangle(rect._Position - point, rect._Size);
+		}
+
+		public static Rectangle operator *(Rectangle rect, Point point)
+		{
+			return new Rectangle(rect._Position, rect._Size * point);
+		}
+		public static Rectangle operator /(Rectangle rect, Point point)
+		{
+			return new Rectangle(rect._Position, rect._Size / point);
+		}
+
+		public static explicit operator SDL2.SDL.Rect(Rectangle rect)
+		{
+			return new SDL2.SDL.Rect { x = (int)rect._Position.X, y = (int)rect._Position.Y, w = (int)rect._Size.X, h = (int)rect._Size.Y };
 		}
 
 		public override string ToString()
 		{
-			if (Changed)
-				Recalculate();
-
-			return String.Format("({0}, {1}, {2}, {3})", Points[0], Points[1], Points[2], Points[3]);
+			return String.Format("({0}, {1})", _Position, _Size);
 		}
 
-		public static readonly Rectangle Zero = new Rectangle(Point.Zero, Point.Zero, Point.Zero, 0f);
+		public static readonly Rectangle Zero = new Rectangle(Point.Zero, Point.Zero);
 	}
 }

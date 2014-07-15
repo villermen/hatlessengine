@@ -94,7 +94,7 @@ namespace HatlessEngine
 				Point texturePos = pos + new Point(horizontalOffset, verticalOffset);
 				Point textureSize = new Point(w, h);
 
-				DrawX.DrawJobs.Add(new TextureDrawJob(depth, new SimpleRectangle(texturePos, textureSize), rowTextures[i], new SimpleRectangle(Point.Zero, new Point(w, h)), new Rectangle(texturePos, textureSize)));
+				DrawX.DrawJobs.Add(new TextureDrawJob(depth, new Rectangle(texturePos, textureSize), rowTextures[i], new Rectangle(Point.Zero, new Point(w, h)), new ComplexRectangle(texturePos, textureSize)));
 			}
 		}
 

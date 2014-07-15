@@ -7,7 +7,7 @@ namespace HatlessEngine
 	{
 		public DrawJobType Type { get; set; }
 		public int Depth { get; set; }
-		public SimpleRectangle Area { get; set; }
+		public Rectangle Area { get; set; }
 
 		public Point[] Points;
 		public int PointCount;
@@ -16,7 +16,7 @@ namespace HatlessEngine
 		/// <summary>
 		/// Line(s) job.
 		/// </summary>
-		public LineDrawJob(int depth, SimpleRectangle area, Point[] points, Color color)
+		public LineDrawJob(int depth, Rectangle area, Point[] points, Color color)
 			: this()
 		{
 			PointCount = points.Length;

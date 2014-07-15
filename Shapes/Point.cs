@@ -38,9 +38,9 @@ namespace HatlessEngine
 		/// <summary>
 		/// Will return a SimpleRectangle with this point as it's Position and no Size.
 		/// </summary>
-		public SimpleRectangle GetEnclosingRectangle()
+		public Rectangle GetEnclosingRectangle()
 		{
-			return new SimpleRectangle(this, Point.Zero);
+			return new Rectangle(this, Point.Zero);
 		}
 
 		public float GetDistanceTo(Point point)

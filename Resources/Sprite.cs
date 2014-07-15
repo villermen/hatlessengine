@@ -43,8 +43,8 @@ namespace HatlessEngine
 			if (!Loaded)
 				throw new NotLoadedException();
 
-			SimpleRectangle sourceRect = new SimpleRectangle(GetIndexLocation(frameIndex), FrameSize);
-			Rectangle destRect = new Rectangle(pos, FrameSize * scale, origin, rotation);
+			Rectangle sourceRect = new Rectangle(GetIndexLocation(frameIndex), FrameSize);
+			ComplexRectangle destRect = new ComplexRectangle(pos, FrameSize * scale, origin, rotation);
 
 			DrawX.DrawJobs.Add(new TextureDrawJob(depth, destRect.GetEnclosingRectangle(), TextureHandle, sourceRect, destRect));
 		}

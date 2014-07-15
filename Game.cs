@@ -111,7 +111,7 @@ namespace HatlessEngine
 			Window.SetIcon();
 
 			//add default view that spans the current window
-			new View("default", new SimpleRectangle(Point.Zero, Window.GetSize()), new SimpleRectangle(Point.Zero , new Point(1f, 1f)));
+			new View("default", new Rectangle(Point.Zero, Window.GetSize()), new Rectangle(Point.Zero , new Point(1f, 1f)));
 
 			//initialize audio system and let Resources handle sound expiration
 			Mix.OpenAudio(44100, SDL.AUDIO_S16SYS, 2, 4096);
@@ -250,7 +250,7 @@ namespace HatlessEngine
 			}
 
 			//create and fill quadtree for this step
-			QuadTree = new QuadTree(new SimpleRectangle(minX, minY, maxX - minX, maxY - minY));
+			QuadTree = new QuadTree(new Rectangle(minX, minY, maxX - minX, maxY - minY));
 
 			//maybe if too slow use SortedList and compare using the default comparer
 			List<PhysicalObject> processingObjects = new List<PhysicalObject>(Resources.PhysicalObjects);	   
@@ -314,7 +314,7 @@ namespace HatlessEngine
 				SDL.RenderSetScale(RendererHandle, scale.X, scale.Y);
 
 				//viewport is affected by scale for whatever reason, correct it
-				SDL.Rect viewport = (SDL.Rect)new SimpleRectangle(view.Viewport.Position1 * windowSize / scale, view.Viewport.Size * windowSize / scale);
+				SDL.Rect viewport = (SDL.Rect)new Rectangle(view.Viewport.Position1 * windowSize / scale, view.Viewport.Size * windowSize / scale);
 				SDL.RenderSetViewport(RendererHandle, ref viewport);
 
 				//get all jobs that will draw inside this view
@@ -324,7 +324,7 @@ namespace HatlessEngine
 					{
 						TextureDrawJob textureDrawJob = (TextureDrawJob)job;
 						SDL.Rect sourceRect = (SDL.Rect)textureDrawJob.SourceRect;
-						SDL.Rect destRect = (SDL.Rect)new SimpleRectangle(textureDrawJob.DestRect.Position - view.Area.Position1 - textureDrawJob.DestRect.Origin, textureDrawJob.DestRect.Size);
+						SDL.Rect destRect = (SDL.Rect)new Rectangle(textureDrawJob.DestRect.Position - view.Area.Position1 - textureDrawJob.DestRect.Origin, textureDrawJob.DestRect.Size);
 
 						if (textureDrawJob.DestRect.Rotation == 0f)
 						{

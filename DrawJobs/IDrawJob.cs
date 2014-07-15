@@ -6,7 +6,7 @@ namespace HatlessEngine
 	{
 		DrawJobType Type { get; set; }
 		int Depth { get; set; }
-		SimpleRectangle Area { get; set; }
+		Rectangle Area { get; set; }
 	}
 
 	internal enum DrawJobType 

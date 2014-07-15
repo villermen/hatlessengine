@@ -89,7 +89,7 @@ namespace HatlessEngine
 		/// The area the bounds can maximally cover given the speed's velocity.
 		/// Per-step, updated after step and before collision handling.
 		/// </summary>
-		internal SimpleRectangle CoverableArea;
+		internal Rectangle CoverableArea;
 
 		/// <summary>
 		/// All the PhysicalObjects this one could possibly collide with this step.
@@ -131,7 +131,7 @@ namespace HatlessEngine
 					maxY = pnt.Y;
 			}
 
-			CoverableArea = new SimpleRectangle(minX - speed, minY - speed, maxX - minX + speed, maxY - minY + speed);
+			CoverableArea = new Rectangle(minX - speed, minY - speed, maxX - minX + speed, maxY - minY + speed);
 		}
 
 		/// <summary>
@@ -253,7 +253,7 @@ namespace HatlessEngine
 							//whether the object should be checked if the filter is enabled
 							if (!cRule.FilterEnabled || cRule.SpritemapFilter.Contains(sprite.TargetSprite)) //account for inheritance
 							{
-								Rectangle sRect = sprite.SpriteRectangle; //copy over so it the relative position won't be changed
+								ComplexRectangle sRect = sprite.SpriteRectangle; //copy over so it the relative position won't be changed
 								sRect.Position += cRule.SpritemapOffset;
 
 								if (Bounds.IntersectsWith(sRect, Speed, out touchingSpeedLeftFraction, out intersectionAxis)

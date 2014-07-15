@@ -14,7 +14,7 @@ namespace HatlessEngine
 		private bool Changed;
 		private Point[] Points;
 		private Point[] PerpAxes;
-		private SimpleRectangle EnclosingRectangle;
+		private Rectangle EnclosingRectangle;
 
 		/// <summary>
 		/// Changes this line's position, setting Point1 to Position and moving Point2 with it equally.
@@ -91,7 +91,7 @@ namespace HatlessEngine
 			Changed = true;
 			Points = new Point[2];
 			PerpAxes = new Point[1];
-			EnclosingRectangle = SimpleRectangle.Zero;
+			EnclosingRectangle = Rectangle.Zero;
 		}
 		public Line(float x1, float y1, float x2, float y2)
 			: this(new Point(x1, y1), new Point(x2, y2)) { }
@@ -112,7 +112,7 @@ namespace HatlessEngine
 			return PerpAxes;
 		}
 
-		public SimpleRectangle GetEnclosingRectangle()
+		public Rectangle GetEnclosingRectangle()
 		{
 			if (Changed)
 				Recalculate();
@@ -139,7 +139,7 @@ namespace HatlessEngine
 				if (p.Y > maxY)
 					maxY = p.Y;
 			}
-			EnclosingRectangle = new SimpleRectangle(minX, minY, maxX, maxY);
+			EnclosingRectangle = new Rectangle(minX, minY, maxX, maxY);
 
 			Changed = false;
 		}
@@ -147,9 +147,9 @@ namespace HatlessEngine
 		/// <summary>
 		/// Creates a complex rectangle of this line by applying a width to it.
 		/// </summary>
-		public Rectangle ToRectangle(float width)
+		public ComplexRectangle ToRectangle(float width)
 		{
-			return new Rectangle(Position, new Point(width, Length), new Point(width / 2, Length), Rotation);
+			return new ComplexRectangle(Position, new Point(width, Length), new Point(width / 2, Length), Rotation);
 		}
 
 		public override string ToString()

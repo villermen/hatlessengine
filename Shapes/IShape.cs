@@ -25,6 +25,6 @@ namespace HatlessEngine
 		/// Gets the smallest SimpleRectangle that this shape could fit in.
 		/// So basically it's minimum to maximum on the horizontal and vertical axis.
 		/// </summary>
-		SimpleRectangle GetEnclosingRectangle();
+		Rectangle GetEnclosingRectangle();
 	}
 }

@@ -20,7 +20,7 @@ namespace HatlessEngine
 		{
 			DrawJobs.Add(new LineDrawJob(depth, line.GetEnclosingRectangle(), line.GetPoints(), color));
 		}
-		public static void Draw(SimpleRectangle rect, Color color, int depth = 0)
+		public static void Draw(Rectangle rect, Color color, int depth = 0)
 		{
 			Point[] points = new Point[5];
 			rect.GetPoints().CopyTo(points, 0);
@@ -53,7 +53,7 @@ namespace HatlessEngine
 			Resources.Sprites[spriteID].Draw(pos, frameIndex, rotation, depth);
 		}
 
-		internal static List<IDrawJob> GetDrawJobsByArea(SimpleRectangle area)
+		internal static List<IDrawJob> GetDrawJobsByArea(Rectangle area)
 		{
 			return DrawJobs.FindAll(j => j.Area.IntersectsWith(area));
 		}
