@@ -56,19 +56,6 @@ namespace HatlessEngine
 		}
 
 		/// <summary>
-		/// Angle from Point1 to Point2.
-		/// </summary>
-		public float Rotation
-		{
-			get { return _Point1.GetAngleTo(_Point2); }
-			set 
-			{
-				_Point2 = _Point2.RotateOverOrigin(_Point1, value - Rotation);
-				Changed = true;
-			}
-		}
-
-		/// <summary>
 		/// Gets the distance between both points.
 		/// Moves Point2 to obtain the given length with set.
 		/// </summary>
@@ -149,7 +136,7 @@ namespace HatlessEngine
 		/// </summary>
 		public ComplexRectangle ToRectangle(float width)
 		{
-			return new ComplexRectangle(Position, new Point(width, Length), new Point(width / 2, Length), Rotation);
+			return new ComplexRectangle(Position, new Point(width, Length), new Point(width / 2, Length), _Point1.GetAngleTo(_Point2));
 		}
 
 		public override string ToString()

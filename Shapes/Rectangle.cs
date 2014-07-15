@@ -78,15 +78,6 @@ namespace HatlessEngine
 		//	get { return _Position + _Size / 2f; }
 		//}
 
-		/// <summary>
-		/// Does nothing, rotation of a simplerectangle is not possible.
-		/// </summary>
-		public float Rotation
-		{
-			get { return 0f; }
-			set { }
-		}
-
 		public Rectangle(Point position, Point size)
 		{
 			_Position = position;

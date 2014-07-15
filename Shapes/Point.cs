@@ -13,11 +13,6 @@ namespace HatlessEngine
 			get { return this; }
 			set { this = value; }
 		}
-		public float Rotation
-		{
-			get { return 0f; }
-			set { }
-		}
 
 		public Point(float x, float y)
 		{
