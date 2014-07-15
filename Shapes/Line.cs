@@ -143,11 +143,6 @@ namespace HatlessEngine
 
 			Changed = false;
 		}
-		
-		public bool IntersectsWith(IShape shape)
-		{
-			return Misc.ShapesIntersecting(this, shape);
-		}
 
 		/// <summary>
 		/// Creates a complex rectangle of this line by applying a width to it.

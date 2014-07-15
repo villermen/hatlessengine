@@ -14,7 +14,7 @@ namespace HatlessEngine
 
 		private bool Changed;
 		private Point[] Points;
-		private static Point[] PerpAxes = new Point[] { new Point(0f, 1f), new Point(1f, 0f) }; //should not be possible
+		private static Point[] PerpAxes = new Point[] { new Point(0f, 1f), new Point(1f, 0f) };
  
 		/// <summary>
 		/// Coordinates of the position of the rectangle.
@@ -127,11 +127,6 @@ namespace HatlessEngine
 			Points[3] = _Position + new Point(0f, _Size.Y);
 
 			Changed = false;
-		}
-
-		public bool IntersectsWith(IShape shape)
-		{
-			return Misc.ShapesIntersecting(this, shape);
 		}
 
 		/// <summary>

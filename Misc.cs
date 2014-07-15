@@ -19,7 +19,7 @@ namespace HatlessEngine
 
 		/// <summary>
 		/// Returns whether a random chance is met.
-		/// Explained: chance in values (1 in 100) chance of returning true
+		/// Explained: chance in values (e.g. 3 in 100) chance of returning true
 		/// </summary>
 		public static bool Chance(int values, int chance = 1)
 		{
@@ -31,24 +31,54 @@ namespace HatlessEngine
 		}
 
 		/// <summary>
-		/// Returns whether two shapes overlap.
+		/// Returns whether this shape overlaps with another somewhere if it moves by relativeSpeed.
+		/// Returns the fraction of the speed given at which they touch and the axis closest to this touching point (from either shape).
+		/// The fraction will be -1f if there's an overlap but no collision caused by the relativeSpeed.
 		/// </summary>
-		public static bool ShapesIntersecting(IShape shape1, IShape shape2)
+		public static bool IntersectsWith(this IShape shape1, IShape shape2, Point relativeSpeed, out float touchingAtSpeedFraction, out Point intersectionAxis)
 		{
+			touchingAtSpeedFraction = float.PositiveInfinity;
+			intersectionAxis = Point.Zero;
+
 			Type shape1Type = shape1.GetType();
 			Type shape2Type = shape2.GetType();
 
 			if (shape1Type == typeof(Point) && shape2Type == typeof(Point)) //2 points
 			{
-				if (shape1 == shape2)
+				Point point1 = (Point)shape1;
+				Point point2 = (Point)shape2;
+
+				//always the axis perpendicular to the speed
+				intersectionAxis = new Point(relativeSpeed.Y, -relativeSpeed.X);
+
+				if (point1 == point2)
+				{
+					touchingAtSpeedFraction = 0f;
 					return true;
-				else
+				}
+
+				//return false if the point cannot be reached with the given speed
+				if (relativeSpeed.X >= 0f && (point1.X + relativeSpeed.X < point2.X || point1.X > point2.X))
 					return false;
+				if (relativeSpeed.X < 0f && (point1.X + relativeSpeed.X > point2.X || point1.X < point2.X))
+					return false;
+				if (relativeSpeed.Y >= 0f && (point1.Y + relativeSpeed.Y < point2.Y || point1.Y > point2.Y))
+					return false;
+				if (relativeSpeed.Y < 0f && (point1.Y + relativeSpeed.Y > point2.Y || point1.Y < point2.Y))
+					return false;
+
+				//check if point2 is on the path of point1 + relativeSpeed
+				touchingAtSpeedFraction = (point2.X - point1.X) / relativeSpeed.X;
+				if (point1.Y + touchingAtSpeedFraction * relativeSpeed.Y != point2.Y)
+					return false;
+
+				return true;
 			}
 			else if (shape1Type == typeof(Point) && shape2Type == typeof(SimpleRectangle) || shape1Type == typeof(SimpleRectangle) && shape2Type == typeof(Point)) //point vs AABB
 			{
 				Point point;
 				SimpleRectangle rect;
+				float xTouchingFraction, yTouchingFraction;
 
 				if (shape1Type == typeof(Point))
 				{
@@ -59,165 +89,127 @@ namespace HatlessEngine
 				{
 					point = (Point)shape2;
 					rect = (SimpleRectangle)shape1;
+
+					relativeSpeed = -relativeSpeed;
 				}
 
-				if (point.X < rect.Position1.X)
-					return false;
-				if (point.X > rect.Position2.X)
-					return false;
-				if (point.Y < rect.Position1.Y)
-					return false;
-				if (point.Y > rect.Position2.Y)
-					return false;
-				return true;
-			}
-			else if (shape1Type == typeof(SimpleRectangle) && shape2Type == typeof(SimpleRectangle)) //2 AABB's
-			{
-				SimpleRectangle rect1 = (SimpleRectangle)shape1;
-				SimpleRectangle rect2 = (SimpleRectangle)shape2;
-
-				if (rect1.Position2.X < rect2.Position1.X)
-					return false;
-				if (rect1.Position1.X > rect2.Position2.X)
-					return false;
-				if (rect1.Position2.Y < rect2.Position1.Y)
-					return false;
-				if (rect1.Position1.Y > rect2.Position2.Y)
-					return false;
-				return true;
-			}
-			else //other shapes
-			{
-				Point[] shape1Points = shape1.GetPoints();
-				Point[] shape2Points = shape2.GetPoints();
-
-				List<Point> allAxes = new List<Point>(shape1.GetPerpAxes());
-				allAxes.AddRange(shape2.GetPerpAxes());
-
-				foreach (Point axis in allAxes)
+				if (relativeSpeed.X >= 0f)
 				{
-					float shape1ScalarMin = float.PositiveInfinity;
-					float shape1ScalarMax = float.NegativeInfinity;
-					float shape2ScalarMin = float.PositiveInfinity;
-					float shape2ScalarMax = float.NegativeInfinity;
-
-					foreach (Point point in shape1Points)
-					{
-						float multiplier = (float)((point.X * axis.X + point.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
-						float scalar = multiplier * axis.X * axis.X + multiplier * axis.Y * axis.Y;
-
-						if (scalar < shape1ScalarMin)
-							shape1ScalarMin = scalar;
-						if (scalar > shape1ScalarMax)
-							shape1ScalarMax = scalar;
-					}
-					foreach (Point point in shape2Points)
-					{
-						float multiplier = (float)((point.X * axis.X + point.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
-						float scalar = multiplier * axis.X * axis.X + multiplier * axis.Y * axis.Y;
-
-						if (scalar < shape2ScalarMin)
-							shape2ScalarMin = scalar;
-						if (scalar > shape2ScalarMax)
-							shape2ScalarMax = scalar;
-					}
-
-					//something does not overlap -> not intersecting
-					if (shape1ScalarMax < shape2ScalarMin || shape1ScalarMin > shape2ScalarMax)
+					if (point.X + relativeSpeed.X < rect.Position1.X || point.X > rect.Position2.X)
 						return false;
+
+					xTouchingFraction = (rect.Position1.X - point.X) / relativeSpeed.X;
 				}
-				//everything´s overlapping -> intersecting
+				else
+				{
+					if (point.X + relativeSpeed.X > rect.Position2.X || point.X < rect.Position1.X)
+						return false;
+
+					xTouchingFraction = (rect.Position2.X - point.X) / relativeSpeed.X;
+				}
+
+				if (relativeSpeed.Y >= 0f)
+				{
+					if (point.Y + relativeSpeed.Y < rect.Position1.Y || point.Y > rect.Position2.Y)
+						return false;
+
+					yTouchingFraction = (rect.Position1.Y - point.Y) / relativeSpeed.Y;
+				}
+				else
+				{
+					if (point.Y + relativeSpeed.Y > rect.Position2.Y || point.Y < rect.Position1.Y)
+						return false;
+
+					yTouchingFraction = (rect.Position2.Y - point.Y) / relativeSpeed.Y;
+				}
+
+				//decide which fraction and corresponding axis to return, if any
+				if (xTouchingFraction >= 0f
+					&& xTouchingFraction <= 1f)
+				{
+					touchingAtSpeedFraction = xTouchingFraction;
+					intersectionAxis = rect.GetPerpAxes()[0];
+				}
+
+				if (yTouchingFraction >= 0f
+					&& yTouchingFraction <= 1f
+					&& yTouchingFraction < touchingAtSpeedFraction)
+				{
+					touchingAtSpeedFraction = yTouchingFraction;
+					intersectionAxis = rect.GetPerpAxes()[1];
+				}
+
+				if (intersectionAxis == Point.Zero)
+					touchingAtSpeedFraction = -1f;
+
 				return true;
-			}
-		}
-
-		/// <summary>
-		/// Returns if, when and at what axis two given shapes are going to intersect using their speed.
-		/// </summary>
-		public static bool ShapesIntersectingBySpeed(IShape shape1, IShape shape2, Point relativeSpeed, out float touchingAtSpeedFraction, out Point intersectionAxis)
-		{
-			touchingAtSpeedFraction = 1f;
-			intersectionAxis = Point.Zero;
-
-			if (relativeSpeed == Point.Zero)
-				return false;
-
-			Type shape1Type = shape1.GetType();
-			Type shape2Type = shape2.GetType();
-
-			if (shape1Type == typeof(Point) && shape2Type == typeof(Point)) //2 points
-				return false; //i guess
-			else if (shape1Type == typeof(Point) && shape2Type == typeof(SimpleRectangle) || shape1Type == typeof(SimpleRectangle) && shape2Type == typeof(Point))
-			{
-				throw new NotImplementedException();
 			}
 			else if (shape1Type == typeof(SimpleRectangle) && shape2Type == typeof(SimpleRectangle)) //2 AABB's
 			{
 				SimpleRectangle rect1 = (SimpleRectangle)shape1;
 				SimpleRectangle rect2 = (SimpleRectangle)shape2;
+				float xTouchingFraction, yTouchingFraction;
 
-				Point positiveOverlap = rect1.Position2 + relativeSpeed - rect2.Position1;
-				Point negativeOverlap = rect1.Position1 + relativeSpeed - rect2.Position2;
+				if (relativeSpeed.X >= 0f)
+				{
+					if (rect1.Position2.X + relativeSpeed.X < rect2.Position1.X || rect1.Position1.X > rect2.Position2.X)
+						return false;
 
-				if (positiveOverlap.X > 0f && positiveOverlap.X < relativeSpeed.X)
-				{
-					if (rect1.Position2.Y + relativeSpeed.Y >= rect2.Position1.Y && rect1.Position1.Y + relativeSpeed.Y <= rect2.Position2.Y)
-					{
-						touchingAtSpeedFraction = (relativeSpeed.X - positiveOverlap.X) / relativeSpeed.X;
-						intersectionAxis = rect2.GetPerpAxes()[1];
-					}
+					xTouchingFraction = (rect2.Position1.X - rect1.Position2.X) / relativeSpeed.X;
 				}
-				if (positiveOverlap.Y > 0f && positiveOverlap.Y < relativeSpeed.Y)
+				else
 				{
-					if (rect1.Position2.X + relativeSpeed.X >= rect2.Position1.X && rect1.Position1.X + relativeSpeed.X <= rect2.Position2.X)
-					{
-						float fraction = (relativeSpeed.Y - positiveOverlap.Y) / relativeSpeed.Y;
-						if (fraction < touchingAtSpeedFraction)
-						{
-							touchingAtSpeedFraction = fraction;
-							intersectionAxis = rect2.GetPerpAxes()[0];
-						}
-					}
-				}
-				if (negativeOverlap.X < 0f && negativeOverlap.X > relativeSpeed.X)
-				{
-					if (rect1.Position2.Y + relativeSpeed.Y >= rect2.Position1.Y && rect1.Position1.Y + relativeSpeed.Y <= rect2.Position2.Y)
-					{
-						float fraction = (relativeSpeed.X - negativeOverlap.X) / relativeSpeed.X;
-						if (fraction < touchingAtSpeedFraction)
-						{
-							touchingAtSpeedFraction = fraction;
-							intersectionAxis = rect2.GetPerpAxes()[1];
-						}
-					}
-				}
-				if (negativeOverlap.Y < 0f && negativeOverlap.Y > relativeSpeed.Y)
-				{
-					if (rect1.Position2.X + relativeSpeed.X >= rect2.Position1.X && rect1.Position1.X + relativeSpeed.X <= rect2.Position2.X)
-					{
-						float fraction = (relativeSpeed.Y - negativeOverlap.Y) / relativeSpeed.Y;
-						if (fraction < touchingAtSpeedFraction)
-						{
-							touchingAtSpeedFraction = fraction;
-							intersectionAxis = rect2.GetPerpAxes()[0];
-						}
-					}
+					if (rect1.Position1.X + relativeSpeed.X > rect2.Position2.X || rect1.Position2.X < rect2.Position1.X)
+						return false;
+
+					xTouchingFraction = (rect2.Position2.X - rect1.Position1.X) / relativeSpeed.X;
 				}
 
-				if (intersectionAxis != Point.Zero)
-					return true;
+				if (relativeSpeed.Y >= 0f)
+				{
+					if (rect1.Position2.Y + relativeSpeed.Y < rect2.Position1.Y || rect1.Position1.Y > rect2.Position2.Y)
+						return false;
 
-				return false;
+					yTouchingFraction = (rect2.Position1.Y - rect1.Position2.Y) / relativeSpeed.Y;
+				}
+				else
+				{
+					if (rect1.Position1.Y + relativeSpeed.Y > rect2.Position2.Y || rect1.Position2.Y < rect2.Position1.Y)
+						return false;
+
+					yTouchingFraction = (rect2.Position2.Y - rect1.Position1.Y) / relativeSpeed.Y;
+				}
+
+				//decide which fraction and corresponding axis to return, if any
+				if (xTouchingFraction >= 0f 
+					&& xTouchingFraction <= 1f)
+				{
+					touchingAtSpeedFraction = xTouchingFraction;
+					intersectionAxis = rect2.GetPerpAxes()[0];
+				}
+				
+				if (yTouchingFraction >= 0f
+					&& yTouchingFraction <= 1f
+					&& yTouchingFraction < touchingAtSpeedFraction)
+				{
+					touchingAtSpeedFraction = yTouchingFraction;
+					intersectionAxis = rect2.GetPerpAxes()[1];
+				}
+
+				if (intersectionAxis == Point.Zero)
+					touchingAtSpeedFraction = -1f;
+
+				return true;
 			}
 			else //other shapes
 			{
-				bool fractionFound = false;
+				touchingAtSpeedFraction = float.PositiveInfinity;
+
 				Point[] shape1Points = shape1.GetPoints();
 				Point[] shape2Points = shape2.GetPoints();
+
 				List<Point> allAxes = new List<Point>(shape1.GetPerpAxes());
 				allAxes.AddRange(shape2.GetPerpAxes());
-
-				float multiplier;
 
 				foreach (Point axis in allAxes)
 				{
@@ -226,9 +218,10 @@ namespace HatlessEngine
 					float shape2ScalarMin = float.PositiveInfinity;
 					float shape2ScalarMax = float.NegativeInfinity;
 
+					//cast shape1's points to the axis
 					foreach (Point point in shape1Points)
 					{
-						multiplier = (float)((point.X * axis.X + point.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
+						float multiplier = (float)((point.X * axis.X + point.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
 						float scalar = multiplier * axis.X * axis.X + multiplier * axis.Y * axis.Y;
 
 						if (scalar < shape1ScalarMin)
@@ -236,9 +229,11 @@ namespace HatlessEngine
 						if (scalar > shape1ScalarMax)
 							shape1ScalarMax = scalar;
 					}
+
+					//cast shape2's points to the axis
 					foreach (Point point in shape2Points)
 					{
-						multiplier = (float)((point.X * axis.X + point.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
+						float multiplier = (float)((point.X * axis.X + point.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
 						float scalar = multiplier * axis.X * axis.X + multiplier * axis.Y * axis.Y;
 
 						if (scalar < shape2ScalarMin)
@@ -248,8 +243,8 @@ namespace HatlessEngine
 					}
 
 					//cast speed to axis
-					multiplier = (float)((relativeSpeed.X * axis.X + relativeSpeed.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
-					float speedScalar = multiplier * axis.X * axis.X + multiplier * axis.Y * axis.Y;
+					float speedMultiplier = (float)((relativeSpeed.X * axis.X + relativeSpeed.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
+					float speedScalar = speedMultiplier * axis.X * axis.X + speedMultiplier * axis.Y * axis.Y;
 
 					float thisTouchingAtSpeedFraction;
 					if (speedScalar >= 0)
@@ -257,30 +252,50 @@ namespace HatlessEngine
 						if (shape1ScalarMax + speedScalar < shape2ScalarMin || shape1ScalarMin > shape2ScalarMax)
 							return false;
 
-						thisTouchingAtSpeedFraction = (shape2ScalarMin - shape1ScalarMax) / Math.Abs(speedScalar);
+						thisTouchingAtSpeedFraction = (shape2ScalarMin - shape1ScalarMax) / speedScalar;
 					}
 					else
 					{
 						if (shape1ScalarMin + speedScalar > shape2ScalarMax || shape1ScalarMax < shape2ScalarMin)
 							return false;
 
-						thisTouchingAtSpeedFraction = (shape1ScalarMin - shape2ScalarMax) / Math.Abs(speedScalar);
+						thisTouchingAtSpeedFraction = (shape2ScalarMax - shape1ScalarMin) / speedScalar;
 					}
 
-					if (thisTouchingAtSpeedFraction <= touchingAtSpeedFraction && thisTouchingAtSpeedFraction >= -0.00001f && thisTouchingAtSpeedFraction <= 1f)
+					if (thisTouchingAtSpeedFraction >= 0f
+						&& thisTouchingAtSpeedFraction <= 1f
+						&& thisTouchingAtSpeedFraction < touchingAtSpeedFraction)
 					{
-						//float precision error passthrough bug
-						if (thisTouchingAtSpeedFraction < 0f)
-							thisTouchingAtSpeedFraction = 0f;
-
 						touchingAtSpeedFraction = thisTouchingAtSpeedFraction;
 						intersectionAxis = axis;
-						fractionFound = true;
 					}
 				}
 
-				return fractionFound;
+				if (intersectionAxis == Point.Zero)
+					touchingAtSpeedFraction = -1f;
+				else //this axis is still a perpendicular axis, revert!
+					intersectionAxis = new Point(intersectionAxis.Y, -intersectionAxis.X);
+
+				return true;
 			}
+		}
+		/// <summary>
+		/// Returns whether this shape overlaps with another somewhere if it moves by relativeSpeed.
+		/// </summary>
+		public static bool IntersectsWith(this IShape shape1, IShape shape2, Point relativeSpeed)
+		{
+			float touchingAtSpeedFraction;
+			Point intersectionAxis;
+			return IntersectsWith(shape1, shape2, relativeSpeed, out touchingAtSpeedFraction, out intersectionAxis);
+		}
+		/// <summary>
+		/// Returns whether this shape overlaps with another.
+		/// </summary>
+		public static bool IntersectsWith(this IShape shape1, IShape shape2)
+		{
+			float touchingAtSpeedFraction;
+			Point intersectionAxis;
+			return IntersectsWith(shape1, shape2, Point.Zero, out touchingAtSpeedFraction, out intersectionAxis);
 		}
 	}
 }

@@ -26,10 +26,5 @@ namespace HatlessEngine
 		/// So basically it's minimum to maximum on the horizontal and vertical axis.
 		/// </summary>
 		SimpleRectangle GetEnclosingRectangle();
-
-		/// <summary>
-		/// Check if this shape overlaps another
-		/// </summary>
-		bool IntersectsWith(IShape shape);
 	}
 }

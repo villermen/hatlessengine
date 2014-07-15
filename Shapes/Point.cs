@@ -81,11 +81,6 @@ namespace HatlessEngine
 			return this;
 		}
 
-		public bool IntersectsWith(IShape shape)
-		{
-			return Misc.ShapesIntersecting(this, shape);
-		}
-
 		public static bool operator ==(Point point1, Point point2)
 		{
 			return (point1.X == point2.X && point1.Y == point2.Y);
@@ -125,10 +120,16 @@ namespace HatlessEngine
 			return new Point(point1.X / point2.X, point1.Y / point2.Y);
 		}
 
+		public static Point operator -(Point point)
+		{
+			return new Point(-point.X, -point.Y);
+		}
+
 		public static implicit operator Point(float f)
 		{
 			return new Point(f, f);
 		}
+
 
 		public static explicit operator SDL2.SDL.Point(Point point)
 		{

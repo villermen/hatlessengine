@@ -162,11 +162,6 @@ namespace HatlessEngine
 			Changed = false;
 		}
 
-		public bool IntersectsWith(IShape shape)
-		{
-			return Misc.ShapesIntersecting(this, shape);
-		}
-
 		public override string ToString()
 		{
 			if (Changed)

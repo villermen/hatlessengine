@@ -36,40 +36,66 @@ namespace HatlessEngine
 		/// Returns true when the specified button is pressed (one step only).
 		/// Searches the gamepadstate if gamepadNumber is given. (1-8)
 		/// </summary>
-		public static bool IsPressed(Button button, int gamepad = 0)
+		public static bool IsPressed(Button button, int gamepad = 1)
 		{
-			if (gamepad == 0)
+			if ((int)button < 3000)
 				return (CurrentState.Contains(button) && !PreviousState.Contains(button));
 			else
-				return (GamepadCurrentStates[gamepad - 1].Contains(button) && !GamepadPreviousStates[gamepad - 1].Contains(button));
+			{
+				if (GamepadConnected(gamepad))
+					return (GamepadCurrentStates[gamepad - 1].Contains(button) && !GamepadPreviousStates[gamepad - 1].Contains(button));
+				else
+					return false;
+			}
 		}
 		/// <summary>
 		/// Returns true when the specified button is being held down (every step).
 		/// Searches the gamepadstate if gamepadNumber is given. (1-8)
 		/// </summary>
-		public static bool IsDown(Button button, int gamepad = 0)
+		public static bool IsDown(Button button, int gamepad = 1)
 		{
-			if (gamepad == 0)
+			if ((int)button < 3000)
 				return CurrentState.Contains(button);
 			else
-				return (GamepadCurrentStates[gamepad - 1].Contains(button));
+			{
+				if (GamepadConnected(gamepad))
+					return (GamepadCurrentStates[gamepad - 1].Contains(button));
+				else
+					return false;
+			}
 		}
 		/// <summary>
 		/// Returns true when the specified button is released (one step only).
 		/// Searches the gamepadstate if gamepadNumber is given. (1-8)
 		/// </summary>
-		public static bool IsReleased(Button button, int gamepad = 0)
+		public static bool IsReleased(Button button, int gamepad = 1)
 		{
-			if (gamepad == 0)
+			if ((int)button < 3000)
 				return (!CurrentState.Contains(button) && PreviousState.Contains(button));
-			else
-				return (!GamepadCurrentStates[gamepad - 1].Contains(button) && GamepadPreviousStates[gamepad - 1].Contains(button));
+			else 
+			{
+				if (GamepadConnected(gamepad))
+					return (!GamepadCurrentStates[gamepad - 1].Contains(button) && GamepadPreviousStates[gamepad - 1].Contains(button));
+				else
+					return false;
+			}
 		}
 
 		/// <summary>
-		/// Returns whether the given gamepad is connected
+		/// Returns whether the given gamepad is connected.
 		/// </summary>
-		public static bool IsGamepadConnected(int gamepad)
+		public static bool GamepadConnected(int gamepad = 1)
+		{
+			if (gamepad < 1 || gamepad > 8)
+				throw new ArgumentOutOfRangeException("gamepad", "gamepad can be 1-8");
+
+			return GamepadHandles[gamepad - 1] != IntPtr.Zero;
+		}
+
+		/// <summary>
+		/// Returns whether the given gamepad supports the rumble feature.
+		/// </summary>
+		public static bool GamepadRumbleSupported(int gamepad)
 		{
 			if (gamepad < 1 || gamepad > 8)
 				throw new ArgumentOutOfRangeException("gamepad", "gamepad can be 1-8");
@@ -82,20 +108,22 @@ namespace HatlessEngine
 		/// </summary>
 		public static Point GetGamepadStickPosition(int gamepad, bool leftStick = true, bool respectDeadZone = true)
 		{
-			if (gamepad < 1 || gamepad > 8)
-				throw new ArgumentOutOfRangeException("gamepad", "gamepad can be 1-8");
+			if (GamepadConnected(gamepad))
+			{
+				Point position = Point.Zero;
+				byte startAxis = 0;
+				if (!leftStick)
+					startAxis = 2;
 
-			Point position = Point.Zero;
-			byte startAxis = 0;
-			if (!leftStick)
-				startAxis = 2;
+				if (!respectDeadZone || GamepadAxisValues[gamepad - 1, startAxis] <= -GamepadDeadZone || GamepadAxisValues[gamepad - 1, startAxis] >= GamepadDeadZone)
+					position.X = GamepadAxisValues[gamepad - 1, startAxis];
+				if (!respectDeadZone || GamepadAxisValues[gamepad - 1, startAxis + 1] <= -GamepadDeadZone || GamepadAxisValues[gamepad - 1, startAxis + 1] >= GamepadDeadZone)
+					position.Y = GamepadAxisValues[gamepad - 1, startAxis + 1];
 
-			if (!respectDeadZone || GamepadAxisValues[gamepad - 1, startAxis] <= -GamepadDeadZone || GamepadAxisValues[gamepad - 1, startAxis] >= GamepadDeadZone)
-				position.X = GamepadAxisValues[gamepad - 1, startAxis];
-			if (!respectDeadZone || GamepadAxisValues[gamepad - 1, startAxis + 1] <= -GamepadDeadZone || GamepadAxisValues[gamepad - 1, startAxis + 1] >= GamepadDeadZone)
-				position.Y = GamepadAxisValues[gamepad - 1, startAxis + 1];
+				return position;
+			}
 
-			return position;
+			return Point.Zero;
 		}
 
 		/// <summary>
@@ -103,17 +131,17 @@ namespace HatlessEngine
 		/// </summary>
 		public static float GetTriggerValue(int gamepad, bool leftTrigger = true, bool respectDeadZone = true)
 		{
-			if (gamepad < 1 || gamepad > 8)
-				throw new ArgumentOutOfRangeException("gamepad", "gamepad can be 1-8");
+			if (GamepadConnected(gamepad))
+			{
+				byte axis = 4;
+				if (!leftTrigger)
+					axis = 5;
 
-			byte axis = 4;
-			if (!leftTrigger)
-				axis = 5;
+				if (!respectDeadZone || GamepadAxisValues[gamepad - 1, axis] >= GamepadDeadZone)
+					return GamepadAxisValues[gamepad - 1, axis];
+			}
 
-			if (!respectDeadZone || GamepadAxisValues[gamepad - 1, axis] >= GamepadDeadZone)
-				return GamepadAxisValues[gamepad - 1, axis];
-			else
-				return 0f;
+			return 0f;
 		}
 
 		/// <summary>
@@ -122,14 +150,12 @@ namespace HatlessEngine
 		/// </summary>
 		public static void Rumble(int gamepad, float strength = 1f, float duration = 1f)
 		{
-			if (gamepad < 1 || gamepad > 8)
-				throw new ArgumentOutOfRangeException("gamepad", "gamepad can be 1-8");
 			if (strength < 0 || strength > 1)
 				throw new ArgumentOutOfRangeException("strength", "strength can be 0f-1f");
 			if (duration < 0)
 				throw new ArgumentOutOfRangeException("duration", "duration can't be negative");
 
-			if (GamepadHapticHandles[gamepad - 1] != IntPtr.Zero)
+			if (GamepadConnected(gamepad) && GamepadRumbleSupported(gamepad))
 				SDL.HapticRumblePlay(GamepadHapticHandles[gamepad - 1], strength, (uint)(1000 * duration));
 		}
 

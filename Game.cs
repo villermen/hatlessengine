@@ -27,6 +27,12 @@ namespace HatlessEngine
 		private static int _ActualFPS;
 
 		/// <summary>
+		/// If true the game will force to run steps at max frequency until it has caught up with the required speed.
+		/// If not it will just keep going at regular speed after it goes out of sync.
+		/// </summary>
+		public static bool CatchUpSteps = false;
+
+		/// <summary>
 		/// Gets or sets the desired amount of steps per second.
 		/// </summary>
 		public static float StepsPerSecond
@@ -96,7 +102,7 @@ namespace HatlessEngine
 
 			//open window
 			SDL.SetHint(SDL.HINT_RENDER_VSYNC, "1");
-			SDL.SetHint(SDL.HINT_RENDER_SCALE_QUALITY, "1");
+			SDL.SetHint(SDL.HINT_RENDER_SCALE_QUALITY, "1");		
 
 			WindowHandle = SDL.CreateWindow("HatlessEngine", SDL.WINDOWPOS_UNDEFINED, SDL.WINDOWPOS_UNDEFINED, 800, 600, SDL.WindowFlags.WINDOW_SHOWN | SDL.WindowFlags.WINDOW_RESIZABLE | SDL.WindowFlags.WINDOW_INPUT_FOCUS);
 			RendererHandle = SDL.CreateRenderer(WindowHandle, -1, (uint)(SDL.RendererFlags.RENDERER_ACCELERATED | SDL.RendererFlags.RENDERER_PRESENTVSYNC));
@@ -137,7 +143,10 @@ namespace HatlessEngine
 				//perform step when needed
 				if (stopWatch.ElapsedTicks >= lastStepTick + TicksPerStep)
 				{
-					lastStepTick = lastStepTick + TicksPerStep;
+					if (CatchUpSteps)
+						lastStepTick = lastStepTick + TicksPerStep;
+					else
+						lastStepTick = stopWatch.ElapsedTicks;
 					Step();
 
 					_ActualSPS = (int)(Stopwatch.Frequency / (stopWatch.ElapsedTicks - lastStepTime));
@@ -239,7 +248,7 @@ namespace HatlessEngine
 				obj.SpeedLeft = 1f;
 				obj.CollisionCandidates = null;
 			}
-			
+
 			//create and fill quadtree for this step
 			QuadTree = new QuadTree(new SimpleRectangle(minX, minY, maxX - minX, maxY - minY));
 
@@ -271,7 +280,6 @@ namespace HatlessEngine
 				}
 			}
 
-			//Resources.SourceRemoval();
 			Resources.ObjectAdditionAndRemoval();
 			Resources.CleanupFontTextures();
 		}
