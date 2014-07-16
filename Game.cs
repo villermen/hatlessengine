@@ -252,17 +252,21 @@ namespace HatlessEngine
 			//create and fill quadtree for this step
 			QuadTree = new QuadTree(new Rectangle(minX, minY, maxX - minX, maxY - minY));
 
-			//maybe if too slow use SortedList and compare using the default comparer
-			List<PhysicalObject> processingObjects = new List<PhysicalObject>(Resources.PhysicalObjects);	   
-		 
-			//get all first collision speedfractions for all objects and sort the list
-			foreach (PhysicalObject obj in processingObjects)
+			//create list of objects to process and calculate all first collision speedfractions for those objects
+			List<PhysicalObject> processingObjects = new List<PhysicalObject>(Resources.PhysicalObjects);	
+			foreach (PhysicalObject obj in Resources.PhysicalObjects)
+			{
+				if (obj.Speed == Point.Zero)
+					continue;
+
+				processingObjects.Add(obj);
 				obj.CalculateClosestCollision();
+			}
 
 			while (processingObjects.Count > 0)			
 			{
 				//get closest collision, process it/the pair of objects
-				PhysicalObject obj = processingObjects.MinBy(MovementForPhysicalObject);
+				PhysicalObject obj = processingObjects.MinBy(o => o.ClosestCollisionSpeedFraction + 1 - o.SpeedLeft);
 
 				obj.PerformClosestCollision();
 
@@ -282,11 +286,6 @@ namespace HatlessEngine
 
 			Resources.ObjectAdditionAndRemoval();
 			Resources.CleanupFontTextures();
-		}
-
-		private static float MovementForPhysicalObject(PhysicalObject obj)
-		{
-			return obj.ClosestCollisionSpeedFraction * obj.SpeedVelocity;
 		}
 
 		private static void Draw()

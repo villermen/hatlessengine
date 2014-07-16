@@ -17,6 +17,8 @@ namespace HatlessEngine
 		internal List<Sprite> SpritemapFilter;
 		internal List<Type> ObjectmapFilter;
 
+		#region Constructors
+
 		public CollisionRule(IShape shape, CollisionAction action, Action<IShape> method = null)
 		{
 			Type = CollisionRuleType.Shape;
@@ -89,12 +91,6 @@ namespace HatlessEngine
 		public CollisionRule(string spritemapID, Point spritemapOffset, CollisionAction action, string[] spriteIDFilter = null, Action<PhysicalObject> method = null)
 			: this(Resources.Spritemaps[spritemapID], spritemapOffset, action, ProcessSpriteIDs(spriteIDFilter), method) { }
 
-		internal void CallMethod(object result)
-		{
-			if (Method != null)
-				Method.DynamicInvoke(result);
-		}
-
 		private static Sprite[] ProcessSpriteIDs(string[] spriteIDs)
 		{
 			if (spriteIDs == null)
@@ -108,6 +104,14 @@ namespace HatlessEngine
 				}
 				return sprites;
 			}
+		}
+
+		#endregion
+
+		internal void CallMethod(object result)
+		{
+			if (Method != null)
+				Method.DynamicInvoke(result);
 		}
 	}
 

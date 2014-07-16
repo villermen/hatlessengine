@@ -139,6 +139,8 @@ namespace HatlessEngine
 		/// </summary>
 		internal void CalculateClosestCollision()
 		{
+			ClosestCollisionSpeedFraction = float.PositiveInfinity;
+
 			//no (more) collision checking this step please
 			if (SpeedLeft == 0f || Speed == Point.Zero)
 			{
@@ -146,7 +148,6 @@ namespace HatlessEngine
 				return;
 			}
 
-			ClosestCollisionSpeedFraction = float.PositiveInfinity;
 			float touchingSpeedLeftFraction = float.PositiveInfinity;
 			Point intersectionAxis;
 
