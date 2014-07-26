@@ -45,6 +45,7 @@
     <Compile Include="Resources\IResource.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="QuadTree.cs" />
+    <Compile Include="Shapes\Polygon.cs" />
     <Compile Include="Shapes\Rectangle.cs" />
     <Compile Include="Resources\View.cs" />
     <Compile Include="Resources\Resources.cs" />

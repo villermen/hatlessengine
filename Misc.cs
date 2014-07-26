@@ -297,5 +297,20 @@ namespace HatlessEngine
 			Point intersectionAxis;
 			return IntersectsWith(shape1, shape2, Point.Zero, out touchingAtSpeedFraction, out intersectionAxis);
 		}
+
+		/// <summary>
+		/// Returns the angle to or from angle1 to angle2 from -180f to 180f.
+		/// </summary>
+		public static float GetRelativeAngle(float angle1, float angle2)
+		{
+			float diff = angle2 - angle1;
+
+			if (diff > 180f)
+				diff -= 360;
+			if (diff < -180f)
+				diff += 360;
+
+			return diff;
+		}
 	}
 }

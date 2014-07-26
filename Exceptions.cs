@@ -23,4 +23,7 @@ namespace HatlessEngine
 
 		public InvalidObjectTypeException(string message) : base(message) { }
 	}
+
+	[Serializable]
+	public class NonConvexShapeDesignException : Exception { }
 }

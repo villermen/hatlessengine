@@ -149,7 +149,7 @@ namespace HatlessEngine
 				if (p.Y > maxY)
 					maxY = p.Y;
 			}
-			EnclosingRectangle = new Rectangle(minX, minY, maxX, maxY);
+			EnclosingRectangle = new Rectangle(minX, minY, maxX - minX, maxY - minY);
 
 			BoundLines =  new Line[4]
 			{

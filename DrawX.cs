@@ -28,6 +28,16 @@ namespace HatlessEngine
 
 			DrawJobs.Add(new LineDrawJob(depth, rect, points, color));
 		}
+		public static void Draw(Polygon poly, Color color, int depth = 0)
+		{
+			//same as rect
+			Point[] polyPoints = poly.GetPoints(); //get points first to get array size
+			Point[] points = new Point[polyPoints.Length + 1];
+			polyPoints.CopyTo(points, 0);	
+			points[points.Length - 1] = points[0];
+
+			DrawJobs.Add(new LineDrawJob(depth, poly.GetEnclosingRectangle(), points, color));
+		}
 		public static void Draw(string str, Font font, Point pos, Color color, Alignment alignment = Alignment.Top | Alignment.Left, int depth = 0)
 		{
 			font.Draw(str, pos, color, alignment, depth);
