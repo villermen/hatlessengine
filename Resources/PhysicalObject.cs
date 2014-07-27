@@ -165,8 +165,9 @@ namespace HatlessEngine
 				switch (cRule.Type)
 				{
 					case CollisionRuleType.Shape:
-						if (Bounds.IntersectsWith((IShape)cRule.Target, Speed * SpeedLeft, out touchingSpeedLeftFraction, out intersectionAxis)
+						if (Bounds.IntersectsWith((IShape)cRule.Target, Speed, out touchingSpeedLeftFraction, out intersectionAxis)
 							&& touchingSpeedLeftFraction > 0f
+							&& touchingSpeedLeftFraction <= SpeedLeft
 							&& touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
 						{
 							ClosestCollisionSpeedFraction = touchingSpeedLeftFraction * SpeedLeft;
@@ -179,8 +180,9 @@ namespace HatlessEngine
 
 					case CollisionRuleType.Object:
 						if (CollisionCandidates.Contains((PhysicalObject)cRule.Target) 
-							&& Bounds.IntersectsWith(((PhysicalObject)cRule.Target).Bounds, (Speed - ((PhysicalObject)cRule.Target).Speed) * SpeedLeft, out touchingSpeedLeftFraction, out intersectionAxis)
+							&& Bounds.IntersectsWith(((PhysicalObject)cRule.Target).Bounds, Speed - ((PhysicalObject)cRule.Target).Speed, out touchingSpeedLeftFraction, out intersectionAxis)
 							&& touchingSpeedLeftFraction > 0f
+							&& touchingSpeedLeftFraction <= SpeedLeft
 							&& (touchingSpeedLeftFraction <= ((PhysicalObject)cRule.Target).SpeedLeft 
 							|| ((PhysicalObject)cRule.Target).Speed == Point.Zero)
 							&& touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
@@ -197,8 +199,9 @@ namespace HatlessEngine
 						foreach (PhysicalObject obj in Resources.PhysicalObjectsByType[(Type)cRule.Target])
 						{
 							if (CollisionCandidates.Contains(obj)
-								&& Bounds.IntersectsWith(obj.Bounds, (Speed - obj.Speed) * SpeedLeft, out touchingSpeedLeftFraction, out intersectionAxis)
+								&& Bounds.IntersectsWith(obj.Bounds, Speed - obj.Speed, out touchingSpeedLeftFraction, out intersectionAxis)
 								&& touchingSpeedLeftFraction > 0f
+								&& touchingSpeedLeftFraction <= SpeedLeft
 								&& (touchingSpeedLeftFraction <= obj.SpeedLeft
 								|| obj.Speed == Point.Zero)	
 								&& touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
@@ -219,8 +222,9 @@ namespace HatlessEngine
 							if (!cRule.FilterEnabled || cRule.ObjectmapFilter.Contains(obj.GetType())) //account for inheritance
 							{
 								if (CollisionCandidates.Contains(obj)
-									&& Bounds.IntersectsWith(obj.Bounds, (Speed - obj.Speed) * SpeedLeft, out touchingSpeedLeftFraction, out intersectionAxis)
+									&& Bounds.IntersectsWith(obj.Bounds, Speed - obj.Speed, out touchingSpeedLeftFraction, out intersectionAxis)
 									&& touchingSpeedLeftFraction > 0f
+									&& touchingSpeedLeftFraction <= SpeedLeft
 									&& (touchingSpeedLeftFraction <= obj.SpeedLeft 
 									|| obj.Speed == Point.Zero)
 									&& touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
@@ -238,6 +242,7 @@ namespace HatlessEngine
 					case CollisionRuleType.ManagedSprite:
 						if (Bounds.IntersectsWith(((ManagedSprite)cRule.Target).SpriteRectangle, Speed, out touchingSpeedLeftFraction, out intersectionAxis)
 							&& touchingSpeedLeftFraction > 0f
+							&& touchingSpeedLeftFraction <= SpeedLeft
 							&& touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
 						{
 							ClosestCollisionSpeedFraction = touchingSpeedLeftFraction;
@@ -259,6 +264,7 @@ namespace HatlessEngine
 
 								if (Bounds.IntersectsWith(sRect, Speed, out touchingSpeedLeftFraction, out intersectionAxis)
 									&& touchingSpeedLeftFraction > 0f
+									&& touchingSpeedLeftFraction <= SpeedLeft
 									&& touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
 								{
 									ClosestCollisionSpeedFraction = touchingSpeedLeftFraction;
