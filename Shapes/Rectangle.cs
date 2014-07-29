@@ -7,134 +7,54 @@ namespace HatlessEngine
 	/// Represents a simple axis-aligned rectangle.
 	/// </summary>
 	[Serializable]
-	public struct Rectangle : IShape
+	public class Rectangle : Shape
 	{
-		private Point _Position;
-		private Point _Size;
+		public new float Rotation { get; set; }
 
-		private bool Changed;
-		private Point[] Points;
-		private static Point[] PerpAxes = new Point[] { new Point(0f, 1f), new Point(1f, 0f) };
- 
 		/// <summary>
-		/// Coordinates of the position of the rectangle.
-		/// If this is changed Position2 will change with it (moving the rectangle).
-		/// Use Position1 to change the topleft position without altering Position2.
-		/// </summary>
-		public Point Position
-		{
-			get { return _Position; }
-			set
-			{
-				_Position = value;
-				Changed = true;
-			}
-		}
-		/// <summary>
-		/// The size of the rectangle.
-		/// </summary>
-		public Point Size
-		{
-			get { return _Size; }
-			set
-			{
-				_Size = value;
-				Changed = true;
-			}
-		}
-		/// <summary>
-		/// Coordinates of the topleft point of the rectangle.
-		/// If this is changed Position2 will remain, thus altering the Size.
-		/// </summary>
-		public Point Position1
-		{
-			get { return _Position; }
-			set
-			{
-				_Size += _Position - value;
-				_Position = value;
-				Changed = true;
-			}
-		}
-		/// <summary>
-		/// Coordinates of the bottomright point of the rectangle.
-		/// X + Width &amp; Y + Height.
+		/// Coordinates of the point diagonal of the position of the rectangle (bottomright if Size is positive on both axes).
+		/// Basically X + Width &amp; Y + Height.
+		/// Cannot be changed directly, use Size and Position for that.
 		/// </summary>
 		public Point Position2
 		{
 			get { return _Position + _Size; }
-			set 
-			{ 
-				_Size = value - _Position;
-				Changed = true;
-			}
 		}
 
-		///// <summary>
-		///// Coordinates of the exact center of the rectangle.
-		///// </summary>
-		//public Point Center
-		//{
-		//	get { return _Position + _Size / 2f; }
-		//}
-
-		public Rectangle(Point position, Point size)
+		/// <summary>
+		/// Coordinates of the exact center of the rectangle.
+		/// </summary>
+		public Point Center
 		{
-			_Position = position;
+			get { return _Position + _Size / 2f; }
+		}
+
+		public Rectangle(Point pos, Point size)
+		{
+			_Position = pos;
 			_Size = size;
 
-			Changed = true;
 			Points = new Point[4];
+			PerpAxes = new Point[] { new Point(0f, 1f), new Point(1f, 0f), new Point(0f, 1f), new Point(1f, 0f) };
 		}
 		public Rectangle(float x, float y, float width, float height)
 			: this(new Point(x, y), new Point(width, height)) { }
 
-		public Point[] GetPoints()
-		{
-			if (Changed)
-				Recalculate();
-
-			return Points;
-		}
-
-		public Point[] GetPerpAxes()
-		{
-			return PerpAxes;
-		}
-
-		/// <summary>
-		/// Why? =(
-		/// </summary>
-		public Rectangle GetEnclosingRectangle()
-		{
-			return this;
-		}
-
-		private void Recalculate()
+		protected override void Recalculate()
 		{
 			Points[0] = _Position;
 			Points[1] = _Position + new Point(_Size.X, 0f);
 			Points[2] = _Position + _Size;
 			Points[3] = _Position + new Point(0f, _Size.Y);
 
-			Changed = false;
-		}
-
-		/// <summary>
-		/// Returns the 4 lines representing the sides of this rectangle.
-		/// </summary>
-		public Line[] GetBoundLines()
-		{
-			if (Changed)
-				Recalculate();
-
-			return new Line[]
-			{
+			BoundLines = new Line[] {
 				new Line(Points[0], Points[1]),
 				new Line(Points[1], Points[2]),
 				new Line(Points[2], Points[3]),
-				new Line(Points[3], Points[0])
+				new Line(Points[3], Points[0]),
 			};
+
+			Changed = false;
 		}
 
 		public static bool operator ==(Rectangle rect1, Rectangle rect2)

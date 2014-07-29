@@ -3,39 +3,15 @@
 namespace HatlessEngine
 {
 	[Serializable]
-	public struct Point : IShape
+	public struct Point : IConvexShape
 	{
 		public float X;
 		public float Y;
-
-		public Point Position
-		{
-			get { return this; }
-			set { this = value; }
-		}
 
 		public Point(float x, float y)
 		{
 			X = x;
 			Y = y;
-		}
-
-		public Point[] GetPoints()
-		{
-			return new Point[] { this };
-		}
-
-		public Point[] GetPerpAxes()
-		{
-			return new Point[0];
-		}
-
-		/// <summary>
-		/// Will return a SimpleRectangle with this point as it's Position and no Size.
-		/// </summary>
-		public Rectangle GetEnclosingRectangle()
-		{
-			return new Rectangle(this, Point.Zero);
 		}
 
 		public float GetDistanceTo(Point point)
@@ -74,6 +50,25 @@ namespace HatlessEngine
 			Y = (float)(origin.Y + (X - origin.X) * Math.Sin(angle) + (Y - origin.Y) * Math.Cos(angle));
 			X = T;
 			return this;
+		}
+
+		public Point[] GetPoints()
+		{
+			return new Point[] { this };
+		}
+
+		public Point[] GetPerpAxes()
+		{
+			return new Point[0];
+		}
+
+		public bool IntersectsWith(IConvexShape shape)
+		{
+			//so it won't enter a call-loop of infinite proportions
+			if (shape.GetType() == typeof(Point))
+				return this == (Point)shape;
+			else //call Shape's better suited sat check 
+				return shape.IntersectsWith(this);
 		}
 
 		public static bool operator ==(Point point1, Point point2)

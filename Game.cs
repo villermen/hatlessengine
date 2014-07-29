@@ -235,12 +235,12 @@ namespace HatlessEngine
 			{
 				obj.UpdateCoverableArea();
 
-				if (obj.CoverableArea.Position1.X < minX)
-					minX = obj.CoverableArea.Position1.X;
+				if (obj.CoverableArea.Position.X < minX)
+					minX = obj.CoverableArea.Position.X;
 				if (obj.CoverableArea.Position2.X > maxX)
 					maxX = obj.CoverableArea.Position2.X;
-				if (obj.CoverableArea.Position1.Y < minY)
-					minY = obj.CoverableArea.Position1.Y;
+				if (obj.CoverableArea.Position.Y < minY)
+					minY = obj.CoverableArea.Position.Y;
 				if (obj.CoverableArea.Position2.Y > maxY)
 					maxY = obj.CoverableArea.Position2.Y;
 
@@ -313,7 +313,7 @@ namespace HatlessEngine
 				SDL.RenderSetScale(RendererHandle, scale.X, scale.Y);
 
 				//viewport is affected by scale for whatever reason, correct it
-				SDL.Rect viewport = (SDL.Rect)new Rectangle(view.Viewport.Position1 * windowSize / scale, view.Viewport.Size * windowSize / scale);
+				SDL.Rect viewport = (SDL.Rect)new Rectangle(view.Viewport.Position * windowSize / scale, view.Viewport.Size * windowSize / scale);
 				SDL.RenderSetViewport(RendererHandle, ref viewport);
 
 				//get all jobs that will draw inside this view
@@ -323,7 +323,7 @@ namespace HatlessEngine
 					{
 						TextureDrawJob textureDrawJob = (TextureDrawJob)job;
 						SDL.Rect sourceRect = (SDL.Rect)textureDrawJob.SourceRect;
-						SDL.Rect destRect = (SDL.Rect)new Rectangle(textureDrawJob.DestRect.Position - view.Area.Position1 - textureDrawJob.DestRect.Origin, textureDrawJob.DestRect.Size);
+						SDL.Rect destRect = (SDL.Rect)new Rectangle(textureDrawJob.DestRect.Position - view.Area.Position - textureDrawJob.DestRect.Origin, textureDrawJob.DestRect.Size);
 
 						if (textureDrawJob.DestRect.Rotation == 0f)
 						{
@@ -340,7 +340,7 @@ namespace HatlessEngine
 						LineDrawJob lineDrawJob = (LineDrawJob)job;
 
 						//transform all points according to view and cast em
-						SDL.Point[] sdlPoints = Array.ConvertAll<Point, SDL.Point>(lineDrawJob.Points, p => (SDL.Point)(p - view.Area.Position1));
+						SDL.Point[] sdlPoints = Array.ConvertAll<Point, SDL.Point>(lineDrawJob.Points, p => (SDL.Point)(p - view.Area.Position));
 
 						SDL.SetRenderDrawColor(RendererHandle, lineDrawJob.Color.R, lineDrawJob.Color.G, lineDrawJob.Color.B, lineDrawJob.Color.A);
 						SDL.RenderDrawLines(RendererHandle, sdlPoints, lineDrawJob.PointCount);

@@ -9,64 +9,17 @@ namespace HatlessEngine
 	/// What is that? A Circle? Sorry, never heard of it.
 	/// </summary>
 	[Serializable]
-	public struct Polygon : IShape
+	public class Polygon : Shape
 	{
-		private Point _Position;
-		private Point _Size;
-		private float _Rotation;
-
-		private bool Changed;
 		private Point[] BasePoints;
-		private Point[] Points;
-		private Point[] PerpAxes;
-		private Line[] BoundLines;
-		private Rectangle EnclosingRectangle;
- 
-		/// <summary>
-		/// The position of the polygon.
-		/// This minus the origin is the first point.
-		/// </summary>
-		public Point Position
-		{
-			get { return _Position; }
-			set
-			{
-				_Position = value;
-				Changed = true;
-			}
-		}
-		public Point Size
-		{
-			get { return _Size; }
-			set
-			{
-				_Size = value;
-				Changed = true;
-			}
-		}
-
-		/// <summary>
-		/// Rotation of the rectangle around it's origin point.
-		/// </summary>
-		public float Rotation
-		{
-			get { return _Rotation; }
-			set 
-			{ 
-				_Rotation = value;
-				Changed = true;
-			}
-		}
 
 		/// <summary>
 		/// Position, and points relative to this position.
 		/// The polygon will be checked for convexness and throw an exception if it's not.
 		/// </summary>
-		public Polygon(Point position, params Point[] points)
+		public Polygon(Point pos, params Point[] points)
 		{
-			_Position = position;
-			_Size = new Point(1f, 1f);
-			_Rotation = 0f;
+			_Position = pos;
 
 			//check for convexness
 			bool clockwise;
@@ -90,44 +43,15 @@ namespace HatlessEngine
 				previousAngle = currentAngle;
 			}
 
-			Changed = true;
 			BasePoints = points;
+
+			//initialize arrays
 			Points = new Point[points.Length];
 			PerpAxes = new Point[points.Length];
 			BoundLines = new Line[points.Length];
-			EnclosingRectangle = Rectangle.Zero;
 		}
 
-		/// <summary>
-		/// Returns an array with all the transformed points.
-		/// </summary>
-		public Point[] GetPoints()
-		{
-			if (Changed)
-				Recalculate();
-
-			return Points;
-		}
-		/// <summary>
-		/// Returns an array with the perpendicular axes.
-		/// </summary>
-		public Point[] GetPerpAxes()
-		{
-			if (Changed)
-				Recalculate();
-			
-			return PerpAxes;
-		}
-
-		public Rectangle GetEnclosingRectangle()
-		{
-			if (Changed)
-				Recalculate();
-
-			return EnclosingRectangle;
-		}
-
-		private void Recalculate()
+		protected override void Recalculate()
 		{
 			float minX = float.PositiveInfinity, minY = float.PositiveInfinity, maxX = float.NegativeInfinity, maxY = float.NegativeInfinity;
 			
@@ -155,18 +79,6 @@ namespace HatlessEngine
 			EnclosingRectangle = new Rectangle(minX, minY, maxX - minX, maxY - minY);
 
 			Changed = false;
-		}
-
-		public override string ToString()
-		{
-			if (Changed)
-				Recalculate();
-
-			string str = "";
-			foreach (Point point in Points)
-				str += point.ToString();
-
-			return str;	
 		}
 	}
 }

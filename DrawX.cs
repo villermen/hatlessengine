@@ -14,7 +14,7 @@ namespace HatlessEngine
 
 		public static void Draw(Point point, Color color, int depth = 0)
 		{
-			DrawJobs.Add(new LineDrawJob(depth, point.GetEnclosingRectangle(), new Point[] { point, point }, color));
+			DrawJobs.Add(new LineDrawJob(depth, new Rectangle(point, Point.Zero), new Point[] { point, point }, color));
 		}
 		public static void Draw(Line line, Color color, int depth = 0)
 		{

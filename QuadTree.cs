@@ -32,7 +32,7 @@ namespace HatlessEngine
 		{
 			Level = level;
 			Bounds = bounds;
-			Center = bounds.Position1 + bounds.Size / 2f;
+			Center = bounds.Position + bounds.Size / 2f;
 			ChildSize = bounds.Size / 2f;
 
 			if (objects.Count > MaxObjects)
@@ -62,9 +62,9 @@ namespace HatlessEngine
 				}
 
 				//create subtrees and add everything that fits inside of em
-				Children[0] = new QuadTree((byte)(Level + 1), new Rectangle(Bounds.Position1, ChildSize), ChildObjects0);
-				Children[1] = new QuadTree((byte)(Level + 1), new Rectangle(new Point(Center.X, Bounds.Position1.Y), ChildSize), ChildObjects1);
-				Children[2] = new QuadTree((byte)(Level + 1), new Rectangle(new Point(Bounds.Position1.X, Center.Y), ChildSize), ChildObjects2);
+				Children[0] = new QuadTree((byte)(Level + 1), new Rectangle(Bounds.Position, ChildSize), ChildObjects0);
+				Children[1] = new QuadTree((byte)(Level + 1), new Rectangle(new Point(Center.X, Bounds.Position.Y), ChildSize), ChildObjects1);
+				Children[2] = new QuadTree((byte)(Level + 1), new Rectangle(new Point(Bounds.Position.X, Center.Y), ChildSize), ChildObjects2);
 				Children[3] = new QuadTree((byte)(Level + 1), new Rectangle(Center, ChildSize), ChildObjects3);
 			}
 			else
@@ -104,9 +104,9 @@ namespace HatlessEngine
 			bool[] fits = new bool[5];
 			byte quadrants = 0;
 
-			if (obj.CoverableArea.Position1.X <= Center.X)
+			if (obj.CoverableArea.Position.X <= Center.X)
 			{
-				if (obj.CoverableArea.Position1.Y <= Center.Y)
+				if (obj.CoverableArea.Position.Y <= Center.Y)
 				{
 					fits[0] = true;
 					quadrants++;
@@ -119,7 +119,7 @@ namespace HatlessEngine
 			}
 			if (obj.CoverableArea.Position2.X >= Center.X)
 			{
-				if (obj.CoverableArea.Position1.Y <= Center.Y)
+				if (obj.CoverableArea.Position.Y <= Center.Y)
 				{
 					fits[1] = true;
 					quadrants++;

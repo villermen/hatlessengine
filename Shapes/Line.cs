@@ -6,113 +6,67 @@ namespace HatlessEngine
 	/// 2 points, connected, line!
 	/// </summary>
 	[Serializable]
-	public struct Line : IShape
+	public class Line : Shape
 	{
-		private Point _Point1;
-		private Point _Point2;
-
-		private bool Changed;
-		private Point[] Points;
-		private Point[] PerpAxes;
-		private Rectangle EnclosingRectangle;
-
 		/// <summary>
-		/// Changes this line's position, setting Point1 to Position and moving Point2 with it equally.
-		/// </summary>
-		public Point Position
-		{
-			get { return _Point1; }
-			set 
-			{ 
-				_Point2 = value + _Point2 - _Point1;
-				_Point1 = value;
-				Changed = true;
-			}
-		}
-		/// <summary>
-		/// First Point and Position of the line.
-		/// Use this property to change it without affecting Point2.
+		/// Gets Position, if set will change Position without altering Point2 (unlike Position, which will move both).
 		/// </summary>
 		public Point Point1
 		{
-			get { return _Point1; }
+			get { return _Position; }
 			set
 			{
-				_Point1 = value;
+				_Size += Position - value;
+				_Position = value;
 				Changed = true;
 			}
 		}
+
 		/// <summary>
-		/// Second point of the line.
+		/// The point diagonal of the Position/Point1.
 		/// </summary>
 		public Point Point2
 		{
-			get { return _Point2; }
+			get { return _Position + _Size; }
 			set
 			{
-				_Point2 = value;
+				_Size = value - _Position;
 				Changed = true;
 			}
 		}
 
 		/// <summary>
 		/// Gets the distance between both points.
-		/// Moves Point2 to obtain the given length with set.
+		/// Moves Point2 to obtain the given length if set.
 		/// </summary>
 		public float Length
 		{
-			get { return Point1.GetDistanceTo(Point2); }
+			get { return Size.GetDistanceFromOrigin(); }
 			set
 			{
-				//multiply point2 by difference factor
-				_Point2 = (_Point2 - _Point1) * (value / Length);
+				//multiply size by the difference factor
+				_Size *= (value / Length);
 				Changed = true;
 			}
 		}
 
 		public Line(Point point1, Point point2)
 		{
-			_Point1 = point1;
-			_Point2 = point2;
+			_Position = point1;
+			Point2 = point2;
 
-			Changed = true;
 			Points = new Point[2];
 			PerpAxes = new Point[1];
-			EnclosingRectangle = Rectangle.Zero;
 		}
 		public Line(float x1, float y1, float x2, float y2)
 			: this(new Point(x1, y1), new Point(x2, y2)) { }
 
-		public Point[] GetPoints()
+		protected override void Recalculate()
 		{
-			if (Changed)
-				Recalculate();
+			Points[0] = _Position;
+			Points[1] = _Position + _Size;
 
-			return Points;
-		}
-
-		public Point[] GetPerpAxes()
-		{
-			if (Changed)
-				Recalculate();
-
-			return PerpAxes;
-		}
-
-		public Rectangle GetEnclosingRectangle()
-		{
-			if (Changed)
-				Recalculate();
-
-			return EnclosingRectangle;
-		}
-
-		private void Recalculate()
-		{
-			Points[0] = _Point1;
-			Points[1] = _Point2;
-
-			PerpAxes[0] = new Point((-_Point2.Y + _Point1.Y) / Length, (_Point2.X - _Point1.X) / Length);
+			PerpAxes[0] = new Point((-Point2.Y + Point1.Y) / Length, (Point2.X - Point1.X) / Length);
 
 			float minX = float.PositiveInfinity, minY = float.PositiveInfinity, maxX = float.NegativeInfinity, maxY = float.NegativeInfinity;
 			foreach (Point p in Points)
@@ -134,14 +88,9 @@ namespace HatlessEngine
 		/// <summary>
 		/// Creates a complex rectangle of this line by applying a width to it.
 		/// </summary>
-		public ComplexRectangle ToRectangle(float width)
+		public ComplexRectangle ToComplexRectangle(float width)
 		{
-			return new ComplexRectangle(Position, new Point(width, Length), new Point(width / 2, Length), _Point1.GetAngleTo(_Point2));
-		}
-
-		public override string ToString()
-		{
-			return String.Format("({0}, {1})", Point1, Point2);
+			return new ComplexRectangle(_Position, new Point(width, Length), new Point(width / 2, Length), Point1.GetAngleTo(Point2));
 		}
 	}
 }

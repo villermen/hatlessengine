@@ -19,7 +19,7 @@ namespace HatlessEngine
 
 		#region Constructors
 
-		public CollisionRule(IShape shape, CollisionAction action, Action<IShape> method = null)
+		public CollisionRule(Shape shape, CollisionAction action, Action<Shape> method = null)
 		{
 			Type = CollisionRuleType.Shape;
 			Target = shape;

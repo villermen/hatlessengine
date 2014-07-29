@@ -216,7 +216,7 @@ namespace HatlessEngine
 						if (view.Viewport.IntersectsWith(positionOnWindow))
 						{
 							//calculate position on virtual gamespace
-							MousePosition = view.Area.Position1 + (positionOnWindow - view.Viewport.Position1) / view.Viewport.Size * view.Area.Size;
+							MousePosition = view.Area.Position + (positionOnWindow - view.Viewport.Position) / view.Viewport.Size * view.Area.Size;
 							break;
 						}
 					}

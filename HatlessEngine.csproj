@@ -45,6 +45,7 @@
     <Compile Include="Resources\IResource.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="QuadTree.cs" />
+    <Compile Include="Shapes\IConvexShape.cs" />
     <Compile Include="Shapes\Polygon.cs" />
     <Compile Include="Shapes\Rectangle.cs" />
     <Compile Include="Resources\View.cs" />
@@ -72,7 +73,7 @@
     <Compile Include="DrawX.cs" />
     <Compile Include="Color.cs" />
     <Compile Include="Shapes\Line.cs" />
-    <Compile Include="Shapes\IShape.cs" />
+    <Compile Include="Shapes\Shape.cs" />
     <Compile Include="Window.cs" />
     <Compile Include="ObjectBlueprint.cs" />
   </ItemGroup>

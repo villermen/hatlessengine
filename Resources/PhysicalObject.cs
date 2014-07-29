@@ -63,9 +63,10 @@ namespace HatlessEngine
 		/// The bounds of this object, used for collision detection.
 		/// Set to a new shape to update it, or cast it to your type before updating.
 		/// </summary>
-		public IShape Bounds = Point.Zero;
+		public Shape Bounds = Rectangle.Zero;
 
-		public PhysicalObject(Point position) : base()
+		public PhysicalObject(Point position) 
+			: base()
 		{
 			//set position
 			Position = position;
@@ -165,7 +166,7 @@ namespace HatlessEngine
 				switch (cRule.Type)
 				{
 					case CollisionRuleType.Shape:
-						if (Bounds.IntersectsWith((IShape)cRule.Target, Speed, out touchingSpeedLeftFraction, out intersectionAxis)
+						if (Bounds.IntersectsWith((Shape)cRule.Target, Speed, out touchingSpeedLeftFraction, out intersectionAxis)
 							&& touchingSpeedLeftFraction > 0f
 							&& touchingSpeedLeftFraction <= SpeedLeft
 							&& touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
