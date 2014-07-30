@@ -44,5 +44,18 @@ namespace HatlessEngine
 
 			return diff;
 		}
+
+		/// <summary>
+		/// Returns the modulus of a and n.
+		/// Division remainder (%) works fine until you start using negative values.
+		/// </summary>
+		public static int Modulus(int a, int n)
+		{
+			int result = a % n;
+			if (a < 0 && n > 0
+				|| a > 0 && n < 0)
+				result += n;
+			return result;
+		}
 	}
 }
