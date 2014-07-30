@@ -312,17 +312,10 @@ namespace HatlessEngine
 
 				case CollisionAction.Bounce:
 					float speedDirection = SpeedDirection;
-					float angleDifference = ClosestCollisionRelativeSpeed.GetAngleFromOrigin() - speedDirection;
-					
-					if (angleDifference < -180f)
-						angleDifference += 360f;
-					if (angleDifference > 180f)
-						angleDifference -= 360f;
-
-					//use other objects speed instead of relativespeed... durr no way but what values??!??
+					float angleDifference = Misc.GetRelativeAngle(ClosestCollisionRelativeSpeed.GetAngleFromOrigin(), speedDirection);
 
 					//prevent from bouncing if it is getting hit from around the side or back (another object just hit this one)
-					if (angleDifference > -70f && angleDifference < 70f)
+					if (angleDifference > -60f && angleDifference < 60f)
 						SpeedDirection = speedDirection - 180f + (ClosestCollisionTouchingAxis.GetAngleFromOrigin() - speedDirection - 90f) * 2;
 					break;
 			}

@@ -20,23 +20,18 @@ namespace HatlessEngine
 		{
 			DrawJobs.Add(new LineDrawJob(depth, line.GetEnclosingRectangle(), line.GetPoints(), color));
 		}
-		public static void Draw(Rectangle rect, Color color, int depth = 0)
+		/// <summary>
+		/// Draws the outline of a shape. Drawing filled shapes is (currently?) not possible with 2d accelerated rendering.
+		/// </summary>
+		public static void Draw(Shape shape, Color color, int depth = 0)
 		{
-			Point[] points = new Point[5];
-			rect.GetPoints().CopyTo(points, 0);
-			points[4] = points[0]; //add first one again so sdl will complete the rectangle
-
-			DrawJobs.Add(new LineDrawJob(depth, rect, points, color));
-		}
-		public static void Draw(Polygon poly, Color color, int depth = 0)
-		{
-			//same as rect
-			Point[] polyPoints = poly.GetPoints(); //get points first to get array size
-			Point[] points = new Point[polyPoints.Length + 1];
-			polyPoints.CopyTo(points, 0);	
+			//add the start point at the end of the array so it will draw the last line
+			Point[] shapePoints = shape.GetPoints();
+			Point[] points = new Point[shapePoints.Length + 1];
+			shapePoints.CopyTo(points, 0);	
 			points[points.Length - 1] = points[0];
 
-			DrawJobs.Add(new LineDrawJob(depth, poly.GetEnclosingRectangle(), points, color));
+			DrawJobs.Add(new LineDrawJob(depth, shape.GetEnclosingRectangle(), points, color));
 		}
 		public static void Draw(string str, Font font, Point pos, Color color, Alignment alignment = Alignment.Top | Alignment.Left, int depth = 0)
 		{
