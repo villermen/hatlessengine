@@ -9,7 +9,7 @@ namespace HatlessEngine
 	/// <summary>
 	/// Class that contains blueprints for sprites to be drawn in bulk.
 	/// </summary>
-	public sealed class ManagedSpritemap : IResource
+	public sealed class Spritemap : IResource
 	{
 		public string ID { get; private set; }
 
@@ -17,19 +17,19 @@ namespace HatlessEngine
 
 		public List<ManagedSprite> ManagedSprites;
 
-		private ManagedSpritemap(string id)
+		private Spritemap(string id)
 		{
 			ID = id;
 			Resources.Spritemaps.Add(ID, this);
 		}
 
-		public ManagedSpritemap(string id, params ManagedSprite[] managedSprites)
+		public Spritemap(string id, params ManagedSprite[] managedSprites)
 			: this(id)
 		{
 			ManagedSprites = new List<ManagedSprite>(managedSprites);
 		}
 
-		public ManagedSpritemap(string id, string filename)
+		public Spritemap(string id, string filename)
 			: this(id)
 		{
 			ManagedSprites = new List<ManagedSprite>();

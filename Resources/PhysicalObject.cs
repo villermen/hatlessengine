@@ -241,7 +241,7 @@ namespace HatlessEngine
 						break;
 
 					case CollisionRuleType.Spritemap:
-						foreach (ManagedSprite sprite in ((ManagedSpritemap)cRule.Target).ManagedSprites)
+						foreach (ManagedSprite sprite in ((Spritemap)cRule.Target).ManagedSprites)
 						{
 							//whether the object should be checked if the filter is enabled
 							if (!cRule.FilterEnabled || cRule.SpritemapFilter.Contains(sprite.TargetSprite)) //account for inheritance

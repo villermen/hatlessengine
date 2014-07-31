@@ -64,7 +64,7 @@ namespace HatlessEngine
 			Action = action;
 			Method = method;
 		}
-		public CollisionRule(ManagedSpritemap spritemap, CollisionAction action, Sprite[] spriteFilter = null, Action<PhysicalObject> method = null)
+		public CollisionRule(Spritemap spritemap, CollisionAction action, Sprite[] spriteFilter = null, Action<PhysicalObject> method = null)
 		{
 			Type = CollisionRuleType.Spritemap;
 			Target = spritemap;
