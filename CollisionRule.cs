@@ -12,7 +12,6 @@ namespace HatlessEngine
 		internal bool DeactivateAfterCollision = false;
 
 		internal object Target;
-		internal Point SpritemapOffset;
 		internal bool FilterEnabled;
 		internal List<Sprite> SpritemapFilter;
 		internal List<Type> ObjectmapFilter;
@@ -65,19 +64,10 @@ namespace HatlessEngine
 			Action = action;
 			Method = method;
 		}
-		//objectmapid
-		public CollisionRule(ManagedSprite mSprite, CollisionAction action, Action<ManagedSprite> method = null)
-		{
-			Type = CollisionRuleType.ManagedSprite;
-			Target = mSprite;
-			Action = action;
-			Method = method;
-		}
-		public CollisionRule(Spritemap spritemap, Point spritemapOffset, CollisionAction action, Sprite[] spriteFilter = null, Action<PhysicalObject> method = null)
+		public CollisionRule(ManagedSpritemap spritemap, CollisionAction action, Sprite[] spriteFilter = null, Action<PhysicalObject> method = null)
 		{
 			Type = CollisionRuleType.Spritemap;
 			Target = spritemap;
-			SpritemapOffset = spritemapOffset;
 			if (spriteFilter != null)
 			{
 				SpritemapFilter = new List<Sprite>(spriteFilter);
@@ -88,8 +78,8 @@ namespace HatlessEngine
 			Action = action;
 			Method = method;
 		}
-		public CollisionRule(string spritemapID, Point spritemapOffset, CollisionAction action, string[] spriteIDFilter = null, Action<PhysicalObject> method = null)
-			: this(Resources.Spritemaps[spritemapID], spritemapOffset, action, ProcessSpriteIDs(spriteIDFilter), method) { }
+		public CollisionRule(string spritemapID, CollisionAction action, string[] spriteIDFilter = null, Action<PhysicalObject> method = null)
+			: this(Resources.Spritemaps[spritemapID], action, ProcessSpriteIDs(spriteIDFilter), method) { }
 
 		private static Sprite[] ProcessSpriteIDs(string[] spriteIDs)
 		{
@@ -121,8 +111,7 @@ namespace HatlessEngine
 		Object = 1,
 		ObjectType = 2,
 		Objectmap = 3,
-		ManagedSprite = 4,
-		Spritemap = 5,
+		Spritemap = 4,
 		//Shapemap = 6
 	}
 

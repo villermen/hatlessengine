@@ -14,7 +14,11 @@ namespace HatlessEngine
 
 		internal IntPtr TextureHandle;
 
-		internal Dictionary<string, int[]> Animations = new Dictionary<string, int[]>();
+		/// <summary>
+		/// Every entry is an animation.
+		/// An identifier and an array of any amount of frames in the order you desire.
+		/// </summary>
+		public Dictionary<string, int[]> Animations = new Dictionary<string, int[]>();
 
 		private bool AutoSize = false;
 		public Point FrameSize { get; private set; }
@@ -38,24 +42,26 @@ namespace HatlessEngine
 			Resources.ExternalResources.Add(this);
 		}
 
-		public void Draw(Point pos, Point scale, Point origin, int frameIndex = 0, float rotation = 0f, int depth = 0)
+		public void Draw(ComplexRectangle rect, int frameIndex = 0, int depth = 0)
 		{
 			if (!Loaded)
 				throw new NotLoadedException();
 
 			Rectangle sourceRect = new Rectangle(GetIndexLocation(frameIndex), FrameSize);
-			ComplexRectangle destRect = new ComplexRectangle(pos, FrameSize * scale, origin, rotation);
-
-			DrawX.DrawJobs.Add(new TextureDrawJob(depth, destRect.GetEnclosingRectangle(), TextureHandle, sourceRect, destRect));
+			DrawX.DrawJobs.Add(new TextureDrawJob(depth, rect.GetEnclosingRectangle(), TextureHandle, sourceRect, rect));
+		}
+		public void Draw(Point pos, Point scale, Point origin, int frameIndex = 0, float rotation = 0f, int depth = 0)
+		{
+			Draw(new ComplexRectangle(pos, FrameSize * scale, origin, rotation), frameIndex, depth);
 		}
 		public void Draw(Point pos, int frameIndex = 0, float rotation = 0f, int depth = 0)
 		{
-			Draw(pos, new Point(1f, 1f), new Point(0f, 0f), frameIndex, rotation, depth);
+			Draw(new ComplexRectangle(pos, FrameSize), frameIndex, depth);
 		}
 
 		private Point GetIndexLocation(int frameIndex)
 		{
-			return new Point(frameIndex % IndexSize.X * FrameSize.X, (float)(Math.Floor(frameIndex / IndexSize.X) % IndexSize.Y * FrameSize.Y));
+			return new Point(Misc.Modulus(frameIndex, (int)IndexSize.X) * FrameSize.X, (float)(Math.Floor(frameIndex / IndexSize.X) % IndexSize.Y * FrameSize.Y));
 		}
 
 		public void Load()
@@ -100,23 +106,6 @@ namespace HatlessEngine
 				TextureHandle = IntPtr.Zero;
 				Loaded = false;
 			}
-		}
-
-		public void AddAnimation(string id, int[] animation)
-		{
-			//add error catching
-			Animations.Add(id, animation);
-		}
-		public void AddAnimation(string id, int startIndex, int frames)
-		{
-			int[] animationArray = new int[frames];
-
-			for (int i = 0; i < frames; i++)
-			{
-				animationArray[i] = startIndex + i;
-			}
-
-			Animations.Add(id, animationArray);
 		}
 
 		public void Destroy()

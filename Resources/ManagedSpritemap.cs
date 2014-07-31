@@ -2,35 +2,34 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+//managedspritemap?
+
 namespace HatlessEngine
 {
 	/// <summary>
 	/// Class that contains blueprints for sprites to be drawn in bulk.
 	/// </summary>
-	public sealed class Spritemap : IResource
+	public sealed class ManagedSpritemap : IResource
 	{
 		public string ID { get; private set; }
 
-		/// <summary>
-		/// protocol version changes on changes to ManagedSprite
-		/// </summary>
 		public static readonly ushort ProtocolVersion = 1;
 
 		public List<ManagedSprite> ManagedSprites;
 
-		private Spritemap(string id)
+		private ManagedSpritemap(string id)
 		{
 			ID = id;
 			Resources.Spritemaps.Add(ID, this);
 		}
 
-		public Spritemap(string id, params ManagedSprite[] managedSprites)
+		public ManagedSpritemap(string id, params ManagedSprite[] managedSprites)
 			: this(id)
 		{
 			ManagedSprites = new List<ManagedSprite>(managedSprites);
 		}
 
-		public Spritemap(string id, string filename)
+		public ManagedSpritemap(string id, string filename)
 			: this(id)
 		{
 			ManagedSprites = new List<ManagedSprite>();
@@ -49,40 +48,33 @@ namespace HatlessEngine
 			{
 				string targetSprite = reader.ReadString();
 				Point position = new Point(reader.ReadSingle(), reader.ReadSingle());
-				Point scale = new Point(reader.ReadSingle(), reader.ReadSingle());
+				Point size = new Point(reader.ReadSingle(), reader.ReadSingle());
 				Point origin = new Point(reader.ReadSingle(), reader.ReadSingle());
 				float rotation = reader.ReadSingle();
-				float rotationSpeed = reader.ReadSingle();
 				string animationID = reader.ReadString();
 				int startIndex = reader.ReadInt32();
 				float animationSpeed = reader.ReadSingle();
 				sbyte depth = reader.ReadSByte();
 				
-				ManagedSprites.Add(new ManagedSprite(targetSprite, position, scale, origin, rotation, rotationSpeed, animationID, startIndex, animationSpeed, depth));
+				ManagedSprite mSprite = new ManagedSprite(targetSprite, position, animationID, startIndex, animationSpeed, depth);
+				mSprite.Size = size;
+				mSprite.Origin = origin;
+				mSprite.Rotation = rotation;
+ 
+				ManagedSprites.Add(mSprite);
 			}
 
 			reader.Close();			
 		}
 
 		/// <summary>
-		/// Draw all the sprites in this spritemap at their absolute positions.
+		/// Draw all the sprites in this spritemap.
 		/// </summary>
 		public void Draw()
 		{
 			foreach(ManagedSprite sprite in ManagedSprites)
 			{
 				sprite.Draw();
-			}
-		}
-
-		/// <summary>
-		/// Draw all the sprites in this spritemap relative to a position.
-		/// </summary>
-		public void Draw(Point pos)
-		{
-			foreach (ManagedSprite sprite in ManagedSprites)
-			{
-				sprite.Draw(new Point(pos.X + sprite.Position.X, pos.Y + sprite.Position.Y));
 			}
 		}
 
@@ -103,12 +95,11 @@ namespace HatlessEngine
 				writer.Write(sprite.TargetSprite.ID);
 				writer.Write(sprite.Position.X);
 				writer.Write(sprite.Position.Y);
-				writer.Write(sprite.Scale.X);
-				writer.Write(sprite.Scale.Y);
+				writer.Write(sprite.Size.X);
+				writer.Write(sprite.Size.Y);
 				writer.Write(sprite.Origin.X);
 				writer.Write(sprite.Origin.Y);
 				writer.Write(sprite.Rotation);
-				writer.Write(sprite.RotationSpeed);
 				writer.Write(sprite.AnimationID);
 				writer.Write(sprite.AnimationIndex);
 				writer.Write(sprite.AnimationSpeed);

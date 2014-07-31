@@ -240,30 +240,13 @@ namespace HatlessEngine
 						}
 						break;
 
-					case CollisionRuleType.ManagedSprite:
-						if (Bounds.IntersectsWith(((ManagedSprite)cRule.Target).SpriteRectangle, Speed, out touchingSpeedLeftFraction, out intersectionAxis)
-							&& touchingSpeedLeftFraction > 0f
-							&& touchingSpeedLeftFraction <= SpeedLeft
-							&& touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)
-						{
-							ClosestCollisionSpeedFraction = touchingSpeedLeftFraction;
-							ClosestCollisionTouchingAxis = intersectionAxis;
-							ClosestCollisionRule = cRule;
-							ClosestCollisionMethodArg = cRule.Target;
-							ClosestCollisionRelativeSpeed = Speed;
-						}
-						break;
-
 					case CollisionRuleType.Spritemap:
-						foreach (ManagedSprite sprite in ((Spritemap)cRule.Target).ManagedSprites)
+						foreach (ManagedSprite sprite in ((ManagedSpritemap)cRule.Target).ManagedSprites)
 						{
 							//whether the object should be checked if the filter is enabled
 							if (!cRule.FilterEnabled || cRule.SpritemapFilter.Contains(sprite.TargetSprite)) //account for inheritance
 							{
-								ComplexRectangle sRect = sprite.SpriteRectangle; //copy over so it the relative position won't be changed
-								sRect.Position += cRule.SpritemapOffset;
-
-								if (Bounds.IntersectsWith(sRect, Speed, out touchingSpeedLeftFraction, out intersectionAxis)
+								if (Bounds.IntersectsWith(sprite, Speed, out touchingSpeedLeftFraction, out intersectionAxis)
 									&& touchingSpeedLeftFraction > 0f
 									&& touchingSpeedLeftFraction <= SpeedLeft
 									&& touchingSpeedLeftFraction < ClosestCollisionSpeedFraction)

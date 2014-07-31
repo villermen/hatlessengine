@@ -33,7 +33,7 @@ namespace HatlessEngine
 
 		//collections
 		public static Dictionary<string, Objectmap> Objectmaps = new Dictionary<string, Objectmap>();
-		public static Dictionary<string, Spritemap> Spritemaps = new Dictionary<string, Spritemap>();
+		public static Dictionary<string, ManagedSpritemap> Spritemaps = new Dictionary<string, ManagedSpritemap>();
 
 		//objects
 		public static List<LogicalObject> Objects = new List<LogicalObject>();

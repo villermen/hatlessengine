@@ -41,6 +41,10 @@ namespace HatlessEngine
 			: this(new Point(x, y), new Point(width, height), new Point(originX, originY), rotation) { }
 		public ComplexRectangle(float x, float y, float width, float height, float rotation = 0)
 			: this(new Point(x, y), new Point(width, height), Point.Zero, rotation) { }
+		public ComplexRectangle(ComplexRectangle rect)
+			: this(rect._Position, rect._Size, rect._Origin, rect._Rotation) { }
+		public ComplexRectangle()
+			: this(Zero) { }
 
 		protected override void Recalculate()
 		{

@@ -55,7 +55,7 @@
     <Compile Include="Resources\Sprite.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="Button.cs" />
-    <Compile Include="Resources\Spritemap.cs" />
+    <Compile Include="Resources\ManagedSpritemap.cs" />
     <Compile Include="Resources\Music.cs" />
     <Compile Include="Resources\Objectmap.cs" />
     <Compile Include="Misc.cs" />
