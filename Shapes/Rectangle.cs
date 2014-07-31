@@ -107,5 +107,10 @@ namespace HatlessEngine
 		}
 
 		public static readonly Rectangle Zero = new Rectangle(Point.Zero, Point.Zero);
+
+		public static explicit operator ComplexRectangle(Rectangle rect)
+		{
+			return new ComplexRectangle(rect._Position, rect._Size);
+		}
 	}
 }

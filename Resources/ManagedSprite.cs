@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace HatlessEngine
 {
@@ -33,7 +34,7 @@ namespace HatlessEngine
 					AnimationLength = TargetSprite.Animations[value].Length;
 				}
 				else
-					throw new IndexNotFoundException("TargetSprite doesn't have an animation with index '" + value + "'.");
+					throw new KeyNotFoundException("TargetSprite doesn't have an animation with index '" + value + "'.");
 			}
 		}
 

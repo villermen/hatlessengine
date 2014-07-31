@@ -148,7 +148,11 @@ namespace HatlessEngine
 			Type shape1Type = GetType();
 			Type shape2Type = shape.GetType();
 
-			if (shape1Type == typeof(Rectangle) && shape2Type == typeof(Rectangle)) //2 AABB's
+			//2 AABB's or ComplexRectangles without a rotation (so basically AABB's)
+			if ((shape1Type == typeof(Rectangle) 
+				|| shape1Type == typeof(ComplexRectangle) && _Rotation == 0f)
+				&& (shape2Type == typeof(Rectangle)
+				|| shape2Type == typeof(ComplexRectangle) && ((Shape)shape)._Rotation == 0f))
 			{
 				Rectangle rect1 = (Rectangle)this;
 				Rectangle rect2 = (Rectangle)shape;
