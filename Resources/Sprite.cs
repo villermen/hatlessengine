@@ -3,12 +3,14 @@ using SDL2_image;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace HatlessEngine
 {
 	public class Sprite : IExternalResource
 	{   
 		public string Filename { get; private set; }
+		public Assembly FileAssembly { get; private set; }
 		public string ID { get; private set; }
 		public bool Loaded { get; private set; }
 
@@ -28,11 +30,14 @@ namespace HatlessEngine
 			: this(id, filename, new Point(1f, 1f))
 		{
 			AutoSize = true;
+			FileAssembly = Assembly.GetCallingAssembly();
 		}
 		public Sprite(string id, string filename, Point frameSize)
 		{
 			ID = id;
 			Filename = filename;
+			FileAssembly = Assembly.GetCallingAssembly();
+			
 			Loaded = false;
 
 			FrameSize = frameSize;
@@ -68,7 +73,7 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 			{
-				IntPtr surface = IMG.Load_RW(Resources.CreateRWFromFile(Filename), 1);
+				IntPtr surface = IMG.Load_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1);
 				if (surface != IntPtr.Zero)
 				{
 					TextureHandle = SDL.CreateTextureFromSurface(Game.RendererHandle, surface);

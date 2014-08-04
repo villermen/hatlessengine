@@ -1,6 +1,7 @@
 ﻿using System;
 using SDL2_mixer;
 using System.IO;
+using System.Reflection;
 
 namespace HatlessEngine
 {
@@ -8,6 +9,7 @@ namespace HatlessEngine
 	{
 		public string ID { get; private set; }
 		public string Filename { get; private set; }
+		public Assembly FileAssembly { get; private set; }
 		public bool Loaded { get; private set; }
 
 		public float BaseVolume { get; private set; }

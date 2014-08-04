@@ -36,6 +36,7 @@ namespace HatlessEngine
 
 			Points = new Point[4];
 			PerpAxes = new Point[] { new Point(0f, 1f), new Point(1f, 0f), new Point(0f, 1f), new Point(1f, 0f) };
+			EnclosingRectangle = this;
 		}
 		public Rectangle(float x, float y, float width, float height)
 			: this(new Point(x, y), new Point(width, height)) { }

@@ -3,6 +3,7 @@ using SDL2_ttf;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace HatlessEngine
 {
@@ -10,6 +11,7 @@ namespace HatlessEngine
 	{
 		public string ID { get; private set; }
 		public string Filename { get; private set; }
+		public Assembly FileAssembly { get; private set; }
 		public bool Loaded { get; private set; }
 
 		internal IntPtr Handle;
@@ -28,6 +30,7 @@ namespace HatlessEngine
 
 			ID = id;
 			Filename = filename;
+			FileAssembly = Assembly.GetCallingAssembly();
 			Loaded = false;
 
 			PointSize = pointSize;
@@ -102,7 +105,7 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 			{
-				Handle = TTF.OpenFontRW(Resources.CreateRWFromFile(Filename), 1, PointSize);
+				Handle = TTF.OpenFontRW(Resources.CreateRWFromFile(Filename, FileAssembly), 1, PointSize);
 
 				if (Handle != IntPtr.Zero)
 				{

@@ -111,7 +111,7 @@ namespace HatlessEngine
 			Window.SetIcon();
 
 			//add default view that spans the current window
-			new View("default", new Rectangle(Point.Zero, Window.GetSize()), new Rectangle(Point.Zero , new Point(1f, 1f)));
+			new View("default", new Rectangle(Point.Zero, Window.Size), new Rectangle(Point.Zero , new Point(1f, 1f)));
 
 			//initialize audio system and let Resources handle sound expiration
 			Mix.OpenAudio(44100, SDL.AUDIO_S16SYS, 2, 4096);
@@ -208,6 +208,11 @@ namespace HatlessEngine
 						Input.InputEvent(e);
 						break;
 					
+					//let Window handle window related events
+					case SDL.EventType.WINDOWEVENT:
+						Window.WindowEvent(e);
+						break;
+
 					//global quit, not only the window's exit button
 					case SDL.EventType.QUIT:
 						Exit();
@@ -219,6 +224,8 @@ namespace HatlessEngine
 
 			//update the weakreferences if they still exist
 			Resources.UpdateManagedSprites();
+
+			Resources.UpdateViewAreas();
 
 			foreach (LogicalObject obj in Resources.Objects)
 			{
@@ -302,24 +309,25 @@ namespace HatlessEngine
 			SDL.SetRenderDrawColor(RendererHandle, DrawX.BackgroundColor.R, DrawX.BackgroundColor.G, DrawX.BackgroundColor.B, DrawX.BackgroundColor.A);
 			SDL.RenderClear(RendererHandle);
 
-			Point windowSize = Window.GetSize();
-
 			foreach (View view in Resources.Views.Values)
 			{
 				if (!view.Active)
 					continue;
 
-				Point scale = view.Viewport.Size * windowSize / view.Area.Size;
+				Point scale = view.Viewport.Size * Window.Size / view.Area.Size;
+
 				SDL.RenderSetScale(RendererHandle, scale.X, scale.Y);
 
 				//viewport is affected by scale for whatever reason, correct it
-				SDL.Rect viewport = (SDL.Rect)new Rectangle(view.Viewport.Position * windowSize / scale, view.Viewport.Size * windowSize / scale);
+				SDL.Rect viewport = (SDL.Rect)new Rectangle(view.Viewport.Position * Window.Size / scale, view.Viewport.Size * Window.Size / scale);
 				SDL.RenderSetViewport(RendererHandle, ref viewport);
 
 				//get all jobs that will draw inside this view
 				foreach (IDrawJob job in DrawX.GetDrawJobsByArea(view.Area))
 				{
-					if (job.Type == DrawJobType.Texture) //draw a texture
+					Type jobType = job.GetType();
+
+					if (jobType == typeof(TextureDrawJob)) //draw a texture
 					{
 						TextureDrawJob textureDrawJob = (TextureDrawJob)job;
 						SDL.Rect sourceRect = (SDL.Rect)textureDrawJob.SourceRect;
@@ -335,7 +343,7 @@ namespace HatlessEngine
 							SDL.RenderCopyEx(RendererHandle, textureDrawJob.Texture, ref sourceRect, ref destRect, textureDrawJob.DestRect.Rotation, ref origin, SDL.RendererFlip.FLIP_NONE);
 						}
 					}
-					else //draw line(s)
+					else if (jobType == typeof(LineDrawJob)) //draw line(s)
 					{
 						LineDrawJob lineDrawJob = (LineDrawJob)job;
 
@@ -344,6 +352,15 @@ namespace HatlessEngine
 
 						SDL.SetRenderDrawColor(RendererHandle, lineDrawJob.Color.R, lineDrawJob.Color.G, lineDrawJob.Color.B, lineDrawJob.Color.A);
 						SDL.RenderDrawLines(RendererHandle, sdlPoints, lineDrawJob.PointCount);
+					}
+					else //draw filledrect
+					{
+						FilledRectDrawJob rectDrawJob = (FilledRectDrawJob)job;
+
+						SDL.Rect rect = (SDL.Rect)rectDrawJob.Area;
+
+						SDL.SetRenderDrawColor(RendererHandle, rectDrawJob.Color.R, rectDrawJob.Color.G, rectDrawJob.Color.B, rectDrawJob.Color.A);
+						SDL.RenderFillRect(RendererHandle, ref rect);
 					}
 				}
 			}

@@ -50,42 +50,38 @@ namespace HatlessEngine
 		internal static Dictionary<int, SoundControl> SoundControls = new Dictionary<int, SoundControl>();
 		internal static Music CurrentlyPlayingMusic;
 
-		private static Assembly EntryAssembly = Assembly.GetEntryAssembly();
-		private static Assembly HatlessEngineAssembly = Assembly.GetExecutingAssembly();
-
 		/// <summary>
 		/// Gets the BinaryReader of a file with the given filename.
 		/// All resources are loaded this way.
 		/// Priority: 
-		/// 1: Embedded Resource in the RootDirectory within the entry assembly.
-		/// 2: Embedded Resource in the entry assembly.
+		/// 1: Embedded Resource in the RootDirectory within the calling assembly.
+		/// 2: Embedded Resource in the calling assembly.
 		/// 3: File in the RootDirectory.
 		/// 4: File in the application's directory, or an absolute filepath.
 		/// Also, don't work with backslashes, they are nasty and unaccounted for.
 		/// </summary>
 		public static BinaryReader GetStream(string filename)
 		{
+			return GetStream(filename, Assembly.GetCallingAssembly());
+		}
+		internal static BinaryReader GetStream(string filename, Assembly assembly)
+		{
 			Stream stream;
-
-			//sneaky extra option: embedded resource in hatlessengine
-			stream = HatlessEngineAssembly.GetManifestResourceStream(HatlessEngineAssembly.GetName().Name + "." + filename);
-			if (stream != null)
-				return new BinaryReader(stream);
-
+			
 			if (RootDirectory != "")
 			{
-				stream = EntryAssembly.GetManifestResourceStream(EntryAssembly.GetName().Name + "." + (RootDirectory + filename).Replace('/', '.'));
+				stream = assembly.GetManifestResourceStream(assembly.GetName().Name + "." + (RootDirectory + filename).Replace('/', '.'));
 				if (stream != null)
 					return new BinaryReader(stream);
 			}
 
-			stream = EntryAssembly.GetManifestResourceStream(EntryAssembly.GetName().Name + "." + filename.Replace('/', '.'));
+			stream = assembly.GetManifestResourceStream(assembly.GetName().Name + "." + filename.Replace('/', '.'));
 			if (stream != null)
 				return new BinaryReader(stream);
 
 			if (RootDirectory != "" && File.Exists(RootDirectory + filename))
 			{
-				stream = File.Open(RootDirectory + filename, FileMode.Open, FileAccess.Read, FileShare.Read);			
+				stream = File.Open(RootDirectory + filename, FileMode.Open, FileAccess.Read, FileShare.Read);
 				if (stream != null)
 					return new BinaryReader(stream);
 			}
@@ -103,9 +99,9 @@ namespace HatlessEngine
 		/// <summary>
 		/// Creates an SDL RW resource from the entire file, using GetStream to resolve the filename.
 		/// </summary>
-		internal static IntPtr CreateRWFromFile(string filename)
+		internal static IntPtr CreateRWFromFile(string filename, Assembly assembly)
 		{
-			using (BinaryReader reader = GetStream(filename))
+			using (BinaryReader reader = GetStream(filename, assembly))
 			{
 				int length = (int)reader.BaseStream.Length;
 				return SDL.RWFromMem(reader.ReadBytes(length), length);
@@ -121,6 +117,15 @@ namespace HatlessEngine
 		{
 			foreach (IExternalResource resource in ExternalResources)
 				resource.Unload();
+		}
+
+		/// <summary>
+		/// Destroys and removes all objects that are going to be added after this step.
+		/// </summary>
+		public static void CancelObjectCreation()
+		{
+			AddObjects.ForEach(obj => obj.Destroy());
+			AddObjects.Clear();
 		}
 
 		internal static void ObjectAdditionAndRemoval()
@@ -198,6 +203,18 @@ namespace HatlessEngine
 					font.Textures.Remove(texture);
 					font.TexturesDrawsUnused.Remove(texture);
 				}
+			}
+		}
+
+		/// <summary>
+		/// Will update all view areas that are set to scale with the window. (AreaSizeIsViewportSize = true)
+		/// </summary>
+		internal static void UpdateViewAreas()
+		{
+			foreach (View view in Views.Values)
+			{
+				if (view.Active && view.AreaSizeIsViewportSize)
+					view.Area.Size = view.Viewport.Size * Window.Size;
 			}
 		}
 	}

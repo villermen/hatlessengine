@@ -5,7 +5,6 @@ namespace HatlessEngine
 {
 	internal struct LineDrawJob : IDrawJob
 	{
-		public DrawJobType Type { get; set; }
 		public int Depth { get; set; }
 		public Rectangle Area { get; set; }
 
@@ -23,7 +22,6 @@ namespace HatlessEngine
 			Points = points;
 			Color = color;
 
-			Type = DrawJobType.Lines;
 			Depth = depth;
 			Area = area;
 		}

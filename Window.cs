@@ -2,6 +2,7 @@
 using System.IO;
 using SDL2;
 using SDL2_image;
+using System.Reflection;
 
 namespace HatlessEngine
 {
@@ -10,6 +11,19 @@ namespace HatlessEngine
 	/// </summary>
 	public static class Window
 	{
+		private static Point _Size = new Point(800f, 600f);
+
+		public static Point Size
+		{
+			get { return _Size; }
+		}
+
+
+		public static void SetSize(Point size)
+		{
+			SDL.SetWindowSize(Game.WindowHandle, (int)size.X, (int)size.Y);
+		}
+
 		public static Point GetPosition()
 		{
 			int x, y;
@@ -19,17 +33,6 @@ namespace HatlessEngine
 		public static void SetPosition(Point pos)
 		{
 			SDL.SetWindowPosition(Game.WindowHandle, (int)pos.X, (int)pos.Y);
-		}
-
-		public static Point GetSize()
-		{
-			int w, h;
-			SDL.GetWindowSize(Game.WindowHandle, out w, out h);
-			return new Point(w, h);
-		}
-		public static void SetSize(Point size)
-		{
-			SDL.SetWindowSize(Game.WindowHandle, (int)size.X, (int)size.Y);
 		}
 
 		public static string GetTitle()
@@ -142,14 +145,14 @@ namespace HatlessEngine
 		/// </summary>
 		public static void SetIcon(string filename)
 		{
-			SDL.SetWindowIcon(Game.WindowHandle, IMG.Load_RW(Resources.CreateRWFromFile(filename), 1));
+			SDL.SetWindowIcon(Game.WindowHandle, IMG.Load_RW(Resources.CreateRWFromFile(filename, Assembly.GetCallingAssembly()), 1));
 		}
 		/// <summary>
 		/// Will set the window's icon to the default HatlessEngine one.
 		/// </summary>
 		public static void SetIcon()
 		{
-			SDL.SetWindowIcon(Game.WindowHandle, IMG.Load_RW(Resources.CreateRWFromFile("defaultwindowicon.png"), 1));
+			SDL.SetWindowIcon(Game.WindowHandle, IMG.Load_RW(Resources.CreateRWFromFile("defaultwindowicon.png", Assembly.GetCallingAssembly()), 1));
 		}
 
 		/// <summary>
@@ -164,7 +167,21 @@ namespace HatlessEngine
 			SetCursor(Resources.Cursors[cursorID]);
 		}
 
-		//left to do: cursorimage & maximizing/minimizing
+		//left to do: maximizing/minimizing
+
+		/// <summary>
+		/// Handles all window related sdl events.
+		/// </summary>
+		internal static void WindowEvent(SDL.Event e)
+		{
+			switch (e.window.windowEvent)
+			{
+				case SDL.WindowEventID.WINDOWEVENT_SIZE_CHANGED:
+					_Size = new Point(e.window.data1, e.window.data2);
+					break;
+			}
+		}
+
 	}
 
 	public enum ScreenMode

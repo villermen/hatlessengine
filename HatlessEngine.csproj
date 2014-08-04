@@ -39,6 +39,7 @@
   <ItemGroup>
     <Compile Include="CollisionRule.cs" />
     <Compile Include="Cursor.cs" />
+    <Compile Include="DrawJobs\FilledRectDrawJob.cs" />
     <Compile Include="DrawJobs\LineDrawJob.cs" />
     <Compile Include="DrawJobs\TextureDrawJob.cs" />
     <Compile Include="DrawJobs\IDrawJob.cs" />
@@ -55,7 +56,7 @@
     <Compile Include="Resources\Sprite.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="Button.cs" />
-    <Compile Include="Resources\ManagedSpritemap.cs" />
+    <Compile Include="Resources\Spritemap.cs" />
     <Compile Include="Resources\Music.cs" />
     <Compile Include="Resources\Objectmap.cs" />
     <Compile Include="Misc.cs" />
@@ -75,7 +76,7 @@
     <Compile Include="Shapes\Line.cs" />
     <Compile Include="Shapes\Shape.cs" />
     <Compile Include="Window.cs" />
-    <Compile Include="ObjectBlueprint.cs" />
+    <Compile Include="Resources\ObjectBlueprint.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="defaultwindowicon.png" />
@@ -138,7 +139,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SDL2-CS\SDL2-CS.csproj">
+    <ProjectReference Include="..\SDL2-CS-Reschemed\SDL2-CS.csproj">
       <Project>{85480198-8711-4355-830e-72fd794ad3f6}</Project>
       <Name>SDL2-CS</Name>
     </ProjectReference>

@@ -5,14 +5,13 @@ namespace HatlessEngine
 {
 	internal struct TextureDrawJob : IDrawJob
 	{
-		public DrawJobType Type { get; set; }
 		public int Depth { get; set; }
 		public Rectangle Area { get; set; }
 
 		public IntPtr Texture;
 		public Rectangle SourceRect;
 		public ComplexRectangle DestRect;
-
+		
 		/// <summary>
 		/// Texture job.
 		/// </summary>
@@ -23,7 +22,6 @@ namespace HatlessEngine
 			SourceRect = sourceRect;
 			DestRect = destRect;
 
-			Type = DrawJobType.Texture;
 			Depth = depth;
 			Area = area;
 		}

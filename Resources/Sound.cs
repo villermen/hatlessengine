@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using SDL2_mixer;
+using System.Reflection;
 
 namespace HatlessEngine
 {
@@ -13,6 +14,7 @@ namespace HatlessEngine
 	{
 		public string ID { get; private set; }
 		public string Filename { get; private set; }
+		public Assembly FileAssembly { get; private set; }
 		public bool Loaded { get; private set; }
 
 		public float BaseVolume { get; private set; }
@@ -23,6 +25,7 @@ namespace HatlessEngine
 		{
 			ID = id;
 			Filename = filename;
+			FileAssembly = Assembly.GetCallingAssembly();
 			Loaded = false;
 
 			BaseVolume = baseVolume;
@@ -49,7 +52,7 @@ namespace HatlessEngine
 			if (Loaded)
 				return;
 
-			ChunkHandle = Mix.LoadWAV_RW(Resources.CreateRWFromFile(Filename), 1);
+			ChunkHandle = Mix.LoadWAV_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1);
 
 			if (ChunkHandle != IntPtr.Zero)
 			{

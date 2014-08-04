@@ -209,7 +209,7 @@ namespace HatlessEngine
 
 				case SDL.EventType.MOUSEMOTION:
 					//resolve absolute to fractional position on window
-					Point positionOnWindow = new Point(e.motion.x, e.motion.y) / Window.GetSize();
+					Point positionOnWindow = new Point(e.motion.x, e.motion.y) / Window.Size;
 					//decide on which viewport the mouse currently is
 					foreach (View view in Resources.Views.Values)
 					{

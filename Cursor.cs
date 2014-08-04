@@ -2,6 +2,7 @@
 using SDL2_image;
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace HatlessEngine
 {
@@ -12,6 +13,7 @@ namespace HatlessEngine
 	{
 		public string ID { get; private set; }
 		public string Filename { get; private set; }
+		public Assembly FileAssembly { get; private set; }
 		public bool Loaded { get; private set; }
 
 		private bool IsSystemCursor;
@@ -35,6 +37,7 @@ namespace HatlessEngine
 			: this(id)
 		{
 			Filename = filename;
+			FileAssembly = Assembly.GetCallingAssembly();
 			Origin = origin;
 			IsSystemCursor = false;	
 		}
@@ -64,7 +67,7 @@ namespace HatlessEngine
 			if (IsSystemCursor)
 				CursorHandle = SDL.CreateSystemCursor((SDL.SystemCursor)SystemCursor);
 			else
-				CursorHandle = SDL.CreateColorCursor(IMG.Load_RW(Resources.CreateRWFromFile(Filename), 1), (int)Origin.X, (int)Origin.Y);
+				CursorHandle = SDL.CreateColorCursor(IMG.Load_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1), (int)Origin.X, (int)Origin.Y);
 			
 			if (CursorHandle != IntPtr.Zero)
 				Loaded = true;

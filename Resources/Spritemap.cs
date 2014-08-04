@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-//managedspritemap?
-
 namespace HatlessEngine
 {
 	/// <summary>

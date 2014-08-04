@@ -9,8 +9,9 @@ namespace HatlessEngine
 		public Rectangle Area;
 		public Rectangle Viewport;
 		public bool Active;
+		public bool AreaSizeIsViewportSize;
 
-		public View(string id, Rectangle area, Rectangle viewport, bool active = true)
+		public View(string id, Rectangle area, Rectangle viewport, bool areaSizeIsViewportSize = false, bool active = true)
 		{
 			//validate if viewport is entirely within the window
 			if (viewport.Position.X < 0f || viewport.Position.Y < 0f || viewport.Position2.X > 1f || viewport.Position2.Y > 1f)
@@ -19,6 +20,7 @@ namespace HatlessEngine
 			ID = id;
 			Area = area;
 			Viewport = viewport;
+			AreaSizeIsViewportSize = areaSizeIsViewportSize;
 			Active = active;
 
 			Resources.Views.Add(ID, this);
