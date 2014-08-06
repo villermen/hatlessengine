@@ -1,4 +1,5 @@
 using MoreLinq;
+using System.Linq;
 using SDL2;
 using SDL2_image;
 using SDL2_mixer;
@@ -304,7 +305,7 @@ namespace HatlessEngine
 					obj.Draw();
 			}
 
-			DrawX.DrawJobs.Sort((j1, j2) => -j1.Depth.CompareTo(j2.Depth));
+			DrawX.DrawJobs.OrderBy((job) => job.Depth);
 
 			SDL.SetRenderDrawColor(RendererHandle, DrawX.BackgroundColor.R, DrawX.BackgroundColor.G, DrawX.BackgroundColor.B, DrawX.BackgroundColor.A);
 			SDL.RenderClear(RendererHandle);
@@ -334,9 +335,7 @@ namespace HatlessEngine
 						SDL.Rect destRect = (SDL.Rect)new Rectangle(textureDrawJob.DestRect.Position - view.Area.Position - textureDrawJob.DestRect.Origin, textureDrawJob.DestRect.Size);
 
 						if (textureDrawJob.DestRect.Rotation == 0f)
-						{
 							SDL.RenderCopy(RendererHandle, textureDrawJob.Texture, ref sourceRect, ref destRect);
-						}
 						else
 						{
 							SDL.Point origin = (SDL.Point)textureDrawJob.DestRect.Origin;

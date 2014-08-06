@@ -66,7 +66,7 @@ namespace HatlessEngine
 
 		private Point GetIndexLocation(int frameIndex)
 		{
-			return new Point(Misc.Modulus(frameIndex, (int)IndexSize.X) * FrameSize.X, (float)(Math.Floor(frameIndex / IndexSize.X) % IndexSize.Y * FrameSize.Y));
+			return new Point(Misc.Modulus(frameIndex, (int)IndexSize.X) * FrameSize.X, (float)(Misc.Modulus((int)(frameIndex / IndexSize.X), (int)IndexSize.Y) * FrameSize.Y));
 		}
 
 		public void Load()
@@ -91,7 +91,7 @@ namespace HatlessEngine
 							IndexSize = new Point(1, 1);
 						}
 						else
-							IndexSize = new Point(w / FrameSize.X, h / FrameSize.Y);
+							IndexSize = new Point((float)Math.Floor(w / FrameSize.X), (float)Math.Floor(h / FrameSize.Y));
 
 						Loaded = true;
 					}

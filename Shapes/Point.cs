@@ -35,6 +35,11 @@ namespace HatlessEngine
 			return Point.Zero.GetAngleTo(this);
 		}
 
+		public float GetProduct()
+		{
+			return X * Y;
+		}
+
 		/// <summary>
 		/// Rotates this point over an absolute origin by [angle] degrees.
 		/// </summary>

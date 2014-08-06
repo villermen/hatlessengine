@@ -43,6 +43,7 @@
     <Compile Include="DrawJobs\LineDrawJob.cs" />
     <Compile Include="DrawJobs\TextureDrawJob.cs" />
     <Compile Include="DrawJobs\IDrawJob.cs" />
+    <Compile Include="GUITools\GUIScrollbar.cs" />
     <Compile Include="Resources\IResource.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="QuadTree.cs" />
@@ -64,7 +65,7 @@
     <Compile Include="Resources\Sound.cs" />
     <Compile Include="Resources\SoundControl.cs" />
     <Compile Include="Resources\Font.cs" />
-    <Compile Include="Resources\ButtonObject.cs" />
+    <Compile Include="GUITools\GUIButton.cs" />
     <Compile Include="Resources\ManagedSprite.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="EventArgs.cs" />
