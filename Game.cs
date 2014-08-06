@@ -226,8 +226,6 @@ namespace HatlessEngine
 			//update the weakreferences if they still exist
 			Resources.UpdateManagedSprites();
 
-			Resources.UpdateViewAreas();
-
 			foreach (LogicalObject obj in Resources.Objects)
 			{
 				if (!obj.Destroyed)
@@ -315,16 +313,19 @@ namespace HatlessEngine
 				if (!view.Active)
 					continue;
 
-				Point scale = view.Viewport.Size * Window.Size / view.Area.Size;
+				Rectangle absoluteGameArea = view.GetAbsoluteGameArea();
+				Rectangle absoluteViewport = view.GetAbsoluteViewport();
+
+				Point scale = absoluteViewport.Size / absoluteGameArea.Size;
 
 				SDL.RenderSetScale(RendererHandle, scale.X, scale.Y);
 
 				//viewport is affected by scale for whatever reason, correct it
-				SDL.Rect viewport = (SDL.Rect)new Rectangle(view.Viewport.Position * Window.Size / scale, view.Viewport.Size * Window.Size / scale);
+				SDL.Rect viewport = (SDL.Rect)(absoluteViewport / scale);
 				SDL.RenderSetViewport(RendererHandle, ref viewport);
 
 				//get all jobs that will draw inside this view
-				foreach (IDrawJob job in DrawX.GetDrawJobsByArea(view.Area))
+				foreach (IDrawJob job in DrawX.GetDrawJobsByArea(absoluteGameArea))
 				{
 					Type jobType = job.GetType();
 
@@ -332,7 +333,7 @@ namespace HatlessEngine
 					{
 						TextureDrawJob textureDrawJob = (TextureDrawJob)job;
 						SDL.Rect sourceRect = (SDL.Rect)textureDrawJob.SourceRect;
-						SDL.Rect destRect = (SDL.Rect)new Rectangle(textureDrawJob.DestRect.Position - view.Area.Position - textureDrawJob.DestRect.Origin, textureDrawJob.DestRect.Size);
+						SDL.Rect destRect = (SDL.Rect)new Rectangle(textureDrawJob.DestRect.Position - absoluteGameArea.Position - textureDrawJob.DestRect.Origin, textureDrawJob.DestRect.Size);
 
 						if (textureDrawJob.DestRect.Rotation == 0f)
 							SDL.RenderCopy(RendererHandle, textureDrawJob.Texture, ref sourceRect, ref destRect);
@@ -347,7 +348,7 @@ namespace HatlessEngine
 						LineDrawJob lineDrawJob = (LineDrawJob)job;
 
 						//transform all points according to view and cast em
-						SDL.Point[] sdlPoints = Array.ConvertAll<Point, SDL.Point>(lineDrawJob.Points, p => (SDL.Point)(p - view.Area.Position));
+						SDL.Point[] sdlPoints = Array.ConvertAll<Point, SDL.Point>(lineDrawJob.Points, point => (SDL.Point)(point - absoluteGameArea.Position));
 
 						SDL.SetRenderDrawColor(RendererHandle, lineDrawJob.Color.R, lineDrawJob.Color.G, lineDrawJob.Color.B, lineDrawJob.Color.A);
 						SDL.RenderDrawLines(RendererHandle, sdlPoints, lineDrawJob.PointCount);
@@ -356,7 +357,7 @@ namespace HatlessEngine
 					{
 						FilledRectDrawJob rectDrawJob = (FilledRectDrawJob)job;
 
-						SDL.Rect rect = (SDL.Rect)rectDrawJob.Area;
+						SDL.Rect rect = (SDL.Rect)(rectDrawJob.Area - absoluteGameArea.Position);
 
 						SDL.SetRenderDrawColor(RendererHandle, rectDrawJob.Color.R, rectDrawJob.Color.G, rectDrawJob.Color.B, rectDrawJob.Color.A);
 						SDL.RenderFillRect(RendererHandle, ref rect);

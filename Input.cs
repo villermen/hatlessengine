@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SDL2;
+using System.Linq;
 
 namespace HatlessEngine
 {
@@ -189,14 +190,19 @@ namespace HatlessEngine
 			switch (e.type)
 			{
 				case SDL.EventType.MOUSEBUTTONDOWN:
+				{
 					CurrentState.Add((Button)(1000 + e.button.button));
 					break;
+				}
 
 				case SDL.EventType.MOUSEBUTTONUP:
+				{
 					CurrentState.Remove((Button)(1000 + e.button.button));
 					break;
+				}
 
 				case SDL.EventType.MOUSEWHEEL:
+				{
 					if (e.wheel.y > 0)
 						CurrentState.Add(Button.MousewheelUp);
 					if (e.wheel.y < 0)
@@ -206,23 +212,31 @@ namespace HatlessEngine
 					if (e.wheel.x > 0)
 						CurrentState.Add(Button.MousewheelRight);
 					break;
+				}
 
 				case SDL.EventType.MOUSEMOTION:
-					//resolve absolute to fractional position on window
-					Point positionOnWindow = new Point(e.motion.x, e.motion.y) / Window.Size;
-					//decide on which viewport the mouse currently is
-					foreach (View view in Resources.Views.Values)
+				{
+					Point mousePosition = new Point(e.motion.x, e.motion.y);
+
+					//decide on which viewport the mouse currently is. backwards because the last view created will be in front of the one before it (if they overlap)
+					for (int i = Resources.Views.Count - 1; i >= 0; i--)
 					{
-						if (view.Viewport.IntersectsWith(positionOnWindow))
+						View view = Resources.Views.Values.ElementAt(i);
+						Rectangle absoluteGameArea = view.GetAbsoluteGameArea();
+						Rectangle absoluteViewport = view.GetAbsoluteViewport();
+
+						if (absoluteViewport.IntersectsWith(mousePosition))
 						{
-							//calculate position on virtual gamespace
-							MousePosition = view.Area.Position + (positionOnWindow - view.Viewport.Position) / view.Viewport.Size * view.Area.Size;
-							break;
+							//calculate mouse position in gamespace
+							MousePosition = absoluteGameArea.Position + (mousePosition - absoluteViewport.Position) / absoluteViewport.Size * absoluteGameArea.Size;
+							break; //found it! let's ditch this dump
 						}
 					}
-					break;		
+					break;
+				}
 
 				case SDL.EventType.KEYDOWN:
+				{
 					if (e.key.repeat == 0) //we dont do repeats (yet?)
 					{
 						int SDLKeyDown = (int)e.key.keysym.sym;
@@ -232,19 +246,23 @@ namespace HatlessEngine
 							CurrentState.Add((Button)(SDLKeyDown - 1073739381));
 					}
 					break;
+				}
 
 				case SDL.EventType.KEYUP:
+				{
 					int SDLKeyUp = (int)e.key.keysym.sym;
 					if (SDLKeyUp < 65536)
 						CurrentState.Remove((Button)(2000 + SDLKeyUp));
 					else
 						CurrentState.Remove((Button)(SDLKeyUp - 1073739381));
 					break;
+				}
 
 				case SDL.EventType.CONTROLLERDEVICEADDED:
+				{
 					//get first free gamepad slot
 					int newGamepadID = -1;
-					while (GamepadHandles[++newGamepadID] != IntPtr.Zero);
+					while (GamepadHandles[++newGamepadID] != IntPtr.Zero) ;
 					GamepadHandles[newGamepadID] = SDL.GameControllerOpen(e.cdevice.which);
 
 					IntPtr joystick = SDL.GameControllerGetJoystick(GamepadHandles[newGamepadID]);
@@ -265,8 +283,10 @@ namespace HatlessEngine
 							SDL.HapticClose(hapticHandle);
 					}
 					break;
+				}
 
 				case SDL.EventType.CONTROLLERDEVICEREMOVED:
+				{
 					int gamepadID = GamepadInstanceIDs[e.cdevice.which];
 					SDL.GameControllerClose(GamepadHandles[gamepadID]);
 					GamepadHandles[gamepadID] = IntPtr.Zero;
@@ -278,16 +298,22 @@ namespace HatlessEngine
 						GamepadHapticHandles[gamepadID] = IntPtr.Zero;
 					}
 					break;
+				}
 
 				case SDL.EventType.CONTROLLERBUTTONDOWN:
+				{
 					GamepadCurrentStates[GamepadInstanceIDs[e.cbutton.which]].Add((Button)(3000 + e.cbutton.button));
 					break;
+				}
 
 				case SDL.EventType.CONTROLLERBUTTONUP:
+				{
 					GamepadCurrentStates[GamepadInstanceIDs[e.cbutton.which]].Remove((Button)(3000 + e.cbutton.button));
 					break;
+				}
 
 				case SDL.EventType.CONTROLLERAXISMOTION:
+				{
 					int gamepad = GamepadInstanceIDs[e.caxis.which];
 					byte axis = e.caxis.axis;
 					float value = (float)e.caxis.axisValue / short.MaxValue;
@@ -306,7 +332,7 @@ namespace HatlessEngine
 						Button button = (Button)(3016 + e.caxis.axis * 2);
 						if (!GamepadCurrentStates[gamepad].Contains(button))
 							GamepadCurrentStates[gamepad].Add(button);
-						
+
 					}
 					else
 					{
@@ -314,8 +340,9 @@ namespace HatlessEngine
 						if (e.caxis.axis < 4)
 							GamepadCurrentStates[gamepad].Remove((Button)(3015 + e.caxis.axis * 2));
 						GamepadCurrentStates[gamepad].Remove((Button)(3016 + e.caxis.axis * 2));
-					}			   
+					}
 					break;
+				}
 			}
 		}
 

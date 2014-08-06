@@ -205,17 +205,5 @@ namespace HatlessEngine
 				}
 			}
 		}
-
-		/// <summary>
-		/// Will update all view areas that are set to scale with the window. (AreaSizeIsViewportSize = true)
-		/// </summary>
-		internal static void UpdateViewAreas()
-		{
-			foreach (View view in Views.Values)
-			{
-				if (view.Active && view.AreaSizeIsViewportSize)
-					view.Area.Size = view.Viewport.Size * Window.Size;
-			}
-		}
 	}
 }
