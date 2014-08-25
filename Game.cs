@@ -103,7 +103,7 @@ namespace HatlessEngine
 
 			//open window
 			SDL.SetHint(SDL.HINT_RENDER_VSYNC, "1");
-			SDL.SetHint(SDL.HINT_RENDER_SCALE_QUALITY, "1");		
+			SDL.SetHint(SDL.HINT_RENDER_SCALE_QUALITY, "2");		
 
 			WindowHandle = SDL.CreateWindow("HatlessEngine", SDL.WINDOWPOS_UNDEFINED, SDL.WINDOWPOS_UNDEFINED, 800, 600, SDL.WindowFlags.WINDOW_SHOWN | SDL.WindowFlags.WINDOW_RESIZABLE | SDL.WindowFlags.WINDOW_INPUT_FOCUS);
 			RendererHandle = SDL.CreateRenderer(WindowHandle, -1, (uint)(SDL.RendererFlags.RENDERER_ACCELERATED | SDL.RendererFlags.RENDERER_PRESENTVSYNC));
@@ -201,11 +201,12 @@ namespace HatlessEngine
 					case SDL.EventType.MOUSEMOTION:
 					case SDL.EventType.KEYDOWN:
 					case SDL.EventType.KEYUP:
+					case SDL.EventType.TEXTINPUT:
 					case SDL.EventType.CONTROLLERDEVICEADDED:
 					case SDL.EventType.CONTROLLERDEVICEREMOVED:					
 					case SDL.EventType.CONTROLLERBUTTONDOWN:
 					case SDL.EventType.CONTROLLERBUTTONUP:
-					case SDL.EventType.CONTROLLERAXISMOTION:					
+					case SDL.EventType.CONTROLLERAXISMOTION:
 						Input.InputEvent(e);
 						break;
 					
@@ -217,10 +218,11 @@ namespace HatlessEngine
 					//global quit, not only the window's exit button
 					case SDL.EventType.QUIT:
 						Exit();
-						break;					
+						break;
 				}
 			}
 
+			Input.UpdateMousePosition();
 			Input.ApplyButtonMaps();
 
 			//update the weakreferences if they still exist
@@ -316,13 +318,16 @@ namespace HatlessEngine
 				Rectangle absoluteGameArea = view.GetAbsoluteGameArea();
 				Rectangle absoluteViewport = view.GetAbsoluteViewport();
 
-				Point scale = absoluteViewport.Size / absoluteGameArea.Size;
+				Point scale = view.GetScale();
 
 				SDL.RenderSetScale(RendererHandle, scale.X, scale.Y);
 
 				//viewport is affected by scale for whatever reason, correct it
-				SDL.Rect viewport = (SDL.Rect)(absoluteViewport / scale);
-				SDL.RenderSetViewport(RendererHandle, ref viewport);
+				Rectangle scaledViewport = new Rectangle(absoluteViewport);
+				scaledViewport.Position /= scale;
+				scaledViewport.Size /= scale;
+				SDL.Rect sdlViewport = (SDL.Rect)scaledViewport;
+				SDL.RenderSetViewport(RendererHandle, ref sdlViewport);
 
 				//get all jobs that will draw inside this view
 				foreach (IDrawJob job in DrawX.GetDrawJobsByArea(absoluteGameArea))

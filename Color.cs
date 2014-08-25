@@ -83,6 +83,11 @@ namespace HatlessEngine
 			}
 		}
 
+		public Color GetComplementary()
+		{
+			return new Color((byte)(255 - R), (byte)(255 - G), (byte)(255 - B), A);
+		}
+
 		public static readonly Color Transparent = new Color(0, 0, 0, 0);
 
 		public static readonly Color Black = new Color(0, 0, 0);

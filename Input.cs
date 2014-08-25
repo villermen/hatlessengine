@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using SDL2;
 using System.Linq;
+using System.Text;
+using System.Runtime.InteropServices;
 
 namespace HatlessEngine
 {
@@ -18,6 +20,7 @@ namespace HatlessEngine
 		/// </summary>
 		public static Dictionary<Button, Button> ButtonMaps = new Dictionary<Button, Button>();
 
+		public static Point UntranslatedMousePosition { get; private set; }
 		public static Point MousePosition { get; private set; }
 
 		/// <summary>
@@ -32,6 +35,11 @@ namespace HatlessEngine
 		private static List<Button>[] GamepadPreviousStates = new List<Button>[8];
 		private static List<Button>[] GamepadCurrentStates = new List<Button>[8];
 		private static float[,] GamepadAxisValues = new float[8,6];
+
+		/// <summary>
+		/// Strings added to this list will have text characters appended or removed by keyboard input.
+		/// </summary>
+		public static List<StringBuilder> TextInputReceivers = new List<StringBuilder>();
 
 		/// <summary>
 		/// Returns true when the specified button is pressed (one step only).
@@ -216,22 +224,7 @@ namespace HatlessEngine
 
 				case SDL.EventType.MOUSEMOTION:
 				{
-					Point mousePosition = new Point(e.motion.x, e.motion.y);
-
-					//decide on which viewport the mouse currently is. backwards because the last view created will be in front of the one before it (if they overlap)
-					for (int i = Resources.Views.Count - 1; i >= 0; i--)
-					{
-						View view = Resources.Views.Values.ElementAt(i);
-						Rectangle absoluteGameArea = view.GetAbsoluteGameArea();
-						Rectangle absoluteViewport = view.GetAbsoluteViewport();
-
-						if (absoluteViewport.IntersectsWith(mousePosition))
-						{
-							//calculate mouse position in gamespace
-							MousePosition = absoluteGameArea.Position + (mousePosition - absoluteViewport.Position) / absoluteViewport.Size * absoluteGameArea.Size;
-							break; //found it! let's ditch this dump
-						}
-					}
+					UntranslatedMousePosition = new Point(e.motion.x, e.motion.y);
 					break;
 				}
 
@@ -245,6 +238,29 @@ namespace HatlessEngine
 						else
 							CurrentState.Add((Button)(SDLKeyDown - 1073739381));
 					}
+
+					//textinput special keys
+					switch (e.key.keysym.sym)
+					{
+						//backspace removes last character from all text input builders
+						case SDL.Keycode.SDLK_BACKSPACE:
+							TextInputReceivers.ForEach(builder =>
+							{
+								int length = builder.Length;
+								if (length > 0)
+									builder.Remove(length - 1, 1);
+							});
+							break;
+
+						case SDL.Keycode.SDLK_RETURN:
+							TextInputReceivers.ForEach(builder => builder.Append('\n'));
+							break;
+
+						case SDL.Keycode.SDLK_TAB:
+							TextInputReceivers.ForEach(builder => builder.Append('\t'));
+							break;
+					}
+
 					break;
 				}
 
@@ -255,6 +271,17 @@ namespace HatlessEngine
 						CurrentState.Remove((Button)(2000 + SDLKeyUp));
 					else
 						CurrentState.Remove((Button)(SDLKeyUp - 1073739381));
+					break;
+				}
+
+				case SDL.EventType.TEXTINPUT:
+				{
+					byte[] rawBytes = new byte[SDL.TEXTINPUTEVENT_TEXT_SIZE];
+					unsafe { Marshal.Copy((IntPtr)e.text.text, rawBytes, 0, SDL.TEXTINPUTEVENT_TEXT_SIZE); }
+					int length = Array.IndexOf<byte>(rawBytes, 0);
+					string text = Encoding.UTF8.GetString(rawBytes, 0, length);
+					//add text to all stringbuilders in TextInputReceivers
+					TextInputReceivers.ForEach(builder => builder.Append(text));
 					break;
 				}
 
@@ -342,6 +369,27 @@ namespace HatlessEngine
 						GamepadCurrentStates[gamepad].Remove((Button)(3016 + e.caxis.axis * 2));
 					}
 					break;
+				}
+			}
+		}
+
+		/// <summary>
+		/// SDL's eventloop only sends a mouse event when it moves, and MousePosition might change because of changes in a view or the window.
+		/// </summary>
+		internal static void UpdateMousePosition()
+		{
+			//decide on which viewport the mouse currently is. backwards because the last view created will be in front of the one before it (if they overlap)
+			for (int i = Resources.Views.Count - 1; i >= 0; i--)
+			{
+				View view = Resources.Views.Values.ElementAt(i);
+				Rectangle absoluteGameArea = view.GetAbsoluteGameArea();
+				Rectangle absoluteViewport = view.GetAbsoluteViewport();
+
+				if (absoluteViewport.IntersectsWith(UntranslatedMousePosition))
+				{
+					//calculate mouse position in gamespace
+					MousePosition = absoluteGameArea.Position + (UntranslatedMousePosition - absoluteViewport.Position) / absoluteViewport.Size * absoluteGameArea.Size;
+					break; //found it! let's ditch this dump
 				}
 			}
 		}

@@ -6,6 +6,12 @@ namespace HatlessEngine
 	public class View : IResource
 	{
 		public string ID { get; private set; }
+
+		/// <summary>
+		/// Whether this View is drawn to the window.
+		/// </summary>
+		public bool Active;
+
 		/// <summary>
 		/// <para>The area represented by this view.</para>
 		/// <para>Everything inside this area will be scaled to fit inside the Viewport.</para>
@@ -23,10 +29,6 @@ namespace HatlessEngine
 		/// <para>You can use negative values for the size to specify the factor of the area that the window has left (-2f = (window width - viewport x) * 2f)</para>
 		/// </summary>
 		public Rectangle Viewport;
-		/// <summary>
-		/// Whether this View is drawn to the window.
-		/// </summary>
-		public bool Active;
 
 		/// <summary>
 		/// See individual fields for explanation on what they are and how to use them.
@@ -98,6 +100,14 @@ namespace HatlessEngine
 				absoluteHeight = Viewport.Size.Y * Window.Size.Y;
 
 			return new Rectangle(absoluteX, absoluteY, absoluteWidth, absoluteHeight);
+		}
+
+		/// <summary>
+		/// The scale conversion from GameArea size to Viewport size.
+		/// </summary>
+		public Point GetScale()
+		{
+			return GetAbsoluteViewport().Size / GetAbsoluteGameArea().Size;
 		}
 
 		public void Destroy()

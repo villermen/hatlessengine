@@ -17,24 +17,37 @@ namespace HatlessEngine
 		/// </summary>
 		public int State { get; private set; }
 		public Rectangle Bounds;
-		/// <summary>
-		/// Code to run when button is pressed and released without the mouse leaving it.
-		/// </summary>
-		public Action OnClick;
-
-		private Sprite Sprite;
-		
-		private int Depth;
-
-		public GUIButton(Point position, Sprite sprite, Action onClick, int depth = 0)
+		private Sprite _Sprite;
+		public Sprite Sprite
 		{
-			Sprite = sprite;
+			get { return _Sprite; }
+			set
+			{
+				//set bound size to 1:1 scale with sprite when sprite is changed manually
+				Bounds.Size = value.FrameSize;
+				_Sprite = value;
+			}
+		}
+		public int Depth;
+
+		/// <summary>
+		/// Occurs when the user has pressed the left mouse button while on the button bounds.
+		/// </summary>
+		public event EventHandler Pressed;
+
+		/// <summary>
+		/// Occurs when the user has pressed and released the left mouse button without leaving the button bounds in between.
+		/// </summary>
+		public event EventHandler Clicked;
+
+		public GUIButton(Point position, Sprite sprite, int depth = 0)
+		{
 			Bounds = new Rectangle(position, sprite.FrameSize);
-			OnClick = onClick;
+			_Sprite = sprite;
 			Depth = depth;
 		}
 
-		public sealed override void Step()
+		public override void Step()
 		{
 			if (Bounds.IntersectsWith(Input.MousePosition))
 			{
@@ -44,22 +57,27 @@ namespace HatlessEngine
 
 				//pressed
 				if (State == 1 && Input.IsPressed(Button.MouseLeft))
+				{
 					State = 2;
+					if (Pressed != null)
+						Pressed(this, EventArgs.Empty);
+				}
 
 				//clicked
 				if (State == 2 && Input.IsReleased(Button.MouseLeft))
 				{
-					OnClick.Invoke();
-					State = 1;
+					if (Clicked != null)
+						Clicked(this, EventArgs.Empty);
+					State = 1;	
 				}
 			}
 			else
 				State = 0;
 		}
 
-		public sealed override void Draw()
+		public override void Draw()
 		{
-			Sprite.Draw(Bounds.Position, State, 0f, Depth);
+			Sprite.Draw(Bounds.Position, Bounds.Size / Sprite.FrameSize, State, 0f, Depth);
 		}
 	}
 }

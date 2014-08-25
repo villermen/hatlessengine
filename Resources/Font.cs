@@ -16,7 +16,7 @@ namespace HatlessEngine
 
 		internal IntPtr Handle;
 
-		private int LineHeight;
+		public int LineHeight;
 
 		public int PointSize { get; private set; }
 
@@ -43,6 +43,9 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 				throw new NotLoadedException();
+
+			//replace tab with 4 spaces because sdl_ttf doesn't
+			str = str.Replace("\t", "    ");
 
 			string[] rows = str.Split('\n');
 			IntPtr[] rowTextures = new IntPtr[rows.Length];

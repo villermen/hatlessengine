@@ -59,6 +59,10 @@ namespace HatlessEngine
 		{
 			Draw(new ComplexRectangle(pos, FrameSize * scale, origin, rotation), frameIndex, depth);
 		}
+		public void Draw(Point pos, Point scale, int frameIndex = 0, float rotation = 0f, int depth = 0)
+		{
+			Draw(new ComplexRectangle(pos, FrameSize * scale, Point.Zero, rotation), frameIndex, depth);
+		}
 		public void Draw(Point pos, int frameIndex = 0, float rotation = 0f, int depth = 0)
 		{
 			Draw(new ComplexRectangle(pos, FrameSize), frameIndex, depth);
