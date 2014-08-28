@@ -39,7 +39,7 @@ namespace HatlessEngine
 			Resources.ExternalResources.Add(this);
 		}
 
-		public void Draw(string str, Point pos, Color color, Alignment alignment = Alignment.Top | Alignment.Left, int depth = 0)
+		public void Draw(string str, Point pos, Color color, Alignment alignment = Alignment.TopLeft, int depth = 0)
 		{
 			if (!Loaded)
 				throw new NotLoadedException();
@@ -47,6 +47,7 @@ namespace HatlessEngine
 			//replace tab with 4 spaces because sdl_ttf doesn't
 			str = str.Replace("\t", "    ");
 
+			//create rows by splitting on newline character
 			string[] rows = str.Split('\n');
 			IntPtr[] rowTextures = new IntPtr[rows.Length];
 
@@ -68,7 +69,7 @@ namespace HatlessEngine
 				}
 				else //generate a new texture
 				{
-					IntPtr textSurface = TTF.RenderText_Blended(Handle, rows[i], color);
+					IntPtr textSurface = TTF.RenderUTF8_Blended(Handle, rows[i], color);
 					rowTextures[i] = SDL.CreateTextureFromSurface(Game.RendererHandle, textSurface);
 					SDL.FreeSurface(textSurface);
 
@@ -102,6 +103,90 @@ namespace HatlessEngine
 
 				DrawX.DrawJobs.Add(new TextureDrawJob(depth, new Rectangle(texturePos, textureSize), rowTextures[i], new Rectangle(Point.Zero, new Point(w, h)), new ComplexRectangle(texturePos, textureSize)));
 			}
+		}
+
+		/// <summary>
+		/// Wraps the string by adding newlines so that (if drawn) it never exceeds the maxWidth.
+		/// Optionally stops after maxLines have been processed, trimming the newline character off that line.
+		/// Using this method before rendering the text will ensure the text is only checked once per step instead of once per draw (which can make a big difference).
+		/// </summary>
+		public string WrapString(string str, float maxWidth, int maxLines = int.MaxValue)
+		{
+			if (maxWidth <= 0f)
+				throw new IndexOutOfRangeException("maxWidth must be positive and nonzero.");
+
+			if (maxLines < 1)
+				throw new IndexOutOfRangeException("maxLines has to be over 0. Leave the argument out or use int.MaxValue to make the method (semi-)ignore the argument.");
+
+			string result = "", lineRemainder;
+			int lines = 0, lineStart = 0, lineLength = 0, w, h, length, newlinePos;
+
+			//replace tab with 4 spaces because sdl_ttf doesn't
+			str = str.Replace("\t", "    ");
+
+			while (lineStart + lineLength < str.Length)
+			{
+				lineStart = lineStart + lineLength;
+				
+				//calculate new line length (length til and including next newline)
+				newlinePos = str.IndexOf('\n', lineStart);
+				if (newlinePos != -1)
+					lineLength = newlinePos + 1 - lineStart;
+				else
+					lineLength = str.Length - lineStart;
+
+				lineRemainder = str.Substring(lineStart, lineLength);
+
+				while(lineRemainder != "" && lines < maxLines)
+				{
+					//check if the string fits initially, because then there would be no situation right?
+					TTF.SizeUTF8(Handle, lineRemainder, out w, out h);
+					if (w < maxWidth)
+					{
+						result += lineRemainder;
+						lineRemainder = "";
+					}
+					else
+					{
+						//get closest fitting multiple of ten and add as many of those to the substring length as possible to reduce the amount of SizeUTF8 calls
+						length = 0;
+						for (int chunkLength = (int)Math.Pow(10, Math.Floor(Math.Log10(lineRemainder.Length))); chunkLength >= 1; chunkLength = chunkLength / 10)
+						{
+							w = 0;
+							while (w < maxWidth)
+							{
+								length += chunkLength;
+
+								//would be invalid to insert into upcoming substring call
+								if (length > lineRemainder.Length)
+									break;
+
+								TTF.SizeUTF8(Handle, lineRemainder.Substring(0, length), out w, out h);
+							}
+
+							//revert last addition
+							length -= chunkLength;
+						}
+
+						//if length still is zero the character would be pushed back till the line limit, which is not desirable
+						if (length <= 0)
+							break;
+
+						result += lineRemainder.Substring(0, length) + '\n';
+						lineRemainder = lineRemainder.Substring(length);
+					}
+
+					lines++;
+				}
+			}
+
+			//last line cannot end with newline
+			if (lines == maxLines && result[result.Length - 1] == '\n')
+				result = result.Remove(result.Length - 1);
+
+			Log.Message(result.Replace('\n', 'ñ'));
+
+			return result;
 		}
 
 		public void Load()
@@ -150,6 +235,10 @@ namespace HatlessEngine
 
 		Top = 8,
 		Middle = 16,
-		Bottom = 32
+		Bottom = 32,
+
+		TopLeft = Top | Left,
+		BottomRight = Bottom | Right,
+		CenterMiddle = Center | Middle
 	}
 }

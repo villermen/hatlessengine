@@ -13,7 +13,9 @@ namespace HatlessEngine
 			: this()
 		{
 			Depth = depth;
-			Area = rect;
+			Area = new Rectangle(rect);
+			//add 1 to size because sdl's filled rects dont fill including the last pixel
+			Area.Size += 1f;
 
 			Color = color;
 		}

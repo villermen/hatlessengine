@@ -15,6 +15,12 @@ namespace HatlessEngine
 		public Font Font;
 		public int Depth;
 
+		public float BorderWidth = 1f;
+
+		public Color BackGroundColor = Color.Silver;
+		public Color BorderColor = Color.Black;
+		public Color TextColor = Color.Black;
+
 		private bool HasFocus = false;
 
 		public event EventHandler Focused;
@@ -30,7 +36,7 @@ namespace HatlessEngine
 
 		private Rectangle Area;
 
-		public GUITextBox(Point position, float width, int lines, Font font, int depth = 0)
+		public GUITextBox(Point position, int width, int lines, Font font, int depth = 0)
 		{
 			Position = position;
 			Width = width;
@@ -74,7 +80,7 @@ namespace HatlessEngine
 
 		public override void Step()
 		{
-			Area = new Rectangle(Position, Width, Font.LineHeight * Lines);
+			Area = new Rectangle(Position, Width, Font.LineHeight * Lines + BorderWidth * 2f);
 
 			if (Input.IsPressed(Button.MouseLeft))
 			{
@@ -109,12 +115,16 @@ namespace HatlessEngine
 				if (++CursorBlinkStep > Game.StepsPerSecond)
 					CursorBlinkStep -= Game.StepsPerSecond;
 			}
+
+			DrawString = Font.WrapString(DrawString, Width - BorderWidth * 2f, Lines);
 		}
 
 		public override void Draw()
 		{
-			DrawX.DrawFilledRect(Area, Color.Silver);
-			DrawX.Draw(DrawString, Font, Position, Color.Black, Alignment.Top | Alignment.Left, -5);
+			DrawX.DrawFilledRect(Area, BackGroundColor);
+			if (HasFocus)
+				 DrawX.DrawShapeOutline(Area, BorderColor);
+			Font.Draw(DrawString, Position + 1f, TextColor, Alignment.TopLeft, -5);
 		}
 	}
 }
