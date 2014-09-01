@@ -109,8 +109,9 @@ namespace HatlessEngine
 		/// Wraps the string by adding newlines so that (if drawn) it never exceeds the maxWidth.
 		/// Optionally stops after maxLines have been processed, trimming the newline character off that line.
 		/// Using this method before rendering the text will ensure the text is only checked once per step instead of once per draw (which can make a big difference).
+		/// <param name="charsTrimmed">Amount of chars trimmed from the end of the INPUT string.</param>
 		/// </summary>
-		public string WrapString(string str, float maxWidth, int maxLines = int.MaxValue)
+		public string WrapString(string str, float maxWidth, int maxLines, out int charsTrimmed)
 		{
 			if (maxWidth <= 0f)
 				throw new IndexOutOfRangeException("maxWidth must be positive and nonzero.");
@@ -118,8 +119,10 @@ namespace HatlessEngine
 			if (maxLines < 1)
 				throw new IndexOutOfRangeException("maxLines has to be over 0. Leave the argument out or use int.MaxValue to make the method (semi-)ignore the argument.");
 
-			string result = "", lineRemainder;
+			string result = "", lineRemainder = "";
 			int lines = 0, lineStart = 0, lineLength = 0, w, h, length, newlinePos;
+
+			charsTrimmed = 0;
 
 			//replace tab with 4 spaces because sdl_ttf doesn't
 			str = str.Replace("\t", "    ");
@@ -143,6 +146,10 @@ namespace HatlessEngine
 					TTF.SizeUTF8(Handle, lineRemainder, out w, out h);
 					if (w < maxWidth)
 					{
+						//will be trimmed later and it's easier to detect here (because the newline could be added by wrapping too)
+						if (++lines == maxLines && lineRemainder[lineRemainder.Length - 1] == '\n')
+							charsTrimmed++;
+
 						result += lineRemainder;
 						lineRemainder = "";
 					}
@@ -174,19 +181,28 @@ namespace HatlessEngine
 
 						result += lineRemainder.Substring(0, length) + '\n';
 						lineRemainder = lineRemainder.Substring(length);
-					}
 
-					lines++;
+						if (++lines == maxLines)
+							break;
+					}
 				}
+
+				if (lines == maxLines)
+					break;
 			}
 
 			//last line cannot end with newline
 			if (lines == maxLines && result[result.Length - 1] == '\n')
 				result = result.Remove(result.Length - 1);
 
-			Log.Message(result.Replace('\n', 'ñ'));
+			charsTrimmed += str.Substring(lineStart + lineLength).Length + lineRemainder.Length;
 
 			return result;
+		}
+		public string WrapString(string str, float maxWidth, int maxLines = int.MaxValue)
+		{
+			int charsTrimmed;
+			return WrapString(str, maxWidth, maxLines, out charsTrimmed);
 		}
 
 		public void Load()

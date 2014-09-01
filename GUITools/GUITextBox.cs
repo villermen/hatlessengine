@@ -5,10 +5,6 @@ namespace HatlessEngine
 {
 	public class GUITextBox : LogicalObject
 	{
-		//reset cursor when character is typed (update event maybe even?)
-		//dont allow overflow
-		//disable other input until this is defocused?
-
 		public Point Position;
 		public int Lines;
 		public float Width;
@@ -22,6 +18,7 @@ namespace HatlessEngine
 		public Color TextColor = Color.Black;
 
 		private bool HasFocus = false;
+		private bool CursorActive;
 
 		public event EventHandler Focused;
 		public event EventHandler Defocused;
@@ -110,13 +107,27 @@ namespace HatlessEngine
 			if (HasFocus)
 			{
 				if (CursorBlinkStep < Game.StepsPerSecond / 2f)
+				{
+					CursorActive = true;
 					DrawString += '|';
+				}
+				else
+					CursorActive = false;
 
 				if (++CursorBlinkStep > Game.StepsPerSecond)
 					CursorBlinkStep -= Game.StepsPerSecond;
 			}
 
-			DrawString = Font.WrapString(DrawString, Width - BorderWidth * 2f, Lines);
+			int charsTrimmed;
+			DrawString = Font.WrapString(DrawString, Width - BorderWidth * 2f, Lines, out charsTrimmed);
+
+			if (charsTrimmed > 0)
+			{
+				if (CursorActive) 
+					charsTrimmed--;
+
+				Text.Remove(Text.Length - charsTrimmed, charsTrimmed);
+			}
 		}
 
 		public override void Draw()
