@@ -18,4 +18,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 
-HatlessEngine's original source can be found at https://github.com/Villermen/HatlessEngine.
+HatlessEngine's original source can be found at http://villermen.com/hatlessengine/
