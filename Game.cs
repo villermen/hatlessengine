@@ -413,5 +413,14 @@ namespace HatlessEngine
 				SDL.ShowSimpleMessageBox(SDL.MessageBoxFlags.MESSAGEBOX_ERROR, "Game Crash", message, WindowHandle);
 			}
 		}
+
+		/// <summary>
+		/// Converts a per-second value to a per-step value based on the game's speed, so you can use relative values.
+		/// Basically all this does is take your value and divide it by the game's speed, but it's more logical and less bug prone if using this method.
+		/// </summary>
+		public static float ValuePerStep(float valuePerSecond)
+		{
+			return valuePerSecond / StepsPerSecond;
+		}
 	}
 }

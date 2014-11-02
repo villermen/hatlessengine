@@ -9,6 +9,7 @@ namespace HatlessEngine.GUI
 	{
 		public Scrollbar()
 		{
+			throw new NotImplementedException();
 		}
 	}
 }
