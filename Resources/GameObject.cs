@@ -2,11 +2,15 @@
 
 namespace HatlessEngine
 {
-	public class LogicalObject
+	/// <summary>
+	/// Represents an object without any built-in physical support.
+	/// Use this for objects that don't need to use the built-in support for moveing or collision detection.
+	/// </summary>
+	public abstract class GameObject
 	{
 		public bool Destroyed { get; private set; }
 
-		public LogicalObject()
+		public GameObject()
 		{
 			//add object to Resource's objectlist
 			Resources.AddObjects.Add(this);

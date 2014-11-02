@@ -11,7 +11,7 @@ namespace HatlessEngine
 
 		public ObjectBlueprint(Type type, params object[] arguments)
 		{
-			if (!type.IsSubclassOf(typeof(LogicalObject)))
+			if (!type.IsSubclassOf(typeof(GameObject)))
 				throw new ArgumentException("Type is not derived from LogicalObject");
 			Type = type;
 			Arguments = arguments;

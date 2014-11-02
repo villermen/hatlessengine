@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Text;
 
-namespace HatlessEngine
+namespace HatlessEngine.GUI
 {
-	public class GUITextBox : LogicalObject
+	/// <summary>
+	/// A single-line text input that will scroll horizontally until max characters is reached.
+	/// </summary>
+	public class TextBox : GameObject
 	{
 		public Point Position;
 		public int Lines;
@@ -33,7 +36,7 @@ namespace HatlessEngine
 
 		private Rectangle Area;
 
-		public GUITextBox(Point position, int width, int lines, Font font, int depth = 0)
+		public TextBox(Point position, int width, int lines, Font font, int depth = 0)
 		{
 			Position = position;
 			Width = width;
@@ -102,7 +105,7 @@ namespace HatlessEngine
 				CursorBlinkStep = 0f;
 			}
 
-			LastDrawString = DrawString;			
+			LastDrawString = DrawString;
 
 			if (HasFocus)
 			{
@@ -123,7 +126,7 @@ namespace HatlessEngine
 
 			if (charsTrimmed > 0)
 			{
-				if (CursorActive) 
+				if (CursorActive)
 					charsTrimmed--;
 
 				Text.Remove(Text.Length - charsTrimmed, charsTrimmed);
@@ -134,7 +137,7 @@ namespace HatlessEngine
 		{
 			DrawX.DrawFilledRect(Area, BackGroundColor);
 			if (HasFocus)
-				 DrawX.DrawShapeOutline(Area, BorderColor);
+				DrawX.DrawShapeOutline(Area, BorderColor);
 			Font.Draw(DrawString, Position + 1f, TextColor, Alignment.TopLeft, -5);
 		}
 	}

@@ -20,7 +20,7 @@ namespace HatlessEngine
 		public static readonly ushort ProtocolVersion = 1;
 
 		public List<ObjectBlueprint> Blueprints;
-		public List<LogicalObject> ActiveObjects = new List<LogicalObject>();
+		public List<GameObject> ActiveObjects = new List<GameObject>();
 		internal List<PhysicalObject> ActivePhysicalObjects = new List<PhysicalObject>();
 
 		private Objectmap(string id)
@@ -52,12 +52,12 @@ namespace HatlessEngine
 			reader.Close();
 		}
 
-		public List<LogicalObject> CreateObjects()
+		public List<GameObject> CreateObjects()
 		{
-			List<LogicalObject> returnList = new List<LogicalObject>();
+			List<GameObject> returnList = new List<GameObject>();
 			foreach (ObjectBlueprint blueprint in Blueprints)
 			{
-				LogicalObject logicalObject = (LogicalObject)Activator.CreateInstance(blueprint.Type, blueprint.Arguments);
+				GameObject logicalObject = (GameObject)Activator.CreateInstance(blueprint.Type, blueprint.Arguments);
 				ActiveObjects.Add(logicalObject);
 				//for collision checking against this map
 				if (blueprint.Type.IsSubclassOf(typeof(PhysicalObject)))
@@ -83,7 +83,7 @@ namespace HatlessEngine
 
 		public void DestroyObjects()
 		{
-			foreach (LogicalObject logicalObject in ActiveObjects)
+			foreach (GameObject logicalObject in ActiveObjects)
 			{
 				logicalObject.Destroy();
 			}

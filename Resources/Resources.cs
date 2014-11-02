@@ -36,13 +36,13 @@ namespace HatlessEngine
 		public static Dictionary<string, Spritemap> Spritemaps = new Dictionary<string, Spritemap>();
 
 		//objects
-		public static List<LogicalObject> Objects = new List<LogicalObject>();
+		public static List<GameObject> Objects = new List<GameObject>();
 		public static List<PhysicalObject> PhysicalObjects = new List<PhysicalObject>();
 		public static Dictionary<Type, List<PhysicalObject>> PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
 
 		//addition/removal (has to be done after looping)
-		internal static List<LogicalObject> AddObjects = new List<LogicalObject>();
-		internal static List<LogicalObject> RemoveObjects = new List<LogicalObject>();
+		internal static List<GameObject> AddObjects = new List<GameObject>();
+		internal static List<GameObject> RemoveObjects = new List<GameObject>();
 
 		internal static List<WeakReference> ManagedSprites = new List<WeakReference>();
 
@@ -135,7 +135,7 @@ namespace HatlessEngine
 			AddObjects.Clear();
 
 			//object removal
-			foreach (LogicalObject logicalObject in RemoveObjects)
+			foreach (GameObject logicalObject in RemoveObjects)
 				Objects.Remove(logicalObject);
 			RemoveObjects.Clear();
 		}

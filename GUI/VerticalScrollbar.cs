@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace HatlessEngine
+namespace HatlessEngine.GUI
 {
-	public class GUIScrollbar : LogicalObject
+	public class VerticalScrollbar : GameObject
 	{
 		public bool Horizontal { get; private set; }
 
@@ -62,7 +62,7 @@ namespace HatlessEngine
 		private Point DragStartPos;
 		private float DragStartLengthOffset;
 
-		public GUIScrollbar(Point position, float length, float contentLength, float scrollAreaOffset, bool horizontal = false, int depth = 0)
+		public VerticalScrollbar(Point position, float length, float contentLength, float scrollAreaOffset, bool horizontal = false, int depth = 0)
 		{
 			Horizontal = horizontal;
 			Position = position;

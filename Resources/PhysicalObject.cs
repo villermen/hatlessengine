@@ -4,10 +4,10 @@ using System.Collections.Generic;
 namespace HatlessEngine
 {
 	/// <summary>
-	/// Object that has physical properties.
-	/// Has built-in support for a sprite, boundbox, collision detection etc.
+	/// Represents an object that has physical properties.
+	/// Has built-in support for a position, boundbox, collision and other physical mumbo-jumbo.
 	/// </summary>
-	public class PhysicalObject : LogicalObject
+	public abstract class PhysicalObject : GameObject
 	{
 		/// <summary>
 		/// Change the position of Bounds easily.
@@ -74,7 +74,7 @@ namespace HatlessEngine
 			Resources.PhysicalObjects.Add(this);
 
 			//add object to PhysicalObjectsByType along with each basetype up till PhysicalObject
-			for (Type currentType = this.GetType(); currentType != typeof(LogicalObject); currentType = currentType.BaseType)
+			for (Type currentType = this.GetType(); currentType != typeof(GameObject); currentType = currentType.BaseType)
 			{
 				if (!Resources.PhysicalObjectsByType.ContainsKey(currentType))
 					Resources.PhysicalObjectsByType[currentType] = new List<PhysicalObject>();
@@ -333,7 +333,7 @@ namespace HatlessEngine
 			Resources.PhysicalObjects.Remove(this);
 
 			//remove from physicalobjectsbytype
-			for (Type currentType = this.GetType(); currentType != typeof(LogicalObject); currentType = currentType.BaseType)
+			for (Type currentType = this.GetType(); currentType != typeof(GameObject); currentType = currentType.BaseType)
 			{
 				Resources.PhysicalObjectsByType[currentType].Remove(this);
 			}

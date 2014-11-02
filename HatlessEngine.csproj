@@ -45,8 +45,12 @@
     <Compile Include="DrawJobs\LineDrawJob.cs" />
     <Compile Include="DrawJobs\TextureDrawJob.cs" />
     <Compile Include="DrawJobs\IDrawJob.cs" />
-    <Compile Include="GUITools\GUIScrollbar.cs" />
-    <Compile Include="GUITools\GUITextBox.cs" />
+    <Compile Include="GUI\TextButton.cs" />
+    <Compile Include="GUI\HorizontalScrollbar.cs" />
+    <Compile Include="GUI\Scrollbar.cs" />
+    <Compile Include="GUI\SolidColorButton.cs" />
+    <Compile Include="GUI\VerticalScrollbar.cs" />
+    <Compile Include="GUI\TextBox.cs" />
     <Compile Include="Resources\IResource.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="QuadTree.cs" />
@@ -55,7 +59,7 @@
     <Compile Include="Shapes\Rectangle.cs" />
     <Compile Include="Resources\View.cs" />
     <Compile Include="Resources\Resources.cs" />
-    <Compile Include="Resources\LogicalObject.cs" />
+    <Compile Include="Resources\GameObject.cs" />
     <Compile Include="Resources\PhysicalObject.cs" />
     <Compile Include="Resources\Sprite.cs" />
     <Compile Include="Input.cs" />
@@ -68,7 +72,7 @@
     <Compile Include="Resources\Sound.cs" />
     <Compile Include="Resources\SoundControl.cs" />
     <Compile Include="Resources\Font.cs" />
-    <Compile Include="GUITools\GUIButton.cs" />
+    <Compile Include="GUI\FullImageButton.cs" />
     <Compile Include="Resources\ManagedSprite.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="EventArgs.cs" />
@@ -84,57 +88,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="defaultwindowicon.png" />
-    <Content Include="libFLAC-8.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libfreetype-6.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libjpeg-9.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libmikmod-2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libmodplug-1.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libogg-0.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libpng16-16.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libtiff-5.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libvorbis-0.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libvorbisfile-3.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libwebp-4.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SDL2_image.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SDL2_mixer.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SDL2_ttf.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="smpeg2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SDL2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="zlib1.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

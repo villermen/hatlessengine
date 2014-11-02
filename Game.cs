@@ -228,7 +228,7 @@ namespace HatlessEngine
 			//update the weakreferences if they still exist
 			Resources.UpdateManagedSprites();
 
-			foreach (LogicalObject obj in Resources.Objects)
+			foreach (GameObject obj in Resources.Objects)
 			{
 				if (!obj.Destroyed)
 				obj.Step();
@@ -299,7 +299,7 @@ namespace HatlessEngine
 		private static void Draw()
 		{
 			//collect drawjobs
-			foreach (LogicalObject obj in Resources.Objects)
+			foreach (GameObject obj in Resources.Objects)
 			{
 				if (!obj.Destroyed)
 					obj.Draw();
