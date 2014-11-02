@@ -65,12 +65,9 @@ namespace HatlessEngine
 		/// </summary>
 		public Shape Bounds = Rectangle.Zero;
 
-		public PhysicalObject(Point position) 
-			: base()
+		public PhysicalObject() 
 		{
-			//set position
-			Position = position;
-
+			//add object to the physicalobjects list
 			Resources.PhysicalObjects.Add(this);
 
 			//add object to PhysicalObjectsByType along with each basetype up till PhysicalObject
