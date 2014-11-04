@@ -24,10 +24,6 @@ namespace HatlessEngine
 		{
 			font.Draw(str, pos, color, alignment, depth);
 		}
-		public static void Draw(string str, string fontID, Point pos, Color color, Alignment alignment = Alignment.Top | Alignment.Left, int depth = 0)
-		{
-			Resources.Fonts[fontID].Draw(str, pos, color, alignment, depth);
-		}
 		public static void Draw(Sprite sprite, Point pos, Point scale, Point origin, int frameIndex = 0, float rotation = 0f, int depth = 0)
 		{
 			sprite.Draw(pos, scale, origin, frameIndex, rotation, depth);
@@ -35,14 +31,6 @@ namespace HatlessEngine
 		public static void Draw(Sprite sprite, Point pos, int frameIndex = 0, float rotation = 0f, int depth = 0)
 		{
 			sprite.Draw(pos, frameIndex, rotation, depth);
-		}
-		public static void Draw(string spriteID, Point pos, Point scale, Point origin, int frameIndex = 0, float rotation = 0f, int depth = 0)
-		{
-			Resources.Sprites[spriteID].Draw(pos, scale, origin, frameIndex, rotation, depth);
-		}
-		public static void Draw(string spriteID, Point pos, int frameIndex = 0, float rotation = 0f, int depth = 0)
-		{
-			Resources.Sprites[spriteID].Draw(pos, frameIndex, rotation, depth);
 		}
 
 		/// <summary>

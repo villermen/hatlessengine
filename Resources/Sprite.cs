@@ -124,5 +124,10 @@ namespace HatlessEngine
 			Resources.Sprites.Remove(ID);
 			Resources.ExternalResources.Remove(this);
 		}
+
+		public static implicit operator Sprite(string str)
+		{
+			return Resources.Sprites[str];
+		}
 	}
 }

@@ -128,5 +128,10 @@ namespace HatlessEngine
 		{
 			Resources.Spritemaps.Remove(ID);
 		}
+
+		public static implicit operator Spritemap(string str)
+		{
+			return Resources.Spritemaps[str];
+		}
 	}
 }

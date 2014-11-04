@@ -63,9 +63,9 @@ namespace HatlessEngine
 		/// <summary>
 		/// All parameters.
 		/// </summary>
-		public ManagedSprite(string targetSpriteID, Point pos, string animationID = "", int startIndex = 0, float animationSpeed = 1f, int depth = 0)
+		public ManagedSprite(Sprite targetSprite, Point pos, string animationID = "", int startIndex = 0, float animationSpeed = 1f, int depth = 0)
 		{
-			TargetSprite = Resources.Sprites[targetSpriteID];
+			TargetSprite = targetSprite;
 			AnimationID = animationID;
 			AnimationIndex = startIndex;
 			AnimationSpeed = animationSpeed;

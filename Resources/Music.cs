@@ -117,5 +117,10 @@ namespace HatlessEngine
 			Resources.Music.Remove(ID);
 			Resources.ExternalResources.Remove(this);
 		}
+
+		public static implicit operator Music(string str)
+		{
+			return Resources.Music[str];
+		}
 	}
 }

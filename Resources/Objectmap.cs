@@ -95,5 +95,10 @@ namespace HatlessEngine
 		{
 			Resources.Objectmaps.Remove(ID);
 		}
+
+		public static implicit operator Objectmap(string str)
+		{
+			return Resources.Objectmaps[str];
+		}
 	}
 }

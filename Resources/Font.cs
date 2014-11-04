@@ -238,6 +238,11 @@ namespace HatlessEngine
 			Resources.Fonts.Remove(ID);
 			Resources.ExternalResources.Remove(this);
 		}
+
+		public static implicit operator Font(string str)
+		{
+			return Resources.Fonts[str];
+		}
 	}
 
 	[Flags]

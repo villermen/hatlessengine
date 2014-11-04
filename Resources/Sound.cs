@@ -81,5 +81,10 @@ namespace HatlessEngine
 			Resources.Sounds.Remove(ID);
 			Resources.ExternalResources.Remove(this);
 		}
+
+		public static implicit operator Sound(string str)
+		{
+			return Resources.Sounds[str];
+		}
 	}
 }

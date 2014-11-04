@@ -114,5 +114,10 @@ namespace HatlessEngine
 		{
 			Resources.Views.Remove(ID);
 		}
+
+		public static implicit operator View(string str)
+		{
+			return Resources.Views[str];
+		}
 	}
 }
