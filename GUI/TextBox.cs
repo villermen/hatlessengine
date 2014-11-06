@@ -28,9 +28,9 @@ namespace HatlessEngine.GUI
 		public event EventHandler<TextChangedEventArgs> TextChanged;
 
 		public StringBuilder Text = new StringBuilder();
+		private string LastTextString = "";
 
 		private string DrawString;
-		private string LastDrawString = "";
 
 		private float CursorBlinkStep;
 
@@ -86,27 +86,14 @@ namespace HatlessEngine.GUI
 			{
 				//focus if on the textbox
 				if (Area.IntersectsWith(Input.MousePosition))
-				{
 					Focus();
-				}
 				else //defocus if not
-				{
 					Defocus();
-				}
 			}
 
 			DrawString = Text.ToString();
 
-			if (DrawString != LastDrawString)
-			{
-				if (TextChanged != null)
-					TextChanged(this, new TextChangedEventArgs(DrawString));
-
-				CursorBlinkStep = 0f;
-			}
-
-			LastDrawString = DrawString;
-
+			//add caret if focused
 			if (HasFocus)
 			{
 				if (CursorBlinkStep < Game.StepsPerSecond / 2f)
@@ -121,15 +108,27 @@ namespace HatlessEngine.GUI
 					CursorBlinkStep -= Game.StepsPerSecond;
 			}
 
+			//trim
 			int charsTrimmed;
 			DrawString = Font.WrapString(DrawString, Width - BorderWidth * 2f, Lines, out charsTrimmed);
 
-			if (charsTrimmed > 0)
+			if (charsTrimmed > 1)
 			{
 				if (CursorActive)
 					charsTrimmed--;
 
-				Text.Remove(Text.Length - charsTrimmed, charsTrimmed);
+				Text.Remove(Text.Length - charsTrimmed + 1, charsTrimmed - 1);
+			}
+
+			//only throw event when the text was manually changed and the key was accepted
+			if (Text.ToString() != LastTextString)
+			{
+				if (TextChanged != null)
+					TextChanged(this, new TextChangedEventArgs(Text.ToString()));
+
+				CursorBlinkStep = 0f;
+
+				LastTextString = Text.ToString();
 			}
 		}
 
