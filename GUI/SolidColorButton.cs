@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HatlessEngine.GUI
+﻿namespace HatlessEngine.GUI
 {
 	/// <summary>
 	/// A button with solid colored backgrounds and text. Useful for quick button creation without a design.

@@ -1,7 +1,7 @@
 ﻿using System;
-using SDL2_mixer;
 using System.IO;
 using System.Reflection;
+using SDL2;
 
 namespace HatlessEngine
 {
@@ -41,12 +41,12 @@ namespace HatlessEngine
 
 			Paused = false;
 
-			Mix.VolumeMusic((int)(128 * BaseVolume * volume));
+			SDL_mixer.Mix_VolumeMusic((int)(128 * BaseVolume * volume));
 
 			if (looping)
-				Mix.PlayMusic(MusicHandle, -1);
+				SDL_mixer.Mix_PlayMusic(MusicHandle, -1);
 			else
-				Mix.PlayMusic(MusicHandle, 0);
+				SDL_mixer.Mix_PlayMusic(MusicHandle, 0);
 
 			Resources.CurrentlyPlayingMusic = this;
 		}
@@ -55,7 +55,7 @@ namespace HatlessEngine
 		{
 			if (IsPlaying())
 			{
-				Mix.PauseMusic();
+				SDL_mixer.Mix_PauseMusic();
 				Paused = true;
 			}
 		}
@@ -64,7 +64,7 @@ namespace HatlessEngine
 		{
 			if (Paused && IsPlaying())
 			{
-				Mix.ResumeMusic();
+				SDL_mixer.Mix_ResumeMusic();
 				Paused = false;
 			}
 		}
@@ -72,7 +72,7 @@ namespace HatlessEngine
 		public void Stop()
 		{
 			if (IsPlaying())
-				Mix.HaltMusic();
+				SDL_mixer.Mix_HaltMusic();
 		}
 
 		public bool IsPlaying()
@@ -85,7 +85,7 @@ namespace HatlessEngine
 			if (Loaded)
 				return;
 
-			MusicHandle = Mix.LoadMUS(Filename);
+			MusicHandle = SDL_mixer.Mix_LoadMUS(Filename);
 
 			if (MusicHandle != IntPtr.Zero)
 				Loaded = true;
@@ -98,7 +98,7 @@ namespace HatlessEngine
 			if (!Loaded)
 				return;
 
-			Mix.FreeMusic(MusicHandle);
+			SDL_mixer.Mix_FreeMusic(MusicHandle);
 			Loaded = false;
 		}
 

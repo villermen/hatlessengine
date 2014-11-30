@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HatlessEngine.GUI
+﻿namespace HatlessEngine.GUI
 {
 	/// <summary>
 	/// A button with sprited backgrounds. The sprite will be stretched to fill Bounds.

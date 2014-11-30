@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HatlessEngine
+﻿namespace HatlessEngine
 {
 	internal struct FilledRectDrawJob : IDrawJob
 	{

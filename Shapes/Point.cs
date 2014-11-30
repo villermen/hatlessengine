@@ -1,4 +1,5 @@
 ﻿using System;
+using SDL2;
 
 namespace HatlessEngine
 {
@@ -126,9 +127,9 @@ namespace HatlessEngine
 		}
 
 
-		public static explicit operator SDL2.SDL.Point(Point point)
+		public static explicit operator SDL.SDL_Point(Point point)
 		{
-			return new SDL2.SDL.Point { x = (int)point.X, y = (int)point.Y };
+			return new SDL.SDL_Point { x = (int)point.X, y = (int)point.Y };
 		}
 
 		public override string ToString()

@@ -1,14 +1,11 @@
-using MoreLinq;
-using System.Linq;
-using SDL2;
-using SDL2_image;
-using SDL2_mixer;
-using SDL2_ttf;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
+using MoreLinq;
+using SDL2;
 
 namespace HatlessEngine
 {
@@ -96,18 +93,28 @@ namespace HatlessEngine
 		/// </summary>
 		public static void Run(float speed = 100f)
 		{
-			SDL.Init(SDL.InitFlags.EVERYTHING);
-			IMG.Init(IMG.InitFlags.EVERYTHING);
-			Mix.Init(Mix.InitFlags.EVERYTHING);
-			TTF.Init();
+			SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
+
+			SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_JPG
+				| SDL_image.IMG_InitFlags.IMG_INIT_PNG
+				| SDL_image.IMG_InitFlags.IMG_INIT_WEBP
+				| SDL_image.IMG_InitFlags.IMG_INIT_TIF);
+
+			SDL_mixer.Mix_Init(SDL_mixer.MIX_InitFlags.MIX_INIT_OGG
+				| SDL_mixer.MIX_InitFlags.MIX_INIT_MP3
+				| SDL_mixer.MIX_InitFlags.MIX_INIT_FLAC
+				| SDL_mixer.MIX_InitFlags.MIX_INIT_MOD
+				| SDL_mixer.MIX_InitFlags.MIX_INIT_FLUIDSYNTH);
+
+			SDL_ttf.TTF_Init();
 
 			//open window
-			SDL.SetHint(SDL.HINT_RENDER_VSYNC, "1");
-			SDL.SetHint(SDL.HINT_RENDER_SCALE_QUALITY, "2");		
+			SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_VSYNC, "1");
+			SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "2");
 
-			WindowHandle = SDL.CreateWindow("HatlessEngine", SDL.WINDOWPOS_UNDEFINED, SDL.WINDOWPOS_UNDEFINED, 800, 600, SDL.WindowFlags.WINDOW_SHOWN | SDL.WindowFlags.WINDOW_RESIZABLE | SDL.WindowFlags.WINDOW_INPUT_FOCUS);
-			RendererHandle = SDL.CreateRenderer(WindowHandle, -1, (uint)(SDL.RendererFlags.RENDERER_ACCELERATED | SDL.RendererFlags.RENDERER_PRESENTVSYNC));
-			SDL.SetRenderDrawBlendMode(RendererHandle, SDL.BlendMode.BLENDMODE_BLEND);
+			WindowHandle = SDL.SDL_CreateWindow("HatlessEngine", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_INPUT_FOCUS);
+			RendererHandle = SDL.SDL_CreateRenderer(WindowHandle, -1, (uint)(SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC));
+			SDL.SDL_SetRenderDrawBlendMode(RendererHandle, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
 			Window.SetIcon();
 
@@ -115,10 +122,10 @@ namespace HatlessEngine
 			new View("default", new Rectangle(Point.Zero, Window.Size), new Rectangle(Point.Zero , new Point(1f, 1f)));
 
 			//initialize audio system and let Resources handle sound expiration
-			Mix.OpenAudio(44100, SDL.AUDIO_S16SYS, 2, 4096);
-			Mix.AllocateChannels((int)(speed * 2)); //might want to dynamically create and remove channels during runtime
-			Mix.ChannelFinished(new Mix.ChannelFinishedDelegate(Resources.SoundChannelFinished));
-			Mix.HookMusicFinished(new Mix.MusicFinishedDelegate(Resources.MusicFinished));
+			SDL_mixer.Mix_OpenAudio(44100, SDL.AUDIO_S16SYS, 2, 4096);
+			SDL_mixer.Mix_AllocateChannels((int)(speed * 2)); //might want to dynamically create and remove channels during runtime
+			SDL_mixer.Mix_ChannelFinished(new SDL_mixer.ChannelFinishedDelegate(Resources.SoundChannelFinished));
+			SDL_mixer.Mix_HookMusicFinished(new SDL_mixer.MusicFinishedDelegate(Resources.MusicFinished));
 
 			//initialize loop
 			StepsPerSecond = speed;
@@ -170,17 +177,17 @@ namespace HatlessEngine
 			Log.CloseAllStreams();
 			Input.CloseGamepads();
 
-			SDL.DestroyWindow(WindowHandle);
+			SDL.SDL_DestroyWindow(WindowHandle);
 			WindowHandle = IntPtr.Zero;
-			SDL.DestroyRenderer(RendererHandle);
+			SDL.SDL_DestroyRenderer(RendererHandle);
 			RendererHandle = IntPtr.Zero;
 
-			Mix.CloseAudio();
+			SDL_mixer.Mix_CloseAudio();
 
-			SDL.Quit();
-			IMG.Quit();
-			Mix.Quit();
-			TTF.Quit();
+			SDL.SDL_Quit();
+			SDL_image.IMG_Quit();
+			SDL_mixer.Mix_Quit();
+			SDL_ttf.TTF_Quit();
 		}
 
 		private static void Step()
@@ -188,35 +195,35 @@ namespace HatlessEngine
 			//push input state
 			Input.PushState();
 
-			//process all SDL events
-			SDL.Event e;
-			while (SDL.PollEvent(out e) == 1)
+			//process all SDL.SDL_events
+			SDL.SDL_Event e;
+			while (SDL.SDL_PollEvent(out e) == 1)
 			{
 				switch (e.type)
 				{
 					//let Input handle input related events
-					case SDL.EventType.MOUSEBUTTONDOWN:
-					case SDL.EventType.MOUSEBUTTONUP:
-					case SDL.EventType.MOUSEWHEEL:
-					case SDL.EventType.MOUSEMOTION:
-					case SDL.EventType.KEYDOWN:
-					case SDL.EventType.KEYUP:
-					case SDL.EventType.TEXTINPUT:
-					case SDL.EventType.CONTROLLERDEVICEADDED:
-					case SDL.EventType.CONTROLLERDEVICEREMOVED:					
-					case SDL.EventType.CONTROLLERBUTTONDOWN:
-					case SDL.EventType.CONTROLLERBUTTONUP:
-					case SDL.EventType.CONTROLLERAXISMOTION:
+					case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+					case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
+					case SDL.SDL_EventType.SDL_MOUSEWHEEL:
+					case SDL.SDL_EventType.SDL_MOUSEMOTION:
+					case SDL.SDL_EventType.SDL_KEYDOWN:
+					case SDL.SDL_EventType.SDL_KEYUP:
+					case SDL.SDL_EventType.SDL_TEXTINPUT:
+					case SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED:
+					case SDL.SDL_EventType.SDL_CONTROLLERDEVICEREMOVED:
+					case SDL.SDL_EventType.SDL_CONTROLLERBUTTONDOWN:
+					case SDL.SDL_EventType.SDL_CONTROLLERBUTTONUP:
+					case SDL.SDL_EventType.SDL_CONTROLLERAXISMOTION:
 						Input.InputEvent(e);
 						break;
 					
 					//let Window handle window related events
-					case SDL.EventType.WINDOWEVENT:
+					case SDL.SDL_EventType.SDL_WINDOWEVENT:
 						Window.WindowEvent(e);
 						break;
 
 					//global quit, not only the window's exit button
-					case SDL.EventType.QUIT:
+					case SDL.SDL_EventType.SDL_QUIT:
 						Exit();
 						break;
 				}
@@ -307,8 +314,8 @@ namespace HatlessEngine
 
 			DrawX.DrawJobs.OrderBy((job) => job.Depth);
 
-			SDL.SetRenderDrawColor(RendererHandle, DrawX.BackgroundColor.R, DrawX.BackgroundColor.G, DrawX.BackgroundColor.B, DrawX.BackgroundColor.A);
-			SDL.RenderClear(RendererHandle);
+			SDL.SDL_SetRenderDrawColor(RendererHandle, DrawX.BackgroundColor.R, DrawX.BackgroundColor.G, DrawX.BackgroundColor.B, DrawX.BackgroundColor.A);
+			SDL.SDL_RenderClear(RendererHandle);
 
 			foreach (View view in Resources.Views.Values)
 			{
@@ -320,14 +327,14 @@ namespace HatlessEngine
 
 				Point scale = view.GetScale();
 
-				SDL.RenderSetScale(RendererHandle, scale.X, scale.Y);
+				SDL.SDL_RenderSetScale(RendererHandle, scale.X, scale.Y);
 
 				//viewport is affected by scale for whatever reason, correct it
 				Rectangle scaledViewport = new Rectangle(absoluteViewport);
 				scaledViewport.Position /= scale;
 				scaledViewport.Size /= scale;
-				SDL.Rect sdlViewport = (SDL.Rect)scaledViewport;
-				SDL.RenderSetViewport(RendererHandle, ref sdlViewport);
+				SDL.SDL_Rect sdlViewport = (SDL.SDL_Rect)scaledViewport;
+				SDL.SDL_RenderSetViewport(RendererHandle, ref sdlViewport);
 
 				//get all jobs that will draw inside this view
 				foreach (IDrawJob job in DrawX.GetDrawJobsByArea(absoluteGameArea))
@@ -337,15 +344,15 @@ namespace HatlessEngine
 					if (jobType == typeof(TextureDrawJob)) //draw a texture
 					{
 						TextureDrawJob textureDrawJob = (TextureDrawJob)job;
-						SDL.Rect sourceRect = (SDL.Rect)textureDrawJob.SourceRect;
-						SDL.Rect destRect = (SDL.Rect)new Rectangle(textureDrawJob.DestRect.Position - absoluteGameArea.Position - textureDrawJob.DestRect.Origin, textureDrawJob.DestRect.Size);
+						SDL.SDL_Rect sourceRect = (SDL.SDL_Rect)textureDrawJob.SourceRect;
+						SDL.SDL_Rect destRect = (SDL.SDL_Rect)new Rectangle(textureDrawJob.DestRect.Position - absoluteGameArea.Position - textureDrawJob.DestRect.Origin, textureDrawJob.DestRect.Size);
 
 						if (textureDrawJob.DestRect.Rotation == 0f)
-							SDL.RenderCopy(RendererHandle, textureDrawJob.Texture, ref sourceRect, ref destRect);
+							SDL.SDL_RenderCopy(RendererHandle, textureDrawJob.Texture, ref sourceRect, ref destRect);
 						else
 						{
-							SDL.Point origin = (SDL.Point)textureDrawJob.DestRect.Origin;
-							SDL.RenderCopyEx(RendererHandle, textureDrawJob.Texture, ref sourceRect, ref destRect, textureDrawJob.DestRect.Rotation, ref origin, SDL.RendererFlip.FLIP_NONE);
+							SDL.SDL_Point origin = (SDL.SDL_Point)textureDrawJob.DestRect.Origin;
+							SDL.SDL_RenderCopyEx(RendererHandle, textureDrawJob.Texture, ref sourceRect, ref destRect, textureDrawJob.DestRect.Rotation, ref origin, SDL.SDL_RendererFlip.SDL_FLIP_NONE);
 						}
 					}
 					else if (jobType == typeof(LineDrawJob)) //draw line(s)
@@ -353,19 +360,19 @@ namespace HatlessEngine
 						LineDrawJob lineDrawJob = (LineDrawJob)job;
 
 						//transform all points according to view and cast em
-						SDL.Point[] sdlPoints = Array.ConvertAll<Point, SDL.Point>(lineDrawJob.Points, point => (SDL.Point)(point - absoluteGameArea.Position));
+						SDL.SDL_Point[] sdlPoints = Array.ConvertAll<Point, SDL.SDL_Point>(lineDrawJob.Points, point => (SDL.SDL_Point)(point - absoluteGameArea.Position));
 
-						SDL.SetRenderDrawColor(RendererHandle, lineDrawJob.Color.R, lineDrawJob.Color.G, lineDrawJob.Color.B, lineDrawJob.Color.A);
-						SDL.RenderDrawLines(RendererHandle, sdlPoints, lineDrawJob.PointCount);
+						SDL.SDL_SetRenderDrawColor(RendererHandle, lineDrawJob.Color.R, lineDrawJob.Color.G, lineDrawJob.Color.B, lineDrawJob.Color.A);
+						SDL.SDL_RenderDrawLines(RendererHandle, sdlPoints, lineDrawJob.PointCount);
 					}
 					else //draw filledrect
 					{
 						FilledRectDrawJob rectDrawJob = (FilledRectDrawJob)job;
 
-						SDL.Rect rect = (SDL.Rect)(rectDrawJob.Area - absoluteGameArea.Position);
+						SDL.SDL_Rect rect = (SDL.SDL_Rect)(rectDrawJob.Area - absoluteGameArea.Position);
 
-						SDL.SetRenderDrawColor(RendererHandle, rectDrawJob.Color.R, rectDrawJob.Color.G, rectDrawJob.Color.B, rectDrawJob.Color.A);
-						SDL.RenderFillRect(RendererHandle, ref rect);
+						SDL.SDL_SetRenderDrawColor(RendererHandle, rectDrawJob.Color.R, rectDrawJob.Color.G, rectDrawJob.Color.B, rectDrawJob.Color.A);
+						SDL.SDL_RenderFillRect(RendererHandle, ref rect);
 					}
 				}
 			}
@@ -389,7 +396,7 @@ namespace HatlessEngine
 
 		private static void PresentRender(object o)
 		{
-			SDL.RenderPresent(RendererHandle);
+			SDL.SDL_RenderPresent(RendererHandle);
 			RenderframeReady = false;
 		}
 
@@ -410,7 +417,7 @@ namespace HatlessEngine
 				string message = "The game encountered an unhandled " + eTypeString + " and has to exit.";
 				message += "\nA crashlog has been written to latestcrashlog.txt.";
 
-				SDL.ShowSimpleMessageBox(SDL.MessageBoxFlags.MESSAGEBOX_ERROR, "Game Crash", message, WindowHandle);
+				SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "Game Crash", message, WindowHandle);
 			}
 		}
 

@@ -1,8 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.Reflection;
 using SDL2;
-using SDL2_image;
-using System.Reflection;
 
 namespace HatlessEngine
 {
@@ -18,47 +15,46 @@ namespace HatlessEngine
 			get { return _Size; }
 		}
 
-
 		public static void SetSize(Point size)
 		{
-			SDL.SetWindowSize(Game.WindowHandle, (int)size.X, (int)size.Y);
+			SDL.SDL_SetWindowSize(Game.WindowHandle, (int)size.X, (int)size.Y);
 		}
 
 		public static Point GetPosition()
 		{
 			int x, y;
-			SDL.GetWindowPosition(Game.WindowHandle, out x, out y);
+			SDL.SDL_GetWindowPosition(Game.WindowHandle, out x, out y);
 			return new Point(x, y);
 		}
 		public static void SetPosition(Point pos)
 		{
-			SDL.SetWindowPosition(Game.WindowHandle, (int)pos.X, (int)pos.Y);
+			SDL.SDL_SetWindowPosition(Game.WindowHandle, (int)pos.X, (int)pos.Y);
 		}
 
 		public static string GetTitle()
 		{
-			return SDL.GetWindowTitle(Game.WindowHandle);
+			return SDL.SDL_GetWindowTitle(Game.WindowHandle);
 		}
 		public static void SetTitle(string title)
 		{
-			SDL.SetWindowTitle(Game.WindowHandle, title);
+			SDL.SDL_SetWindowTitle(Game.WindowHandle, title);
 		}
 
 		public static bool GetCursorGrab()
 		{
-			return SDL.GetWindowGrab(Game.WindowHandle) == SDL.Bool.TRUE;
+			return SDL.SDL_GetWindowGrab(Game.WindowHandle) == SDL.SDL_bool.SDL_TRUE;
 		}
 		public static void SetCursorGrab(bool confine)
 		{
-			SDL.SetWindowGrab(Game.WindowHandle, confine ? SDL.Bool.TRUE : SDL.Bool.FALSE);
+			SDL.SDL_SetWindowGrab(Game.WindowHandle, confine ? SDL.SDL_bool.SDL_TRUE : SDL.SDL_bool.SDL_FALSE);
 		}
 
 		public static ScreenMode GetScreenMode()
 		{
-			SDL.WindowFlags flags = (SDL.WindowFlags)SDL.GetWindowFlags(Game.WindowHandle);
-			if (flags.HasFlag(SDL.WindowFlags.WINDOW_FULLSCREEN))
+			SDL.SDL_WindowFlags flags = (SDL.SDL_WindowFlags)SDL.SDL_GetWindowFlags(Game.WindowHandle);
+			if (flags.HasFlag(SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN))
 				return ScreenMode.Fullscreen;
-			else if (flags.HasFlag(SDL.WindowFlags.WINDOW_FULLSCREEN_DESKTOP))
+			else if (flags.HasFlag(SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP))
 				return ScreenMode.FakeFullscreen;
 			return ScreenMode.Windowed;
 		}
@@ -68,18 +64,18 @@ namespace HatlessEngine
 			if (mode == ScreenMode.Windowed)
 				flag = 0;
 			else if (mode == ScreenMode.Fullscreen)
-				flag = (uint)SDL.WindowFlags.WINDOW_FULLSCREEN;
+				flag = (uint)SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN;
 			else
-				flag = (uint)SDL.WindowFlags.WINDOW_FULLSCREEN_DESKTOP;
+				flag = (uint)SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP;
 
-			SDL.SetWindowFullscreen(Game.WindowHandle, flag);
+			SDL.SDL_SetWindowFullscreen(Game.WindowHandle, flag);
 		}
 
 		/* CANNOT SET RESIZABLE WITHOUT RECREATING WINDOW BUT ITS NEEDED FOR A FULL BORDERLESS WINDOW SO VERY MEH
 		public static bool GetResizable()
 		{
-			SDL.WindowFlags flags = (SDL.WindowFlags)SDL.GetWindowFlags(Game.WindowHandle);
-			if (flags.HasFlag(SDL.WindowFlags.WINDOW_RESIZABLE))
+			SDL.SDL_WindowFlags flags = (SDL.SDL_WindowFlags)SDL.SDL_GetWindowFlags(Game.WindowHandle);
+			if (flags.HasFlag(SDL.SDL_WindowFlags.WINDOW_RESIZABLE))
 				return true;
 			return false;
 		}
@@ -91,53 +87,53 @@ namespace HatlessEngine
 		public static Point[] GetResizeLimits()
 		{
 			int minX, minY, maxX, maxY;
-			SDL.GetWindowMinimumSize(Game.WindowHandle, out minX, out minY);
-			SDL.GetWindowMaximumSize(Game.WindowHandle, out maxX, out maxY);
+			SDL.SDL_GetWindowMinimumSize(Game.WindowHandle, out minX, out minY);
+			SDL.SDL_GetWindowMaximumSize(Game.WindowHandle, out maxX, out maxY);
 
 			return new Point[] { new Point(minX, minY), new Point(maxX, maxY) };
 		}
 		public static void SetResizeLimits(Point minSize, Point maxSize)
 		{
-			SDL.SetWindowMinimumSize(Game.WindowHandle, (int)minSize.X, (int)minSize.Y);
-			SDL.SetWindowMaximumSize(Game.WindowHandle, (int)maxSize.X, (int)maxSize.Y);
+			SDL.SDL_SetWindowMinimumSize(Game.WindowHandle, (int)minSize.X, (int)minSize.Y);
+			SDL.SDL_SetWindowMaximumSize(Game.WindowHandle, (int)maxSize.X, (int)maxSize.Y);
 		}
 
 		public static bool GetBorder()
 		{
-			SDL.WindowFlags flags = (SDL.WindowFlags)SDL.GetWindowFlags(Game.WindowHandle);
-			if (flags.HasFlag(SDL.WindowFlags.WINDOW_BORDERLESS))
+			SDL.SDL_WindowFlags flags = (SDL.SDL_WindowFlags)SDL.SDL_GetWindowFlags(Game.WindowHandle);
+			if (flags.HasFlag(SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS))
 				return false;
 			return true;
 		}
 		public static void SetBorder(bool border)
 		{
-			SDL.SetWindowBordered(Game.WindowHandle, border ? SDL.Bool.TRUE : SDL.Bool.FALSE);
+			SDL.SDL_SetWindowBordered(Game.WindowHandle, border ? SDL.SDL_bool.SDL_TRUE : SDL.SDL_bool.SDL_FALSE);
 		}
 
 		public static bool GetVisible()
 		{
-			SDL.WindowFlags flags = (SDL.WindowFlags)SDL.GetWindowFlags(Game.WindowHandle);
-			if (flags.HasFlag(SDL.WindowFlags.WINDOW_SHOWN))
+			SDL.SDL_WindowFlags flags = (SDL.SDL_WindowFlags)SDL.SDL_GetWindowFlags(Game.WindowHandle);
+			if (flags.HasFlag(SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN))
 				return true;
 			return false;
 		}
 		public static void SetVisible(bool visible)
 		{
 			if (visible)
-				SDL.ShowWindow(Game.WindowHandle);
+				SDL.SDL_ShowWindow(Game.WindowHandle);
 			else
-				SDL.HideWindow(Game.WindowHandle);
+				SDL.SDL_HideWindow(Game.WindowHandle);
 		}
 
 		public static bool GetCursorVisible()
 		{
-			if (SDL.ShowCursor(-1) == 0)
+			if (SDL.SDL_ShowCursor(-1) == 0)
 				return false;
 			return true;
 		}
 		public static void SetCursorVisible(bool visible)
 		{
-			SDL.ShowCursor(visible ? 1 : 0);
+			SDL.SDL_ShowCursor(visible ? 1 : 0);
 		}
 
 		/// <summary>
@@ -145,14 +141,14 @@ namespace HatlessEngine
 		/// </summary>
 		public static void SetIcon(string filename)
 		{
-			SDL.SetWindowIcon(Game.WindowHandle, IMG.Load_RW(Resources.CreateRWFromFile(filename, Assembly.GetCallingAssembly()), 1));
+			SDL.SDL_SetWindowIcon(Game.WindowHandle, SDL_image.IMG_Load_RW(Resources.CreateRWFromFile(filename, Assembly.GetCallingAssembly()), 1));
 		}
 		/// <summary>
 		/// Will set the window's icon to the default HatlessEngine one.
 		/// </summary>
 		public static void SetIcon()
 		{
-			SDL.SetWindowIcon(Game.WindowHandle, IMG.Load_RW(Resources.CreateRWFromFile("defaultwindowicon.png", Assembly.GetCallingAssembly()), 1));
+			SDL.SDL_SetWindowIcon(Game.WindowHandle, SDL_image.IMG_Load_RW(Resources.CreateRWFromFile("defaultwindowicon.png", Assembly.GetCallingAssembly()), 1));
 		}
 
 		/// <summary>
@@ -170,13 +166,13 @@ namespace HatlessEngine
 		//left to do: maximizing/minimizing
 
 		/// <summary>
-		/// Handles all window related sdl events.
+		/// Handles all window related SDL.SDL_events.
 		/// </summary>
-		internal static void WindowEvent(SDL.Event e)
+		internal static void WindowEvent(SDL.SDL_Event e)
 		{
 			switch (e.window.windowEvent)
 			{
-				case SDL.WindowEventID.WINDOWEVENT_SIZE_CHANGED:
+				case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED:
 					_Size = new Point(e.window.data1, e.window.data2);
 					break;
 			}

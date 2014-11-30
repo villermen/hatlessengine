@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HatlessEngine
+﻿namespace HatlessEngine
 {
 	/// <summary>
 	/// Interface for the bare necessities of SAT-checking.

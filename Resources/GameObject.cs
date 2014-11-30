@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HatlessEngine
+﻿namespace HatlessEngine
 {
 	/// <summary>
 	/// Represents an object without any built-in physical support.

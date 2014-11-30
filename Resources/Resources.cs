@@ -1,8 +1,8 @@
-﻿using SDL2;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using SDL2;
 
 namespace HatlessEngine
 {
@@ -97,14 +97,14 @@ namespace HatlessEngine
 		}
 
 		/// <summary>
-		/// Creates an SDL RW resource from the entire file, using GetStream to resolve the filename.
+		/// Creates an SDL.SDL_RW resource from the entire file, using GetStream to resolve the filename.
 		/// </summary>
 		internal static IntPtr CreateRWFromFile(string filename, Assembly assembly)
 		{
 			using (BinaryReader reader = GetStream(filename, assembly))
 			{
 				int length = (int)reader.BaseStream.Length;
-				return SDL.RWFromMem(reader.ReadBytes(length), length);
+				return SDL.SDL_RWFromMem(reader.ReadBytes(length), length);
 			}
 		}
 
@@ -191,7 +191,7 @@ namespace HatlessEngine
 					//delete texture if it hasn't been used for 10 steps
 					if (font.TexturesDrawsUnused[texture.Key] == 10)
 					{
-						SDL.DestroyTexture(texture.Value);
+						SDL.SDL_DestroyTexture(texture.Value);
 						removeTextures.Add(texture.Key);
 					}
 

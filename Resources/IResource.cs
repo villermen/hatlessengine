@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HatlessEngine
+﻿namespace HatlessEngine
 {
 	public interface IResource
 	{

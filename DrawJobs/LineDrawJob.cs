@@ -1,7 +1,4 @@
-﻿using System;
-using SDL2;
-
-namespace HatlessEngine
+﻿namespace HatlessEngine
 {
 	internal struct LineDrawJob : IDrawJob
 	{

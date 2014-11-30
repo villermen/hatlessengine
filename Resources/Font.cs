@@ -1,9 +1,8 @@
-﻿using SDL2;
-using SDL2_ttf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using SDL2;
 
 namespace HatlessEngine
 {
@@ -44,7 +43,7 @@ namespace HatlessEngine
 			if (!Loaded)
 				throw new NotLoadedException();
 
-			//replace tab with 4 spaces because sdl_ttf doesn't
+			//replace tab with 4 spaces because SDL.SDL_SDL_ttf.TTF_doesn't
 			str = str.Replace("\t", "    ");
 
 			//create rows by splitting on newline character
@@ -69,9 +68,9 @@ namespace HatlessEngine
 				}
 				else //generate a new texture
 				{
-					IntPtr textSurface = TTF.RenderUTF8_Blended(Handle, rows[i], color);
-					rowTextures[i] = SDL.CreateTextureFromSurface(Game.RendererHandle, textSurface);
-					SDL.FreeSurface(textSurface);
+					IntPtr textSurface = SDL_ttf.TTF_RenderUTF8_Blended(Handle, rows[i], color);
+					rowTextures[i] = SDL.SDL_CreateTextureFromSurface(Game.RendererHandle, textSurface);
+					SDL.SDL_FreeSurface(textSurface);
 
 					Textures.Add(key, rowTextures[i]);
 					TexturesDrawsUnused.Add(key, 0);
@@ -79,7 +78,7 @@ namespace HatlessEngine
 
 				uint format;
 				int access, w, h;
-				SDL.QueryTexture(rowTextures[i], out format, out access, out w, out h);
+				SDL.SDL_QueryTexture(rowTextures[i], out format, out access, out w, out h);
 
 				float horizontalOffset = 0f;
 				float verticalOffset = 0f;
@@ -124,7 +123,7 @@ namespace HatlessEngine
 
 			charsTrimmed = 0;
 
-			//replace tab with 4 spaces because sdl_ttf doesn't
+			//replace tab with 4 spaces because SDL.SDL_SDL_ttf.TTF_doesn't
 			str = str.Replace("\t", "    ");
 
 			while (lineStart + lineLength < str.Length)
@@ -143,7 +142,7 @@ namespace HatlessEngine
 				while(lineRemainder != "" && lines < maxLines)
 				{
 					//check if the string fits initially, because then there would be no situation right?
-					TTF.SizeUTF8(Handle, lineRemainder, out w, out h);
+					SDL_ttf.TTF_SizeUTF8(Handle, lineRemainder, out w, out h);
 					if (w < maxWidth)
 					{
 						//will be trimmed later and it's easier to detect here (because the newline could be added by wrapping too)
@@ -168,7 +167,7 @@ namespace HatlessEngine
 								if (length > lineRemainder.Length)
 									break;
 
-								TTF.SizeUTF8(Handle, lineRemainder.Substring(0, length), out w, out h);
+								SDL_ttf.TTF_SizeUTF8(Handle, lineRemainder.Substring(0, length), out w, out h);
 							}
 
 							//revert last addition
@@ -209,15 +208,15 @@ namespace HatlessEngine
 		{
 			if (!Loaded)
 			{
-				Handle = TTF.OpenFontRW(Resources.CreateRWFromFile(Filename, FileAssembly), 1, PointSize);
+				Handle = SDL_ttf.TTF_OpenFontRW(Resources.CreateRWFromFile(Filename, FileAssembly), 1, PointSize);
 
 				if (Handle != IntPtr.Zero)
 				{
-					LineHeight = TTF.FontLineSkip(Handle);
+					LineHeight = SDL_ttf.TTF_FontLineSkip(Handle);
 					Loaded = true;
 				}
 				else
-					throw new FileLoadException(SDL.GetError());
+					throw new FileLoadException(SDL.SDL_GetError());
 			}
 		}
 
@@ -225,7 +224,7 @@ namespace HatlessEngine
 		{
 			if (Loaded)
 			{
-				TTF.CloseFont(Handle);
+				SDL_ttf.TTF_CloseFont(Handle);
 				Handle = IntPtr.Zero;
 				Loaded = false;
 			}

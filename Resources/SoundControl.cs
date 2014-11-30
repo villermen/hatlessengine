@@ -1,5 +1,5 @@
 using System;
-using SDL2_mixer;
+using SDL2;
 
 namespace HatlessEngine
 {
@@ -23,7 +23,7 @@ namespace HatlessEngine
 			if (Done)
 				return;
 
-			Mix.Pause(Channel);
+			SDL_mixer.Mix_Pause(Channel);
 		}
 
 		public void Resume()
@@ -31,7 +31,7 @@ namespace HatlessEngine
 			if (Done)
 				return;
 
-			Mix.Resume(Channel);
+			SDL_mixer.Mix_Resume(Channel);
 		}
 
 		public void Stop()
@@ -39,7 +39,7 @@ namespace HatlessEngine
 			if (Done)
 				return;
 
-			Mix.HaltChannel(Channel);
+			SDL_mixer.Mix_HaltChannel(Channel);
 		}
 
 		public event EventHandler Stopped;

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HatlessEngine
+﻿namespace HatlessEngine
 {
 	public enum Button
 	{
@@ -14,7 +12,7 @@ namespace HatlessEngine
 		MousewheelLeft = 1008,
 		MousewheelRight = 1009,
 
-		KeyboardUnknown = 2000, //SDL charmapped
+		KeyboardUnknown = 2000, //SDL.SDL_charmapped
 		KeyboardBackspace = 2008,
 		KeyboardTab = 2009,
 		KeyboardReturn = 2013,
@@ -86,7 +84,7 @@ namespace HatlessEngine
 		KeyboardY = 2121,
 		KeyboardZ = 2122,
 		KeyboardDelete = 2177,
-		KeyboardCapslock = 2500, //SDL scancodemapped
+		KeyboardCapslock = 2500, //SDL.SDL_scancodemapped
 		KeyboardF1 = 2501,
 		KeyboardF2 = 2502,
 		KeyboardF3 = 2503,

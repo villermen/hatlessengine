@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using SDL2;
 
 namespace HatlessEngine
 {
@@ -103,9 +103,9 @@ namespace HatlessEngine
 			return new Rectangle(rect._Position, rect._Size / point);
 		}
 
-		public static explicit operator SDL2.SDL.Rect(Rectangle rect)
+		public static explicit operator SDL.SDL_Rect(Rectangle rect)
 		{
-			return new SDL2.SDL.Rect { x = (int)rect._Position.X, y = (int)rect._Position.Y, w = (int)rect._Size.X, h = (int)rect._Size.Y };
+			return new SDL.SDL_Rect { x = (int)rect._Position.X, y = (int)rect._Position.Y, w = (int)rect._Size.X, h = (int)rect._Size.Y };
 		}
 
 		public override string ToString()

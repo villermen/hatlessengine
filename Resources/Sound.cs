@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using SDL2_mixer;
 using System.Reflection;
+using SDL2;
 
 namespace HatlessEngine
 {
 	/// <summary>
 	/// A sound effect that can be played multiple times simultaneously and is loaded into memory in it's entirity.
-	/// Supports the following file formats taken from SDL_mixer: WAVE, AIFF, RIFF, OGG, and VOC.
+	/// Supports the following file formats taken from SDL.SDL_SDL_mixer.Mix_r: WAVE, AIFF, RIFF, OGG, and VOC.
 	/// </summary>
 	public class Sound : IExternalResource
 	{
@@ -39,10 +38,10 @@ namespace HatlessEngine
 			if (!Loaded)
 				throw new NotLoadedException();
 
-			int channel = Mix.PlayChannelTimed(-1, ChunkHandle, 0, -1);
-			Mix.Volume(channel, (int)(128 * volume));
+			int channel = SDL_mixer.Mix_PlayChannelTimed(-1, ChunkHandle, 0, -1);
+			SDL_mixer.Mix_Volume(channel, (int)(128 * volume));
 			balance = balance / 2f + 0.5f; //0-1
-			Mix.SetPanning(channel, (byte)(255 - 255 * balance), (byte)(0 + 255 * balance));
+			SDL_mixer.Mix_SetPanning(channel, (byte)(255 - 255 * balance), (byte)(0 + 255 * balance));
 
 			return new SoundControl(channel);
 		}
@@ -52,11 +51,11 @@ namespace HatlessEngine
 			if (Loaded)
 				return;
 
-			ChunkHandle = Mix.LoadWAV_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1);
+			ChunkHandle = SDL_mixer.Mix_LoadWAV_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1);
 
 			if (ChunkHandle != IntPtr.Zero)
 			{
-				Mix.VolumeChunk(ChunkHandle, (int)(128 * BaseVolume));
+				SDL_mixer.Mix_VolumeChunk(ChunkHandle, (int)(128 * BaseVolume));
 				Loaded = true;
 			}
 			else
@@ -68,7 +67,7 @@ namespace HatlessEngine
 			if (!Loaded)
 				return;
 
-			Mix.FreeChunk(ChunkHandle);
+			SDL_mixer.Mix_FreeChunk(ChunkHandle);
 			ChunkHandle = IntPtr.Zero;
 
 			Loaded = false;

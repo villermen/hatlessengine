@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using SDL2;
 using System.Linq;
-using System.Text;
 using System.Runtime.InteropServices;
+using System.Text;
+using SDL2;
 
 namespace HatlessEngine
 {
@@ -165,7 +165,7 @@ namespace HatlessEngine
 				throw new ArgumentOutOfRangeException("duration", "duration can't be negative");
 
 			if (GamepadConnected(gamepad) && GamepadRumbleSupported(gamepad))
-				SDL.HapticRumblePlay(GamepadHapticHandles[gamepad - 1], strength, (uint)(1000 * duration));
+				SDL.SDL_HapticRumblePlay(GamepadHapticHandles[gamepad - 1], strength, (uint)(1000 * duration));
 		}
 
 		/// <summary>
@@ -193,23 +193,23 @@ namespace HatlessEngine
 			}
 		}
 
-		internal static void InputEvent(SDL.Event e)
+		internal static void InputEvent(SDL.SDL_Event e)
 		{
 			switch (e.type)
 			{
-				case SDL.EventType.MOUSEBUTTONDOWN:
+				case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
 				{
 					CurrentState.Add((Button)(1000 + e.button.button));
 					break;
 				}
 
-				case SDL.EventType.MOUSEBUTTONUP:
+				case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
 				{
 					CurrentState.Remove((Button)(1000 + e.button.button));
 					break;
 				}
 
-				case SDL.EventType.MOUSEWHEEL:
+				case SDL.SDL_EventType.SDL_MOUSEWHEEL:
 				{
 					if (e.wheel.y > 0)
 						CurrentState.Add(Button.MousewheelUp);
@@ -222,28 +222,28 @@ namespace HatlessEngine
 					break;
 				}
 
-				case SDL.EventType.MOUSEMOTION:
+				case SDL.SDL_EventType.SDL_MOUSEMOTION:
 				{
 					UntranslatedMousePosition = new Point(e.motion.x, e.motion.y);
 					break;
 				}
 
-				case SDL.EventType.KEYDOWN:
+				case SDL.SDL_EventType.SDL_KEYDOWN:
 				{
 					if (e.key.repeat == 0) //we dont do repeats (yet?)
 					{
-						int SDLKeyDown = (int)e.key.keysym.sym;
-						if (SDLKeyDown < 65536)
-							CurrentState.Add((Button)(2000 + SDLKeyDown));
+						int sdlKeyDown = (int)e.key.keysym.sym;
+						if (sdlKeyDown < 65536)
+							CurrentState.Add((Button)(2000 + sdlKeyDown));
 						else
-							CurrentState.Add((Button)(SDLKeyDown - 1073739381));
+							CurrentState.Add((Button)(sdlKeyDown - 1073739381));
 					}
 
 					//textinput special keys
 					switch (e.key.keysym.sym)
 					{
 						//backspace removes last character from all text input builders
-						case SDL.Keycode.SDLK_BACKSPACE:
+						case SDL.SDL_Keycode.SDLK_BACKSPACE:
 							TextInputReceivers.ForEach(builder =>
 							{
 								int length = builder.Length;
@@ -252,11 +252,11 @@ namespace HatlessEngine
 							});
 							break;
 
-						case SDL.Keycode.SDLK_RETURN:
+						case SDL.SDL_Keycode.SDLK_RETURN:
 							TextInputReceivers.ForEach(builder => builder.Append('\n'));
 							break;
 
-						case SDL.Keycode.SDLK_TAB:
+						case SDL.SDL_Keycode.SDLK_TAB:
 							TextInputReceivers.ForEach(builder => builder.Append('\t'));
 							break;
 					}
@@ -264,20 +264,20 @@ namespace HatlessEngine
 					break;
 				}
 
-				case SDL.EventType.KEYUP:
+				case SDL.SDL_EventType.SDL_KEYUP:
 				{
-					int SDLKeyUp = (int)e.key.keysym.sym;
-					if (SDLKeyUp < 65536)
-						CurrentState.Remove((Button)(2000 + SDLKeyUp));
+					int sdlKeyUp = (int)e.key.keysym.sym;
+					if (sdlKeyUp < 65536)
+						CurrentState.Remove((Button)(2000 + sdlKeyUp));
 					else
-						CurrentState.Remove((Button)(SDLKeyUp - 1073739381));
+						CurrentState.Remove((Button)(sdlKeyUp - 1073739381));
 					break;
 				}
 
-				case SDL.EventType.TEXTINPUT:
+				case SDL.SDL_EventType.SDL_TEXTINPUT:
 				{
-					byte[] rawBytes = new byte[SDL.TEXTINPUTEVENT_TEXT_SIZE];
-					unsafe { Marshal.Copy((IntPtr)e.text.text, rawBytes, 0, SDL.TEXTINPUTEVENT_TEXT_SIZE); }
+					byte[] rawBytes = new byte[SDL.SDL_TEXTINPUTEVENT_TEXT_SIZE];
+					unsafe { Marshal.Copy((IntPtr)e.text.text, rawBytes, 0, SDL.SDL_TEXTINPUTEVENT_TEXT_SIZE); }
 					int length = Array.IndexOf<byte>(rawBytes, 0);
 					string text = Encoding.UTF8.GetString(rawBytes, 0, length);
 					//add text to all stringbuilders in TextInputReceivers
@@ -285,61 +285,61 @@ namespace HatlessEngine
 					break;
 				}
 
-				case SDL.EventType.CONTROLLERDEVICEADDED:
+				case SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED:
 				{
 					//get first free gamepad slot
 					int newGamepadID = -1;
 					while (GamepadHandles[++newGamepadID] != IntPtr.Zero) ;
-					GamepadHandles[newGamepadID] = SDL.GameControllerOpen(e.cdevice.which);
+					GamepadHandles[newGamepadID] = SDL.SDL_GameControllerOpen(e.cdevice.which);
 
-					IntPtr joystick = SDL.GameControllerGetJoystick(GamepadHandles[newGamepadID]);
-					GamepadInstanceIDs.Add(SDL.JoystickInstanceID(joystick), newGamepadID);
+					IntPtr joystick = SDL.SDL_GameControllerGetJoystick(GamepadHandles[newGamepadID]);
+					GamepadInstanceIDs.Add(SDL.SDL_JoystickInstanceID(joystick), newGamepadID);
 					GamepadCurrentStates[newGamepadID] = new List<Button>();
 					GamepadPreviousStates[newGamepadID] = new List<Button>();
 
 					//init rumble if supported
-					if (SDL.JoystickIsHaptic(joystick) == 1)
+					if (SDL.SDL_JoystickIsHaptic(joystick) == 1)
 					{
-						IntPtr hapticHandle = SDL.HapticOpenFromJoystick(joystick);
-						if (SDL.HapticRumbleSupported(hapticHandle) == 1)
+						IntPtr hapticHandle = SDL.SDL_HapticOpenFromJoystick(joystick);
+						if (SDL.SDL_HapticRumbleSupported(hapticHandle) == 1)
 						{
-							SDL.HapticRumbleInit(hapticHandle);
+							SDL.SDL_HapticRumbleInit(hapticHandle);
 							GamepadHapticHandles[newGamepadID] = hapticHandle;
 						}
 						else
-							SDL.HapticClose(hapticHandle);
+							SDL.SDL_HapticClose(hapticHandle);
 					}
 					break;
 				}
 
-				case SDL.EventType.CONTROLLERDEVICEREMOVED:
+				case SDL.SDL_EventType.SDL_CONTROLLERDEVICEREMOVED:
 				{
 					int gamepadID = GamepadInstanceIDs[e.cdevice.which];
-					SDL.GameControllerClose(GamepadHandles[gamepadID]);
+					SDL.SDL_GameControllerClose(GamepadHandles[gamepadID]);
 					GamepadHandles[gamepadID] = IntPtr.Zero;
 					GamepadInstanceIDs.Remove(e.cdevice.which);
 
 					if (GamepadHapticHandles[gamepadID] != IntPtr.Zero)
 					{
-						SDL.HapticClose(GamepadHapticHandles[gamepadID]);
+						SDL.SDL_HapticClose(GamepadHapticHandles[gamepadID]);
 						GamepadHapticHandles[gamepadID] = IntPtr.Zero;
 					}
 					break;
 				}
 
-				case SDL.EventType.CONTROLLERBUTTONDOWN:
+				case SDL.SDL_EventType.SDL_CONTROLLERBUTTONDOWN:
 				{
 					GamepadCurrentStates[GamepadInstanceIDs[e.cbutton.which]].Add((Button)(3000 + e.cbutton.button));
 					break;
 				}
 
-				case SDL.EventType.CONTROLLERBUTTONUP:
+				case SDL.SDL_EventType.SDL_CONTROLLERBUTTONUP:
 				{
 					GamepadCurrentStates[GamepadInstanceIDs[e.cbutton.which]].Remove((Button)(3000 + e.cbutton.button));
 					break;
 				}
 
-				case SDL.EventType.CONTROLLERAXISMOTION:
+				case SDL.SDL_EventType.SDL_CONTROLLERAXISMOTION:
 				{
 					int gamepad = GamepadInstanceIDs[e.caxis.which];
 					byte axis = e.caxis.axis;
@@ -374,7 +374,7 @@ namespace HatlessEngine
 		}
 
 		/// <summary>
-		/// SDL's eventloop only sends a mouse event when it moves, and MousePosition might change because of changes in a view or the window.
+		/// SDL.SDL_s eventloop only sends a mouse event when it moves, and MousePosition might change because of changes in a view or the window.
 		/// </summary>
 		internal static void UpdateMousePosition()
 		{
@@ -524,12 +524,12 @@ namespace HatlessEngine
 			{
 				if (GamepadHandles[i] != IntPtr.Zero)
 				{
-					SDL.GameControllerClose(GamepadHandles[i]);
+					SDL.SDL_GameControllerClose(GamepadHandles[i]);
 					GamepadHandles[i] = IntPtr.Zero;
 
 					if (GamepadHapticHandles[i] != IntPtr.Zero)
 					{
-						SDL.HapticClose(GamepadHapticHandles[i]);
+						SDL.SDL_HapticClose(GamepadHapticHandles[i]);
 						GamepadHapticHandles[i] = IntPtr.Zero;
 					}
 				}				

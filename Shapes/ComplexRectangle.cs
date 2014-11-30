@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace HatlessEngine
 {
@@ -10,7 +9,6 @@ namespace HatlessEngine
 	public class ComplexRectangle : Shape
 	{
 		private Point _Origin;
-
 		/// <summary>
 		/// Origin is the offset from the topleft-most corner to the position before rotation is applied.
 		/// </summary>
@@ -84,14 +82,5 @@ namespace HatlessEngine
 		}
 
 		public static readonly ComplexRectangle Zero = new ComplexRectangle(Point.Zero, Point.Zero, Point.Zero, 0f);
-
-		/// <summary>
-		/// Cast to a rectangle, ignoring the rotation.
-		/// Will only create the exact same shape if Rotation is 0f.
-		/// </summary>
-		public static explicit operator Rectangle(ComplexRectangle cRect)
-		{
-			return new Rectangle(cRect._Position - cRect._Origin, cRect._Size);
-		}
 	}
 }
