@@ -7,7 +7,7 @@ namespace HatlessEngine
 {
 	public sealed class Music : IExternalResource
 	{
-		public string ID { get; private set; }
+		public string Id { get; private set; }
 		public string Filename { get; private set; }
 		public Assembly FileAssembly { get; private set; }
 		public bool Loaded { get; private set; }
@@ -15,18 +15,18 @@ namespace HatlessEngine
 		public float BaseVolume { get; private set; }
 		public bool Paused { get; private set; }
 
-		private IntPtr MusicHandle;
+		private IntPtr _musicHandle;
 
 		public Music(string id, string filename, float baseVolume = 1f)
 		{
-			ID = id;
+			Id = id;
 			Filename = filename;
 			Loaded = false;
 
 			BaseVolume = baseVolume;
 			Paused = false;
 
-			Resources.Music.Add(ID, this);
+			Resources.Music.Add(Id, this);
 			Resources.ExternalResources.Add(this);
 		}
 
@@ -44,29 +44,29 @@ namespace HatlessEngine
 			SDL_mixer.Mix_VolumeMusic((int)(128 * BaseVolume * volume));
 
 			if (looping)
-				SDL_mixer.Mix_PlayMusic(MusicHandle, -1);
+				SDL_mixer.Mix_PlayMusic(_musicHandle, -1);
 			else
-				SDL_mixer.Mix_PlayMusic(MusicHandle, 0);
+				SDL_mixer.Mix_PlayMusic(_musicHandle, 0);
 
 			Resources.CurrentlyPlayingMusic = this;
 		}
 
 		public void Pause()
 		{
-			if (IsPlaying())
-			{
-				SDL_mixer.Mix_PauseMusic();
-				Paused = true;
-			}
+			if (!IsPlaying()) 
+				return;
+
+			SDL_mixer.Mix_PauseMusic();
+			Paused = true;
 		}
 
 		public void Resume()
 		{
-			if (Paused && IsPlaying())
-			{
-				SDL_mixer.Mix_ResumeMusic();
-				Paused = false;
-			}
+			if (!Paused || !IsPlaying()) 
+				return;
+
+			SDL_mixer.Mix_ResumeMusic();
+			Paused = false;
 		}
 
 		public void Stop()
@@ -85,9 +85,9 @@ namespace HatlessEngine
 			if (Loaded)
 				return;
 
-			MusicHandle = SDL_mixer.Mix_LoadMUS(Filename);
+			_musicHandle = SDL_mixer.Mix_LoadMUS(Filename);
 
-			if (MusicHandle != IntPtr.Zero)
+			if (_musicHandle != IntPtr.Zero)
 				Loaded = true;
 			else
 				throw new FileLoadException();
@@ -98,7 +98,7 @@ namespace HatlessEngine
 			if (!Loaded)
 				return;
 
-			SDL_mixer.Mix_FreeMusic(MusicHandle);
+			SDL_mixer.Mix_FreeMusic(_musicHandle);
 			Loaded = false;
 		}
 
@@ -114,7 +114,7 @@ namespace HatlessEngine
 		{
 			Unload();
 
-			Resources.Music.Remove(ID);
+			Resources.Music.Remove(Id);
 			Resources.ExternalResources.Remove(this);
 		}
 

@@ -52,15 +52,15 @@ namespace HatlessEngine.GUI
 		/// </summary>
 		public event EventHandler<SliderMovedEventArgs> SliderMoved;
 
-		private float CurrentLengthOffset = 0f;
+		private float _currentLengthOffset = 0f;
 
-		private Rectangle ScrollbarRect;
-		private Rectangle SliderRect;
-		private Rectangle ScrollArea;
-		private bool Hovering = false;
-		private bool Dragging = false;
-		private Point DragStartPos;
-		private float DragStartLengthOffset;
+		private Rectangle _scrollbarRect;
+		private Rectangle _sliderRect;
+		private Rectangle _scrollArea;
+		private bool _hovering = false;
+		private bool _dragging = false;
+		private Point _dragStartPos;
+		private float _dragStartLengthOffset;
 
 		public VerticalScrollbar(Point position, float length, float contentLength, float scrollAreaOffset, bool horizontal = false, int depth = 0)
 		{
@@ -74,87 +74,87 @@ namespace HatlessEngine.GUI
 
 		public override void Step()
 		{
-			float nextLengthOffset = CurrentLengthOffset;
+			float nextLengthOffset = _currentLengthOffset;
 
 			if (!Horizontal)
 			{
-				ScrollbarRect = new Rectangle(Position, Width, Length);
-				SliderRect = new Rectangle(Position.X + SliderOffset, Position.Y + SliderOffset + CurrentLengthOffset, Width - SliderOffset * 2f, (float)Math.Pow(Length - SliderOffset, 2) / ContentLength);
+				_scrollbarRect = new Rectangle(Position, Width, Length);
+				_sliderRect = new Rectangle(Position.X + SliderOffset, Position.Y + SliderOffset + _currentLengthOffset, Width - SliderOffset * 2f, (float)Math.Pow(Length - SliderOffset, 2) / ContentLength);
 
 				if (ScrollAreaOffset >= 0f)
-					ScrollArea = new Rectangle(Position.X, Position.Y, ScrollAreaOffset + Width, Length);
+					_scrollArea = new Rectangle(Position.X, Position.Y, ScrollAreaOffset + Width, Length);
 				else
-					ScrollArea = new Rectangle(Position.X + ScrollAreaOffset, Position.Y, -ScrollAreaOffset + Width, Length);
+					_scrollArea = new Rectangle(Position.X + ScrollAreaOffset, Position.Y, -ScrollAreaOffset + Width, Length);
 
 				//moving slider by mouse
-				if (Dragging)
-					nextLengthOffset = Math.Min(Length - SliderOffset - SliderRect.Size.Y, Math.Max(0f, DragStartLengthOffset + Input.UntranslatedMousePosition.Y - DragStartPos.Y));
+				if (_dragging)
+					nextLengthOffset = Math.Min(Length - SliderOffset - _sliderRect.Size.Y, Math.Max(0f, _dragStartLengthOffset + Input.UntranslatedMousePosition.Y - _dragStartPos.Y));
 
 				//moving slider by mousewheel
-				if (ScrollArea.IntersectsWith(Input.MousePosition))
+				if (_scrollArea.IntersectsWith(Input.MousePosition))
 				{
 					if (Input.IsPressed(Button.MousewheelUp))
 						nextLengthOffset = Math.Max(0f, nextLengthOffset - (Length - SliderOffset * 2f) / 20f);
 
 					if (Input.IsPressed(Button.MousewheelDown))
-						nextLengthOffset = Math.Min(Length - SliderOffset - SliderRect.Size.Y, nextLengthOffset + (Length - SliderOffset * 2f) / 20f);
+						nextLengthOffset = Math.Min(Length - SliderOffset - _sliderRect.Size.Y, nextLengthOffset + (Length - SliderOffset * 2f) / 20f);
 				}				
 			}
 			else
 			{
-				ScrollbarRect = new Rectangle(Position, Length, Width);
-				SliderRect = new Rectangle(Position.X + SliderOffset + CurrentLengthOffset, Position.Y + SliderOffset, (float)Math.Pow(Length - SliderOffset * 2f, 2) / ContentLength, Width - SliderOffset * 2f);
+				_scrollbarRect = new Rectangle(Position, Length, Width);
+				_sliderRect = new Rectangle(Position.X + SliderOffset + _currentLengthOffset, Position.Y + SliderOffset, (float)Math.Pow(Length - SliderOffset * 2f, 2) / ContentLength, Width - SliderOffset * 2f);
 
 				if (ScrollAreaOffset >= 0f)
-					ScrollArea = new Rectangle(Position.X, Position.Y, Length, ScrollAreaOffset + Width);
+					_scrollArea = new Rectangle(Position.X, Position.Y, Length, ScrollAreaOffset + Width);
 				else
-					ScrollArea = new Rectangle(Position.X, Position.Y + ScrollAreaOffset, Length, -ScrollAreaOffset + Width);
+					_scrollArea = new Rectangle(Position.X, Position.Y + ScrollAreaOffset, Length, -ScrollAreaOffset + Width);
 
 				//moving slider by mouse
-				if (Dragging)
-					nextLengthOffset = Math.Min(Length - SliderOffset - SliderRect.Size.X, Math.Max(0f, DragStartLengthOffset + Input.UntranslatedMousePosition.X - DragStartPos.X));
+				if (_dragging)
+					nextLengthOffset = Math.Min(Length - SliderOffset - _sliderRect.Size.X, Math.Max(0f, _dragStartLengthOffset + Input.UntranslatedMousePosition.X - _dragStartPos.X));
 
 				//moving slider by mousewheel
-				if (ScrollArea.IntersectsWith(Input.MousePosition))
+				if (_scrollArea.IntersectsWith(Input.MousePosition))
 				{
 					if (Input.IsPressed(Button.MousewheelLeft))
 						nextLengthOffset = Math.Max(0f, nextLengthOffset - (Length - SliderOffset * 2f) / 20f);
 
 					if (Input.IsPressed(Button.MousewheelRight))
-						nextLengthOffset = Math.Min(Length - SliderOffset - SliderRect.Size.X, nextLengthOffset + (Length - SliderOffset * 2f) / 20f);
+						nextLengthOffset = Math.Min(Length - SliderOffset - _sliderRect.Size.X, nextLengthOffset + (Length - SliderOffset * 2f) / 20f);
 				}				
 			}
 
 			//things that both directions do the same
-			if (SliderRect.IntersectsWith(Input.MousePosition))
+			if (_sliderRect.IntersectsWith(Input.MousePosition))
 			{
-				Hovering = true;
+				_hovering = true;
 
 				if (Input.IsPressed(Button.MouseLeft))
 				{
-					Dragging = true;
-					DragStartPos = Input.UntranslatedMousePosition;
-					DragStartLengthOffset = CurrentLengthOffset;
+					_dragging = true;
+					_dragStartPos = Input.UntranslatedMousePosition;
+					_dragStartLengthOffset = _currentLengthOffset;
 				}
 			}
 			else
-				Hovering = false;
+				_hovering = false;
 
 			if (Input.IsReleased(Button.MouseLeft))
-				Dragging = false;
+				_dragging = false;
 
-			if (nextLengthOffset != CurrentLengthOffset)
-			{
-				CurrentLengthOffset = nextLengthOffset;
-				if (SliderMoved != null)
-					SliderMoved(this, new SliderMovedEventArgs(CurrentLengthOffset / (Length - SliderOffset * 2f) * ContentLength, CurrentLengthOffset / (Length - SliderOffset * 2f)));
-			}
+			if (nextLengthOffset == _currentLengthOffset) 
+				return;
+
+			_currentLengthOffset = nextLengthOffset;
+			if (SliderMoved != null)
+				SliderMoved(this, new SliderMovedEventArgs(_currentLengthOffset / (Length - SliderOffset * 2f) * ContentLength, _currentLengthOffset / (Length - SliderOffset * 2f)));
 		}
 
 		public override void Draw()
 		{
-			DrawX.DrawFilledRect(ScrollbarRect, BackgroundColor, Depth);
-			DrawX.DrawFilledRect(SliderRect, Dragging ? SliderColorDragging : Hovering ? SliderColorHovering : SliderColor, Depth);
+			DrawX.DrawFilledRect(_scrollbarRect, BackgroundColor, Depth);
+			DrawX.DrawFilledRect(_sliderRect, _dragging ? SliderColorDragging : _hovering ? SliderColorHovering : SliderColor, Depth);
 		}
 	}
 }

@@ -12,7 +12,7 @@ namespace HatlessEngine
 	/// </summary>
 	public class Objectmap : IResource
 	{
-		public string ID { get; private set; }
+		public string Id { get; private set; }
 
 		/// <summary>
 		/// protocol version changes on changes to ObjectBlueprint.
@@ -25,8 +25,8 @@ namespace HatlessEngine
 
 		private Objectmap(string id)
 		{
-			ID = id;
-			Resources.Objectmaps.Add(ID, this);
+			Id = id;
+			Resources.Objectmaps.Add(Id, this);
 		}
 
 		public Objectmap(string id, params ObjectBlueprint[] blueprints)
@@ -44,7 +44,7 @@ namespace HatlessEngine
 				throw new ProtocolMismatchException("The file's magic number is not 'HEOm' (HatlessEngine Objectmap)");
 
 			if (reader.ReadUInt16() != ProtocolVersion)
-				throw new ProtocolMismatchException("The file's protocol version is not equal to the required one (" + ProtocolVersion.ToString() + ")");
+				throw new ProtocolMismatchException("The file's protocol version is not equal to the required one (" + ProtocolVersion + ")");
 				
 			BinaryFormatter formatter = new BinaryFormatter();
 			Blueprints = (List<ObjectBlueprint>)formatter.Deserialize(reader.BaseStream);
@@ -73,9 +73,11 @@ namespace HatlessEngine
 			writer.Write("HEOm".ToCharArray());
 			writer.Write(ProtocolVersion);
 
-			BinaryFormatter formatter = new BinaryFormatter();
-			formatter.TypeFormat = FormatterTypeStyle.TypesWhenNeeded;
-			formatter.FilterLevel = TypeFilterLevel.Low;
+			BinaryFormatter formatter = new BinaryFormatter
+			{
+				TypeFormat = FormatterTypeStyle.TypesWhenNeeded,
+				FilterLevel = TypeFilterLevel.Low
+			};
 			formatter.Serialize(writer.BaseStream, Blueprints);
 
 			writer.Close();
@@ -93,7 +95,7 @@ namespace HatlessEngine
 
 		public void Destroy()
 		{
-			Resources.Objectmaps.Remove(ID);
+			Resources.Objectmaps.Remove(Id);
 		}
 
 		public static implicit operator Objectmap(string str)

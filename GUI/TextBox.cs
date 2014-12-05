@@ -20,21 +20,21 @@ namespace HatlessEngine.GUI
 		public Color BorderColor = Color.Black;
 		public Color TextColor = Color.Black;
 
-		private bool HasFocus = false;
-		private bool CursorActive;
+		private bool _hasFocus = false;
+		private bool _cursorActive;
 
 		public event EventHandler Focused;
 		public event EventHandler Defocused;
 		public event EventHandler<TextChangedEventArgs> TextChanged;
 
 		public StringBuilder Text = new StringBuilder();
-		private string LastTextString = "";
+		private string _lastTextString = "";
 
-		private string DrawString;
+		private string _drawString;
 
-		private float CursorBlinkStep;
+		private float _cursorBlinkStep;
 
-		private Rectangle Area;
+		private Rectangle _area;
 
 		public TextBox(Point position, int width, int lines, Font font, int depth = 0)
 		{
@@ -51,12 +51,12 @@ namespace HatlessEngine.GUI
 		public void Focus()
 		{
 			//make sure we dont focus multiple times
-			if (!HasFocus)
+			if (!_hasFocus)
 			{
 				Input.TextInputReceivers.Add(Text);
-				HasFocus = true;
+				_hasFocus = true;
 
-				CursorBlinkStep = 0f;
+				_cursorBlinkStep = 0f;
 
 				if (Focused != null)
 					Focused(this, EventArgs.Empty);
@@ -68,10 +68,10 @@ namespace HatlessEngine.GUI
 		/// </summary>
 		public void Defocus()
 		{
-			if (HasFocus)
+			if (_hasFocus)
 			{
 				Input.TextInputReceivers.Remove(Text);
-				HasFocus = false;
+				_hasFocus = false;
 
 				if (Defocused != null)
 					Defocused(this, EventArgs.Empty);
@@ -80,64 +80,64 @@ namespace HatlessEngine.GUI
 
 		public override void Step()
 		{
-			Area = new Rectangle(Position, Width, Font.LineHeight * Lines + BorderWidth * 2f);
+			_area = new Rectangle(Position, Width, Font.LineHeight * Lines + BorderWidth * 2f);
 
 			if (Input.IsPressed(Button.MouseLeft))
 			{
 				//focus if on the textbox
-				if (Area.IntersectsWith(Input.MousePosition))
+				if (_area.IntersectsWith(Input.MousePosition))
 					Focus();
 				else //defocus if not
 					Defocus();
 			}
 
-			DrawString = Text.ToString();
+			_drawString = Text.ToString();
 
 			//add caret if focused
-			if (HasFocus)
+			if (_hasFocus)
 			{
-				if (CursorBlinkStep < Game.StepsPerSecond / 2f)
+				if (_cursorBlinkStep < Game.StepsPerSecond / 2f)
 				{
-					CursorActive = true;
-					DrawString += '|';
+					_cursorActive = true;
+					_drawString += '|';
 				}
 				else
-					CursorActive = false;
+					_cursorActive = false;
 
-				if (++CursorBlinkStep > Game.StepsPerSecond)
-					CursorBlinkStep -= Game.StepsPerSecond;
+				if (++_cursorBlinkStep > Game.StepsPerSecond)
+					_cursorBlinkStep -= Game.StepsPerSecond;
 			}
 
 			//trim
 			int charsTrimmed;
-			DrawString = Font.WrapString(DrawString, Width - BorderWidth * 2f, Lines, out charsTrimmed);
+			_drawString = Font.WrapString(_drawString, Width - BorderWidth * 2f, Lines, out charsTrimmed);
 
 			if (charsTrimmed > 1)
 			{
-				if (CursorActive)
+				if (_cursorActive)
 					charsTrimmed--;
 
 				Text.Remove(Text.Length - charsTrimmed + 1, charsTrimmed - 1);
 			}
 
 			//only throw event when the text was manually changed and the key was accepted
-			if (Text.ToString() != LastTextString)
+			if (Text.ToString() != _lastTextString)
 			{
 				if (TextChanged != null)
 					TextChanged(this, new TextChangedEventArgs(Text.ToString()));
 
-				CursorBlinkStep = 0f;
+				_cursorBlinkStep = 0f;
 
-				LastTextString = Text.ToString();
+				_lastTextString = Text.ToString();
 			}
 		}
 
 		public override void Draw()
 		{
-			DrawX.DrawFilledRect(Area, BackGroundColor);
-			if (HasFocus)
-				DrawX.DrawShapeOutline(Area, BorderColor);
-			Font.Draw(DrawString, Position + 1f, TextColor, Alignment.TopLeft, -5);
+			DrawX.DrawFilledRect(_area, BackGroundColor);
+			if (_hasFocus)
+				DrawX.DrawShapeOutline(_area, BorderColor);
+			Font.Draw(_drawString, Position + 1f, TextColor, Alignment.TopLeft, -5);
 		}
 	}
 }

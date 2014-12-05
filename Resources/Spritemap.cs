@@ -8,7 +8,7 @@ namespace HatlessEngine
 	/// </summary>
 	public sealed class Spritemap : IResource
 	{
-		public string ID { get; private set; }
+		public string Id { get; private set; }
 
 		public static readonly ushort ProtocolVersion = 1;
 
@@ -16,8 +16,8 @@ namespace HatlessEngine
 
 		private Spritemap(string id)
 		{
-			ID = id;
-			Resources.Spritemaps.Add(ID, this);
+			Id = id;
+			Resources.Spritemaps.Add(Id, this);
 		}
 
 		public Spritemap(string id, params ManagedSprite[] managedSprites)
@@ -37,7 +37,7 @@ namespace HatlessEngine
 				throw new ProtocolMismatchException("The file's magic number is not 'HESm' (HatlessEngine Spritemap)");
 				
 			if (reader.ReadUInt16() != ProtocolVersion)
-				throw new ProtocolMismatchException("The file's protocol version is not equal to the required one (" + ProtocolVersion.ToString() + ")");
+				throw new ProtocolMismatchException("The file's protocol version is not equal to the required one (" + ProtocolVersion + ")");
 
 			ushort spriteCount = reader.ReadUInt16();
 
@@ -48,16 +48,18 @@ namespace HatlessEngine
 				Point size = new Point(reader.ReadSingle(), reader.ReadSingle());
 				Point origin = new Point(reader.ReadSingle(), reader.ReadSingle());
 				float rotation = reader.ReadSingle();
-				string animationID = reader.ReadString();
+				string animationId = reader.ReadString();
 				int startIndex = reader.ReadInt32();
 				float animationSpeed = reader.ReadSingle();
 				sbyte depth = reader.ReadSByte();
 				
-				ManagedSprite mSprite = new ManagedSprite(targetSprite, position, animationID, startIndex, animationSpeed, depth);
-				mSprite.Size = size;
-				mSprite.Origin = origin;
-				mSprite.Rotation = rotation;
- 
+				ManagedSprite mSprite = new ManagedSprite(targetSprite, position, animationId, startIndex, animationSpeed, depth)
+				{
+					Size = size,
+					Origin = origin,
+					Rotation = rotation
+				};
+
 				ManagedSprites.Add(mSprite);
 			}
 
@@ -89,7 +91,7 @@ namespace HatlessEngine
 			foreach (ManagedSprite sprite in ManagedSprites)
 			{
 				//writewritewritewrite...
-				writer.Write(sprite.TargetSprite.ID);
+				writer.Write(sprite.TargetSprite.Id);
 				writer.Write(sprite.Position.X);
 				writer.Write(sprite.Position.Y);
 				writer.Write(sprite.Size.X);
@@ -97,7 +99,7 @@ namespace HatlessEngine
 				writer.Write(sprite.Origin.X);
 				writer.Write(sprite.Origin.Y);
 				writer.Write(sprite.Rotation);
-				writer.Write(sprite.AnimationID);
+				writer.Write(sprite.AnimationId);
 				writer.Write(sprite.AnimationIndex);
 				writer.Write(sprite.AnimationSpeed);
 				writer.Write(sprite.Depth);
@@ -125,7 +127,7 @@ namespace HatlessEngine
 
 		public void Destroy()
 		{
-			Resources.Spritemaps.Remove(ID);
+			Resources.Spritemaps.Remove(Id);
 		}
 
 		public static implicit operator Spritemap(string str)

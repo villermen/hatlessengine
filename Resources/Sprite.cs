@@ -10,7 +10,7 @@ namespace HatlessEngine
 	{   
 		public string Filename { get; private set; }
 		public Assembly FileAssembly { get; private set; }
-		public string ID { get; private set; }
+		public string Id { get; private set; }
 		public bool Loaded { get; private set; }
 
 		internal IntPtr TextureHandle;
@@ -21,19 +21,19 @@ namespace HatlessEngine
 		/// </summary>
 		public Dictionary<string, int[]> Animations = new Dictionary<string, int[]>();
 
-		private bool AutoSize = false;
+		private readonly bool _autoSize = false;
 		public Point FrameSize { get; private set; }
 		public Point IndexSize { get; private set; }
 		
 		public Sprite(string id, string filename) 
 			: this(id, filename, new Point(1f, 1f))
 		{
-			AutoSize = true;
+			_autoSize = true;
 			FileAssembly = Assembly.GetCallingAssembly();
 		}
 		public Sprite(string id, string filename, Point frameSize)
 		{
-			ID = id;
+			Id = id;
 			Filename = filename;
 			FileAssembly = Assembly.GetCallingAssembly();
 			
@@ -42,7 +42,7 @@ namespace HatlessEngine
 			FrameSize = frameSize;
 			IndexSize = new Point(1f, 1f);
 
-			Resources.Sprites.Add(ID, this);
+			Resources.Sprites.Add(Id, this);
 			Resources.ExternalResources.Add(this);
 		}
 
@@ -69,41 +69,41 @@ namespace HatlessEngine
 
 		private Point GetIndexLocation(int frameIndex)
 		{
-			return new Point(Misc.Modulus(frameIndex, (int)IndexSize.X) * FrameSize.X, (float)(Misc.Modulus((int)(frameIndex / IndexSize.X), (int)IndexSize.Y) * FrameSize.Y));
+			return new Point(Misc.Modulus(frameIndex, (int)IndexSize.X) * FrameSize.X, Misc.Modulus((int)(frameIndex / IndexSize.X), (int)IndexSize.Y) * FrameSize.Y);
 		}
 
 		public void Load()
 		{
-			if (!Loaded)
+			if (Loaded)
+				return;
+
+			IntPtr surface = SDL_image.IMG_Load_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1);
+			if (surface != IntPtr.Zero)
 			{
-				IntPtr surface = SDL_image.IMG_Load_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1);
-				if (surface != IntPtr.Zero)
+				TextureHandle = SDL.SDL_CreateTextureFromSurface(Game.RendererHandle, surface);
+				SDL.SDL_FreeSurface(surface);
+
+				if (TextureHandle != IntPtr.Zero)
 				{
-					TextureHandle = SDL.SDL_CreateTextureFromSurface(Game.RendererHandle, surface);
-					SDL.SDL_FreeSurface(surface);
+					uint format;
+					int access, w, h;
+					SDL.SDL_QueryTexture(TextureHandle, out format, out access, out w, out h);
 
-					if (TextureHandle != IntPtr.Zero)
+					if (_autoSize)
 					{
-						uint format;
-						int access, w, h;
-						SDL.SDL_QueryTexture(TextureHandle, out format, out access, out w, out h);
-
-						if (AutoSize)
-						{
-							FrameSize = new Point(w, h);
-							IndexSize = new Point(1, 1);
-						}
-						else
-							IndexSize = new Point((float)Math.Floor(w / FrameSize.X), (float)Math.Floor(h / FrameSize.Y));
-
-						Loaded = true;
+						FrameSize = new Point(w, h);
+						IndexSize = new Point(1, 1);
 					}
 					else
-						throw new FileLoadException(SDL.SDL_GetError());
+						IndexSize = new Point((float)Math.Floor(w / FrameSize.X), (float)Math.Floor(h / FrameSize.Y));
+
+					Loaded = true;
 				}
 				else
 					throw new FileLoadException(SDL.SDL_GetError());
 			}
+			else
+				throw new FileLoadException(SDL.SDL_GetError());
 		}
 
 		public void Unload()
@@ -120,7 +120,7 @@ namespace HatlessEngine
 		{
 			Unload();
 
-			Resources.Sprites.Remove(ID);
+			Resources.Sprites.Remove(Id);
 			Resources.ExternalResources.Remove(this);
 		}
 

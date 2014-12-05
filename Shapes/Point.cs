@@ -21,7 +21,7 @@ namespace HatlessEngine
 		}
 		public float GetDistanceFromOrigin()
 		{
-			return GetDistanceTo(Point.Zero);
+			return GetDistanceTo(Zero);
 		}
 
 		public float GetAngleTo(Point point)
@@ -33,7 +33,7 @@ namespace HatlessEngine
 		}
 		public float GetAngleFromOrigin()
 		{
-			return Point.Zero.GetAngleTo(this);
+			return Zero.GetAngleTo(this);
 		}
 
 		public float GetProduct()
@@ -51,8 +51,7 @@ namespace HatlessEngine
 			//convert angle to radians
 			angle = (float)(Math.PI / 180 * angle);
 
-			float T; //dont use already updated X for calculating Y
-			T = (float)(origin.X + (X - origin.X) * Math.Cos(angle) - (Y - origin.Y) * Math.Sin(angle));
+			float T = (float)(origin.X + (X - origin.X) * Math.Cos(angle) - (Y - origin.Y) * Math.Sin(angle));
 			Y = (float)(origin.Y + (X - origin.X) * Math.Sin(angle) + (Y - origin.Y) * Math.Cos(angle));
 			X = T;
 			return this;
@@ -71,10 +70,11 @@ namespace HatlessEngine
 		public bool IntersectsWith(IConvexShape shape)
 		{
 			//so it won't enter a call-loop of infinite proportions
-			if (shape.GetType() == typeof(Point))
+			if (shape is Point)
 				return this == (Point)shape;
-			else //call Shape's better suited sat check 
-				return shape.IntersectsWith(this);
+
+			//call Shape's better suited intersection check 
+			return shape.IntersectsWith(this);
 		}
 
 		public static bool operator ==(Point point1, Point point2)
@@ -92,7 +92,7 @@ namespace HatlessEngine
 				return false;
 			}
 			Point point = (Point)obj;
-			return point.X == X && point.Y == Y && point.GetType().Equals(base.GetType());
+			return point.X == X && point.Y == Y && point.GetType() == GetType();
 		}
 		public override int GetHashCode()
 		{

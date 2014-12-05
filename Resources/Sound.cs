@@ -11,25 +11,25 @@ namespace HatlessEngine
 	/// </summary>
 	public class Sound : IExternalResource
 	{
-		public string ID { get; private set; }
+		public string Id { get; private set; }
 		public string Filename { get; private set; }
 		public Assembly FileAssembly { get; private set; }
 		public bool Loaded { get; private set; }
 
 		public float BaseVolume { get; private set; }
 
-		private IntPtr ChunkHandle;
+		private IntPtr _chunkHandle;
 
 		public Sound(string id, string filename, float baseVolume = 1f)
 		{
-			ID = id;
+			Id = id;
 			Filename = filename;
 			FileAssembly = Assembly.GetCallingAssembly();
 			Loaded = false;
 
 			BaseVolume = baseVolume;
 
-			Resources.Sounds.Add(ID, this);
+			Resources.Sounds.Add(Id, this);
 			Resources.ExternalResources.Add(this);
 		}
 
@@ -38,7 +38,7 @@ namespace HatlessEngine
 			if (!Loaded)
 				throw new NotLoadedException();
 
-			int channel = SDL_mixer.Mix_PlayChannelTimed(-1, ChunkHandle, 0, -1);
+			int channel = SDL_mixer.Mix_PlayChannelTimed(-1, _chunkHandle, 0, -1);
 			SDL_mixer.Mix_Volume(channel, (int)(128 * volume));
 			balance = balance / 2f + 0.5f; //0-1
 			SDL_mixer.Mix_SetPanning(channel, (byte)(255 - 255 * balance), (byte)(0 + 255 * balance));
@@ -51,11 +51,11 @@ namespace HatlessEngine
 			if (Loaded)
 				return;
 
-			ChunkHandle = SDL_mixer.Mix_LoadWAV_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1);
+			_chunkHandle = SDL_mixer.Mix_LoadWAV_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1);
 
-			if (ChunkHandle != IntPtr.Zero)
+			if (_chunkHandle != IntPtr.Zero)
 			{
-				SDL_mixer.Mix_VolumeChunk(ChunkHandle, (int)(128 * BaseVolume));
+				SDL_mixer.Mix_VolumeChunk(_chunkHandle, (int)(128 * BaseVolume));
 				Loaded = true;
 			}
 			else
@@ -67,8 +67,8 @@ namespace HatlessEngine
 			if (!Loaded)
 				return;
 
-			SDL_mixer.Mix_FreeChunk(ChunkHandle);
-			ChunkHandle = IntPtr.Zero;
+			SDL_mixer.Mix_FreeChunk(_chunkHandle);
+			_chunkHandle = IntPtr.Zero;
 
 			Loaded = false;
 		}
@@ -77,7 +77,7 @@ namespace HatlessEngine
 		{
 			Unload();
 
-			Resources.Sounds.Remove(ID);
+			Resources.Sounds.Remove(Id);
 			Resources.ExternalResources.Remove(this);
 		}
 

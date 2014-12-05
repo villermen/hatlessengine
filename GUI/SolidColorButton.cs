@@ -9,7 +9,7 @@
 		public Color MouseoverColor;
 		public Color MousedownColor;
 
-		private Color CurrentColor;
+		private Color _currentColor;
 
 		public SolidColorButton(Rectangle bounds, string text, Font textFont, Color textColor, Color defaultColor, Color mouseoverColor, Color mousedownColor, Alignment textAlignment = Alignment.CenterMiddle, int depth = 0)
 			: base(bounds, text, textFont, textColor, textAlignment, depth)
@@ -28,16 +28,16 @@
 			base.Step();
 
 			if (State == ButtonState.Mouseover)
-				CurrentColor = MouseoverColor;
+				_currentColor = MouseoverColor;
 			else if (State == ButtonState.Mousedown)
-				CurrentColor = MousedownColor;
+				_currentColor = MousedownColor;
 			else
-				CurrentColor = DefaultColor;
+				_currentColor = DefaultColor;
 		}
 
 		public override void Draw()
 		{
-			DrawX.DrawFilledRect(Bounds, CurrentColor, Depth);
+			DrawX.DrawFilledRect(Bounds, _currentColor, Depth);
 
 			base.Draw();
 		}

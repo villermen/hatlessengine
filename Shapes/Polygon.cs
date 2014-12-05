@@ -10,7 +10,7 @@ namespace HatlessEngine
 	[Serializable]
 	public class Polygon : Shape
 	{
-		private Point[] BasePoints;
+		private readonly Point[] _basePoints;
 
 		/// <summary>
 		/// Position, and points relative to this position.
@@ -21,13 +21,9 @@ namespace HatlessEngine
 			_Position = pos;
 
 			//check for convexness
-			bool clockwise;
 			float previousAngle = points[points.Length - 1].GetAngleTo(points[0]);
 			float currentAngle  = points[0].GetAngleTo(points[1]);
-			if (Misc.GetRelativeAngle(previousAngle, currentAngle) >= 0f) //if its zero it might still be counter-clockwise though
-				clockwise = true;
-			else
-				clockwise = false;
+			bool clockwise = Misc.GetRelativeAngle(previousAngle, currentAngle) >= 0f;
 
 			previousAngle = currentAngle;
 
@@ -42,7 +38,7 @@ namespace HatlessEngine
 				previousAngle = currentAngle;
 			}
 
-			BasePoints = points;
+			_basePoints = points;
 
 			//initialize arrays
 			Points = new Point[points.Length];
@@ -54,9 +50,9 @@ namespace HatlessEngine
 		{
 			float minX = float.PositiveInfinity, minY = float.PositiveInfinity, maxX = float.NegativeInfinity, maxY = float.NegativeInfinity;
 			
-			for (int i = 0; i < BasePoints.Length; i++)
+			for (int i = 0; i < _basePoints.Length; i++)
 			{
-				Points[i] = _Position + BasePoints[i].RotateOverOrigin(Point.Zero, _Rotation) * _Size;
+				Points[i] = _Position + _basePoints[i].RotateOverOrigin(Point.Zero, _Rotation) * _Size;
 
 				if (Points[i].X < minX)
 					minX = Points[i].X;
@@ -67,7 +63,7 @@ namespace HatlessEngine
 				if (Points[i].Y > maxY)
 					maxY = Points[i].Y;
 
-				if (i < BasePoints.Length - 1)
+				if (i < _basePoints.Length - 1)
 					BoundLines[i] = new Line(Points[i], Points[i + 1]);
 				else
 					BoundLines[i] = new Line(Points[i], Points[0]);

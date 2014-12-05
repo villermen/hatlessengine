@@ -5,7 +5,7 @@ namespace HatlessEngine
 	[Serializable]
 	public class View : IResource
 	{
-		public string ID { get; private set; }
+		public string Id { get; private set; }
 
 		/// <summary>
 		/// Whether this View is drawn to the window.
@@ -35,12 +35,12 @@ namespace HatlessEngine
 		/// </summary>
 		public View(string id, Rectangle area, Rectangle viewport, bool active = true)
 		{
-			ID = id;
+			Id = id;
 			GameArea = area;
 			Viewport = viewport;
 			Active = active;
 
-			Resources.Views.Add(ID, this);
+			Resources.Views.Add(Id, this);
 		}
 
 		/// <summary>
@@ -112,7 +112,7 @@ namespace HatlessEngine
 
 		public void Destroy()
 		{
-			Resources.Views.Remove(ID);
+			Resources.Views.Remove(Id);
 		}
 
 		public static implicit operator View(string str)

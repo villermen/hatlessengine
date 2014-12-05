@@ -81,16 +81,14 @@ namespace HatlessEngine
 
 			if (RootDirectory != "" && File.Exists(RootDirectory + filename))
 			{
-				stream = File.Open(RootDirectory + filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-				if (stream != null)
-					return new BinaryReader(stream);
+				return new BinaryReader(File.Open(RootDirectory + filename,
+					FileMode.Open, FileAccess.Read, FileShare.Read));
 			}
 
 			if (File.Exists(filename))
 			{
-				stream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-				if (stream != null)
-					return new BinaryReader(stream);
+				return new BinaryReader(File.Open(filename,
+					FileMode.Open, FileAccess.Read, FileShare.Read));
 			}
 
 			throw new FileNotFoundException("The file could not be found in any of the possible locations.");
@@ -150,13 +148,13 @@ namespace HatlessEngine
 
 		internal static void MusicFinished()
 		{
-			if (CurrentlyPlayingMusic != null)
-			{
-				//CurrentlyPlayMusic.PerformStopped might change CurrentlyPlayingMusic itself, so use a temp value
-				Music tempCurrentlyPlayingMusic = CurrentlyPlayingMusic;
-				CurrentlyPlayingMusic = null;
-				tempCurrentlyPlayingMusic.PerformStopped();
-			}
+			if (CurrentlyPlayingMusic == null) 
+				return;
+
+			//CurrentlyPlayMusic.PerformStopped might change CurrentlyPlayingMusic itself, so use a temp value
+			Music tempCurrentlyPlayingMusic = CurrentlyPlayingMusic;
+			CurrentlyPlayingMusic = null;
+			tempCurrentlyPlayingMusic.PerformStopped();
 		}
 
 		internal static void UpdateManagedSprites()

@@ -9,11 +9,11 @@ namespace HatlessEngine
 	/// </summary>
 	public static class Log
 	{
-		private static bool ConsoleEnabled = false;
-		private static TextWriter ConsoleWriter;
+		private static bool _consoleEnabled = false;
+		private static TextWriter _consoleWriter;
 
-		private static bool FileEnabled = false;
-		private static StreamWriter FileWriter;
+		private static bool _fileEnabled = false;
+		private static StreamWriter _fileWriter;
 
 		public static List<StreamWriter> CustomStreams = new List<StreamWriter>();
 
@@ -25,52 +25,52 @@ namespace HatlessEngine
 				formattedMessage += DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ";
 
 			if (logLevel != LogLevel.None)
-				formattedMessage += "[" + logLevel.ToString() + "] ";
+				formattedMessage += "[" + logLevel + "] ";
 
 			formattedMessage += message;
 
-			if (ConsoleEnabled)
-				ConsoleWriter.WriteLine(formattedMessage);
-			if (FileEnabled)
-				FileWriter.WriteLine(formattedMessage);
+			if (_consoleEnabled)
+				_consoleWriter.WriteLine(formattedMessage);
+			if (_fileEnabled)
+				_fileWriter.WriteLine(formattedMessage);
 			foreach (StreamWriter stream in CustomStreams)
 				stream.WriteLine(formattedMessage);
 		}
 
 		public static void EnableConsole()
 		{
-			if (!ConsoleEnabled)
-			{
-				ConsoleWriter = Console.Out;
-				ConsoleEnabled = true;
-			}
+			if (_consoleEnabled) 
+				return;
+
+			_consoleWriter = Console.Out;
+			_consoleEnabled = true;
 		}
 		public static void DisableConsole()
 		{
-			if (ConsoleEnabled)
-			{
-				ConsoleWriter.Close();
-				ConsoleWriter = null;
-				ConsoleEnabled = false;
-			}
+			if (!_consoleEnabled) 
+				return;
+
+			_consoleWriter.Close();
+			_consoleWriter = null;
+			_consoleEnabled = false;
 		}
 
 		public static void EnableFile(string filename)
 		{
-			if (!FileEnabled)
-			{
-				FileWriter = new StreamWriter(File.Open(filename, FileMode.Append, FileAccess.Write, FileShare.Read));
-				FileEnabled = true;
-			}
+			if (_fileEnabled) 
+				return;
+
+			_fileWriter = new StreamWriter(File.Open(filename, FileMode.Append, FileAccess.Write, FileShare.Read));
+			_fileEnabled = true;
 		}
 		public static void DisableFile()
 		{
-			if (FileEnabled)
-			{
-				FileWriter.Close();
-				FileWriter = null;
-				FileEnabled = false;
-			}
+			if (!_fileEnabled) 
+				return;
+
+			_fileWriter.Close();
+			_fileWriter = null;
+			_fileEnabled = false;
 		}
 
 		/// <summary>

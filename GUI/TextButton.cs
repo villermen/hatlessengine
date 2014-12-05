@@ -17,7 +17,7 @@ namespace HatlessEngine.GUI
 
 		public int Depth;
 
-		private Point TextPos;
+		private Point _textPos;
 
 		/// <summary>
 		/// Occurs when the user has pressed the left mouse button while on the button bounds.
@@ -28,7 +28,7 @@ namespace HatlessEngine.GUI
 		/// </summary>
 		public event EventHandler Clicked;
 
-		public TextButton(Rectangle bounds, string text, Font textFont, Color textColor, Alignment textAlignment, int depth = 0)
+		protected TextButton(Rectangle bounds, string text, Font textFont, Color textColor, Alignment textAlignment, int depth = 0)
 		{
 			Bounds = bounds;
 
@@ -71,25 +71,25 @@ namespace HatlessEngine.GUI
 			if (!String.IsNullOrEmpty(Text))
 			{
 				if (TextAlignment.HasFlag(Alignment.Right))
-					TextPos.X = Bounds.Position2.X;
+					_textPos.X = Bounds.Position2.X;
 				else if (TextAlignment.HasFlag(Alignment.Center))
-					TextPos.X = Bounds.Center.X;
+					_textPos.X = Bounds.Center.X;
 				else
-					TextPos.X = Bounds.Position.X;
+					_textPos.X = Bounds.Position.X;
 
 				if (TextAlignment.HasFlag(Alignment.Bottom))
-					TextPos.Y = Bounds.Position2.Y;
+					_textPos.Y = Bounds.Position2.Y;
 				else if (TextAlignment.HasFlag(Alignment.Middle))
-					TextPos.Y = Bounds.Center.Y;
+					_textPos.Y = Bounds.Center.Y;
 				else
-					TextPos.Y = Bounds.Position.Y;
+					_textPos.Y = Bounds.Position.Y;
 			}
 		}
 
 		public override void Draw()
 		{
 			if (!String.IsNullOrEmpty(Text))
-				TextFont.Draw(Text, TextPos, TextColor, TextAlignment, Depth);
+				TextFont.Draw(Text, _textPos, TextColor, TextAlignment, Depth);
 		}
 	}
 

@@ -8,12 +8,12 @@ namespace HatlessEngine
 	/// </summary>
 	public class SoundControl
 	{
-		private int Channel;
+		private readonly int _channel;
 		public bool Done { get; private set; }
 
 		internal SoundControl(int channel)
 		{
-			Channel = channel;
+			_channel = channel;
 			Resources.SoundControls.Add(channel, this);
 			Done = false;
 		}
@@ -23,7 +23,7 @@ namespace HatlessEngine
 			if (Done)
 				return;
 
-			SDL_mixer.Mix_Pause(Channel);
+			SDL_mixer.Mix_Pause(_channel);
 		}
 
 		public void Resume()
@@ -31,7 +31,7 @@ namespace HatlessEngine
 			if (Done)
 				return;
 
-			SDL_mixer.Mix_Resume(Channel);
+			SDL_mixer.Mix_Resume(_channel);
 		}
 
 		public void Stop()
@@ -39,7 +39,7 @@ namespace HatlessEngine
 			if (Done)
 				return;
 
-			SDL_mixer.Mix_HaltChannel(Channel);
+			SDL_mixer.Mix_HaltChannel(_channel);
 		}
 
 		public event EventHandler Stopped;
@@ -49,7 +49,7 @@ namespace HatlessEngine
 			if (Stopped != null)
 				Stopped(this, EventArgs.Empty);
 
-			Resources.SoundControls.Remove(Channel);
+			Resources.SoundControls.Remove(_channel);
 			Done = true;
 		}
 	}

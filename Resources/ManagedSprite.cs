@@ -13,25 +13,25 @@ namespace HatlessEngine
 
 		public int Depth;
 
-		private string _AnimationID;
+		private string _animationId;
 
 		/// <summary>
 		/// The animation index of the sprite, if none is given it will loop through all frames.
 		/// </summary>
-		public string AnimationID
+		public string AnimationId
 		{
-			get { return _AnimationID; }
+			get { return _animationId; }
 			set
 			{
 				if (value == "")
 				{
-					_AnimationID = "";
-					AnimationLength = (int)(TargetSprite.IndexSize.X * TargetSprite.IndexSize.Y);
+					_animationId = "";
+					_animationLength = (int)(TargetSprite.IndexSize.X * TargetSprite.IndexSize.Y);
 				}
 				else if (TargetSprite.Animations.ContainsKey(value))
 				{
-					_AnimationID = value;
-					AnimationLength = TargetSprite.Animations[value].Length;
+					_animationId = value;
+					_animationLength = TargetSprite.Animations[value].Length;
 				}
 				else
 					throw new KeyNotFoundException("TargetSprite doesn't have an animation with index '" + value + "'.");
@@ -43,7 +43,7 @@ namespace HatlessEngine
 		/// </summary>
 		public int AnimationIndex;
 
-		private int AnimationLength;
+		private int _animationLength;
 
 		/// <summary>
 		/// Frames per step, use SetFramesPerSecond if you want it to be independent of game speed or just don't feel like doing maths.
@@ -53,7 +53,7 @@ namespace HatlessEngine
 		/// <summary>
 		/// Used for determining when to increase the index and how many times.
 		/// </summary>
-		private float IndexIncrement;
+		private float _indexIncrement;
 
 		/// <summary>
 		/// While this is false, the sprite will not change in any way.
@@ -63,10 +63,10 @@ namespace HatlessEngine
 		/// <summary>
 		/// All parameters.
 		/// </summary>
-		public ManagedSprite(Sprite targetSprite, Point pos, string animationID = "", int startIndex = 0, float animationSpeed = 1f, int depth = 0)
+		public ManagedSprite(Sprite targetSprite, Point pos, string animationId = "", int startIndex = 0, float animationSpeed = 1f, int depth = 0)
 		{
 			TargetSprite = targetSprite;
-			AnimationID = animationID;
+			AnimationId = animationId;
 			AnimationIndex = startIndex;
 			AnimationSpeed = animationSpeed;
 			Depth = depth;
@@ -80,10 +80,9 @@ namespace HatlessEngine
 
 		public void Draw()
 		{
-			if (_AnimationID == "")
-				TargetSprite.Draw(this, AnimationIndex, Depth);
-			else //resolve AnimationID to actual frame
-				TargetSprite.Draw(this, TargetSprite.Animations[_AnimationID][AnimationIndex], Depth);
+			TargetSprite.Draw(this, 
+				_animationId == "" ? AnimationIndex : TargetSprite.Animations[_animationId][AnimationIndex],
+				Depth);
 		}
 
 		internal void Step()
@@ -91,17 +90,17 @@ namespace HatlessEngine
 			if (PerformStep)
 			{
 				//animation
-				IndexIncrement += AnimationSpeed;
+				_indexIncrement += AnimationSpeed;
 
-				while (IndexIncrement >= 1)
+				while (_indexIncrement >= 1)
 				{
 					AnimationIndex++;
 
 					//reset if over the length
-					if (AnimationIndex < 0 || AnimationIndex > AnimationLength)
-						AnimationIndex = Misc.Modulus(AnimationIndex, AnimationLength);
+					if (AnimationIndex < 0 || AnimationIndex > _animationLength)
+						AnimationIndex = Misc.Modulus(AnimationIndex, _animationLength);
 
-					IndexIncrement--;
+					_indexIncrement--;
 				}
 			}
 		}

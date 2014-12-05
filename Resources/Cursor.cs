@@ -10,23 +10,23 @@ namespace HatlessEngine
 	/// </summary>
 	public class Cursor : IExternalResource
 	{
-		public string ID { get; private set; }
+		public string Id { get; private set; }
 		public string Filename { get; private set; }
 		public Assembly FileAssembly { get; private set; }
 		public bool Loaded { get; private set; }
 
-		private bool IsSystemCursor;
-		private SystemCursor SystemCursor;
-		private IntPtr CursorHandle;
+		private readonly bool _isSystemCursor;
+		private readonly SystemCursor _systemCursor;
+		private IntPtr _cursorHandle;
 
 		public Point Origin;
 
 		private Cursor(string id)
 		{
-			ID = id;
+			Id = id;
 			Loaded = false;
 
-			Resources.Cursors.Add(ID, this);
+			Resources.Cursors.Add(Id, this);
 			Resources.ExternalResources.Add(this);
 		}
 		/// <summary>
@@ -38,7 +38,7 @@ namespace HatlessEngine
 			Filename = filename;
 			FileAssembly = Assembly.GetCallingAssembly();
 			Origin = origin;
-			IsSystemCursor = false;	
+			_isSystemCursor = false;	
 		}
 		/// <summary>
 		/// Creates a system cursor.
@@ -46,14 +46,14 @@ namespace HatlessEngine
 		public Cursor(string id, SystemCursor cursor)
 			: this(id)
 		{
-			IsSystemCursor = true;
-			SystemCursor = cursor;
+			_isSystemCursor = true;
+			_systemCursor = cursor;
 		}
 
 		public void Set()
 		{
 			if (Loaded)
-				SDL.SDL_SetCursor(CursorHandle);
+				SDL.SDL_SetCursor(_cursorHandle);
 			else
 				throw new NotLoadedException();
 		}
@@ -63,12 +63,12 @@ namespace HatlessEngine
 			if (Loaded)
 				return;
 
-			if (IsSystemCursor)
-				CursorHandle = SDL.SDL_CreateSystemCursor((SDL.SDL_SystemCursor)SystemCursor);
+			if (_isSystemCursor)
+				_cursorHandle = SDL.SDL_CreateSystemCursor((SDL.SDL_SystemCursor)_systemCursor);
 			else
-				CursorHandle = SDL.SDL_CreateColorCursor(SDL_image.IMG_Load_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1), (int)Origin.X, (int)Origin.Y);
+				_cursorHandle = SDL.SDL_CreateColorCursor(SDL_image.IMG_Load_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1), (int)Origin.X, (int)Origin.Y);
 			
-			if (CursorHandle != IntPtr.Zero)
+			if (_cursorHandle != IntPtr.Zero)
 				Loaded = true;
 			else
 				throw new FileLoadException();
@@ -79,8 +79,8 @@ namespace HatlessEngine
 			if (!Loaded)
 				return;
 
-			SDL.SDL_FreeCursor(CursorHandle);
-			CursorHandle = IntPtr.Zero;
+			SDL.SDL_FreeCursor(_cursorHandle);
+			_cursorHandle = IntPtr.Zero;
 			Loaded = false;
 
 		}
@@ -89,7 +89,7 @@ namespace HatlessEngine
 		{
 			Unload();
 
-			Resources.Cursors.Remove(ID);
+			Resources.Cursors.Remove(Id);
 			Resources.ExternalResources.Remove(this);
 		}
 

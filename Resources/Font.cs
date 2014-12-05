@@ -8,7 +8,7 @@ namespace HatlessEngine
 {
 	public class Font : IExternalResource
 	{
-		public string ID { get; private set; }
+		public string Id { get; private set; }
 		public string Filename { get; private set; }
 		public Assembly FileAssembly { get; private set; }
 		public bool Loaded { get; private set; }
@@ -27,14 +27,14 @@ namespace HatlessEngine
 			if (pointSize < 1)
 				throw new ArgumentOutOfRangeException("pointSize", "pointSize must be bigger than zero.");
 
-			ID = id;
+			Id = id;
 			Filename = filename;
 			FileAssembly = Assembly.GetCallingAssembly();
 			Loaded = false;
 
 			PointSize = pointSize;
 
-			Resources.Fonts.Add(ID, this);
+			Resources.Fonts.Add(Id, this);
 			Resources.ExternalResources.Add(this);
 		}
 
@@ -119,7 +119,7 @@ namespace HatlessEngine
 				throw new IndexOutOfRangeException("maxLines has to be over 0. Leave the argument out or use int.MaxValue to make the method (semi-)ignore the argument.");
 
 			string result = "", lineRemainder = "";
-			int lines = 0, lineStart = 0, lineLength = 0, w, h, length, newlinePos;
+			int lines = 0, lineStart = 0, lineLength = 0;
 
 			charsTrimmed = 0;
 
@@ -131,7 +131,8 @@ namespace HatlessEngine
 				lineStart = lineStart + lineLength;
 				
 				//calculate new line length (length til and including next newline)
-				newlinePos = str.IndexOf('\n', lineStart);
+				int newlinePos = str.IndexOf('\n', lineStart);
+
 				if (newlinePos != -1)
 					lineLength = newlinePos + 1 - lineStart;
 				else
@@ -142,6 +143,7 @@ namespace HatlessEngine
 				while(lineRemainder != "" && lines < maxLines)
 				{
 					//check if the string fits initially, because then there would be no situation right?
+					int w, h;
 					SDL_ttf.TTF_SizeUTF8(Handle, lineRemainder, out w, out h);
 					if (w < maxWidth)
 					{
@@ -155,7 +157,7 @@ namespace HatlessEngine
 					else
 					{
 						//get closest fitting multiple of ten and add as many of those to the substring length as possible to reduce the amount of SizeUTF8 calls
-						length = 0;
+						int length = 0;
 						for (int chunkLength = (int)Math.Pow(10, Math.Floor(Math.Log10(lineRemainder.Length))); chunkLength >= 1; chunkLength = chunkLength / 10)
 						{
 							w = 0;
@@ -206,18 +208,16 @@ namespace HatlessEngine
 
 		public void Load()
 		{
-			if (!Loaded)
-			{
-				Handle = SDL_ttf.TTF_OpenFontRW(Resources.CreateRWFromFile(Filename, FileAssembly), 1, PointSize);
+			if (Loaded) 
+				return;
 
-				if (Handle != IntPtr.Zero)
-				{
-					LineHeight = SDL_ttf.TTF_FontLineSkip(Handle);
-					Loaded = true;
-				}
-				else
-					throw new FileLoadException(SDL.SDL_GetError());
-			}
+			Handle = SDL_ttf.TTF_OpenFontRW(Resources.CreateRWFromFile(Filename, FileAssembly), 1, PointSize);
+
+			if (Handle == IntPtr.Zero)
+				throw new FileLoadException(SDL.SDL_GetError());
+
+			LineHeight = SDL_ttf.TTF_FontLineSkip(Handle);
+			Loaded = true;
 		}
 
 		public void Unload()
@@ -234,7 +234,7 @@ namespace HatlessEngine
 		{
 			Unload();
 
-			Resources.Fonts.Remove(ID);
+			Resources.Fonts.Remove(Id);
 			Resources.ExternalResources.Remove(this);
 		}
 

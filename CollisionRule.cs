@@ -36,7 +36,7 @@ namespace HatlessEngine
 		{
 			//validate objType
 			if (!objType.IsSubclassOf(typeof(PhysicalObject)))
-				throw new InvalidObjectTypeException("objType (" + objType.ToString() + ") is not a subclass of PhysicalObject");
+				throw new InvalidObjectTypeException("objType (" + objType + ") is not a subclass of PhysicalObject");
 
 			Type = CollisionRuleType.ObjectType;
 			Target = objType;
@@ -45,26 +45,29 @@ namespace HatlessEngine
 		}
 		public CollisionRule(Objectmap objMap, CollisionAction action, Type[] objFilter = null, Action<PhysicalObject> method = null)
 		{
-			//validate objFilter
-			foreach(Type objType in objFilter)
-			{
-				if (!objType.IsSubclassOf(typeof(PhysicalObject)))
-					throw new InvalidObjectTypeException("objType in objFilter (" + objType.ToString() + ") is not a subclass of PhysicalObject");
-			}
-
 			Type = CollisionRuleType.Objectmap;
 			Target = objMap;
+			Action = action;
+			Method = method;
+
 			if (objFilter != null)
 			{
+				//validate the filter
+				foreach (Type objType in objFilter)
+				{
+					if (!objType.IsSubclassOf(typeof (PhysicalObject)))
+						throw new InvalidObjectTypeException("objType in objFilter (" + objType +
+						                                     ") is not a subclass of PhysicalObject");
+				}
+
 				ObjectmapFilter = new List<Type>(objFilter);
+
 				FilterEnabled = true;
 			}
 			else
 				FilterEnabled = false;
-			Action = action;
-			Method = method;
 		}
-		public CollisionRule(Spritemap spritemap, CollisionAction action, Sprite[] spriteFilter = null, Action<PhysicalObject> method = null)
+		public CollisionRule(Spritemap spritemap, CollisionAction action, IEnumerable<Sprite> spriteFilter = null, Action<PhysicalObject> method = null)
 		{
 			Type = CollisionRuleType.Spritemap;
 			Target = spritemap;
@@ -78,22 +81,20 @@ namespace HatlessEngine
 			Action = action;
 			Method = method;
 		}
-		public CollisionRule(string spritemapID, CollisionAction action, string[] spriteIDFilter = null, Action<PhysicalObject> method = null)
-			: this(Resources.Spritemaps[spritemapID], action, ProcessSpriteIDs(spriteIDFilter), method) { }
+		public CollisionRule(string spritemapId, CollisionAction action, IList<string> spriteIdFilter = null, Action<PhysicalObject> method = null)
+			: this(Resources.Spritemaps[spritemapId], action, ProcessSpriteIDs(spriteIdFilter), method) { }
 
-		private static Sprite[] ProcessSpriteIDs(string[] spriteIDs)
+		private static IEnumerable<Sprite> ProcessSpriteIDs(IList<string> spriteIDs)
 		{
 			if (spriteIDs == null)
 				return null;
-			else
+			
+			Sprite[] sprites = new Sprite[spriteIDs.Count];
+			for (int i = 0; i < spriteIDs.Count; i++)
 			{
-				Sprite[] sprites = new Sprite[spriteIDs.Length];
-				for (int i = 0; i < spriteIDs.Length; i++)
-				{
-					sprites[i] = Resources.Sprites[spriteIDs[i]];
-				}
-				return sprites;
+				sprites[i] = Resources.Sprites[spriteIDs[i]];
 			}
+			return sprites;
 		}
 
 		#endregion

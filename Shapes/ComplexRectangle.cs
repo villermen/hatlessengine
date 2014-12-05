@@ -8,16 +8,16 @@ namespace HatlessEngine
 	[Serializable]
 	public class ComplexRectangle : Shape
 	{
-		private Point _Origin;
+		private Point _origin;
 		/// <summary>
 		/// Origin is the offset from the topleft-most corner to the position before rotation is applied.
 		/// </summary>
 		public Point Origin
 		{
-			get { return _Origin; }
+			get { return _origin; }
 			set 
 			{ 
-				_Origin = value;
+				_origin = value;
 				Changed = true;
 			}
 		}
@@ -26,7 +26,7 @@ namespace HatlessEngine
 		{
 			_Position = pos;
 			_Size = size;
-			_Origin = origin;
+			_origin = origin;
 			_Rotation = rotation;
 
 			Points = new Point[4];
@@ -40,16 +40,16 @@ namespace HatlessEngine
 		public ComplexRectangle(float x, float y, float width, float height, float rotation = 0)
 			: this(new Point(x, y), new Point(width, height), Point.Zero, rotation) { }
 		public ComplexRectangle(ComplexRectangle rect)
-			: this(rect._Position, rect._Size, rect._Origin, rect._Rotation) { }
+			: this(rect._Position, rect._Size, rect._origin, rect._Rotation) { }
 		public ComplexRectangle()
 			: this(Zero) { }
 
 		protected override void Recalculate()
 		{
-			Points[0] = new Point(_Position.X - _Origin.X, _Position.Y - _Origin.Y).RotateOverOrigin(_Position, _Rotation);
-			Points[1] = new Point(_Position.X - _Origin.X + _Size.X, _Position.Y - _Origin.Y).RotateOverOrigin(_Position, _Rotation);
-			Points[2] = new Point(_Position.X - _Origin.X + _Size.X, _Position.Y - _Origin.Y + _Size.Y).RotateOverOrigin(_Position, _Rotation);
-			Points[3] = new Point(_Position.X - _Origin.X, _Position.Y - _Origin.Y + _Size.Y).RotateOverOrigin(_Position, _Rotation);
+			Points[0] = new Point(_Position.X - _origin.X, _Position.Y - _origin.Y).RotateOverOrigin(_Position, _Rotation);
+			Points[1] = new Point(_Position.X - _origin.X + _Size.X, _Position.Y - _origin.Y).RotateOverOrigin(_Position, _Rotation);
+			Points[2] = new Point(_Position.X - _origin.X + _Size.X, _Position.Y - _origin.Y + _Size.Y).RotateOverOrigin(_Position, _Rotation);
+			Points[3] = new Point(_Position.X - _origin.X, _Position.Y - _origin.Y + _Size.Y).RotateOverOrigin(_Position, _Rotation);
 
 			PerpAxes[0] = new Point((-Points[1].Y + Points[0].Y) / _Size.X, (Points[1].X - Points[0].X) / _Size.X);
 			PerpAxes[1] = new Point((-Points[2].Y + Points[1].Y) / _Size.Y, (Points[2].X - Points[1].X) / _Size.Y);
@@ -70,7 +70,7 @@ namespace HatlessEngine
 			}
 			EnclosingRectangle = new Rectangle(minX, minY, maxX - minX, maxY - minY);
 
-			BoundLines =  new Line[4]
+			BoundLines =  new Line[]
 			{
 				new Line(Points[0], Points[1]),
 				new Line(Points[1], Points[2]),
@@ -81,6 +81,6 @@ namespace HatlessEngine
 			Changed = false;
 		}
 
-		public static readonly ComplexRectangle Zero = new ComplexRectangle(Point.Zero, Point.Zero, Point.Zero, 0f);
+		public static readonly ComplexRectangle Zero = new ComplexRectangle(Point.Zero, Point.Zero, Point.Zero);
 	}
 }

@@ -9,8 +9,8 @@ namespace HatlessEngine
 {
 	public static class Input
 	{
-		private static List<Button> PreviousState = new List<Button>();
-		private static List<Button> CurrentState = new List<Button>();
+		private static List<Button> _previousState = new List<Button>();
+		private static readonly List<Button> CurrentState = new List<Button>();
 
 		/// <summary>
 		/// Buttons mapped to other buttons.
@@ -28,13 +28,13 @@ namespace HatlessEngine
 		/// </summary>
 		public static float GamepadDeadZone = 0.2f;
 
-		private static IntPtr[] GamepadHandles = new IntPtr[8];
-		private static Dictionary<int, int> GamepadInstanceIDs = new Dictionary<int, int>();
-		private static IntPtr[] GamepadHapticHandles = new IntPtr[8];
+		private static readonly IntPtr[] GamepadHandles = new IntPtr[8];
+		private static readonly Dictionary<int, int> GamepadInstanceIDs = new Dictionary<int, int>();
+		private static readonly IntPtr[] GamepadHapticHandles = new IntPtr[8];
 
-		private static List<Button>[] GamepadPreviousStates = new List<Button>[8];
-		private static List<Button>[] GamepadCurrentStates = new List<Button>[8];
-		private static float[,] GamepadAxisValues = new float[8,6];
+		private static readonly List<Button>[] GamepadPreviousStates = new List<Button>[8];
+		private static readonly List<Button>[] GamepadCurrentStates = new List<Button>[8];
+		private static readonly float[,] GamepadAxisValues = new float[8,6];
 
 		/// <summary>
 		/// Strings added to this list will have text characters appended or removed by keyboard input.
@@ -48,15 +48,14 @@ namespace HatlessEngine
 		public static bool IsPressed(Button button, int gamepad = 1)
 		{
 			if ((int)button < 3000)
-				return (CurrentState.Contains(button) && !PreviousState.Contains(button));
-			else
-			{
-				if (GamepadConnected(gamepad))
-					return (GamepadCurrentStates[gamepad - 1].Contains(button) && !GamepadPreviousStates[gamepad - 1].Contains(button));
-				else
-					return false;
-			}
+				return (CurrentState.Contains(button) && !_previousState.Contains(button));
+			
+			if (GamepadConnected(gamepad))
+				return (GamepadCurrentStates[gamepad - 1].Contains(button) && !GamepadPreviousStates[gamepad - 1].Contains(button));
+			
+			return false;
 		}
+
 		/// <summary>
 		/// Returns true when the specified button is being held down (every step).
 		/// Searches the gamepadstate if gamepadNumber is given. (1-8)
@@ -65,13 +64,11 @@ namespace HatlessEngine
 		{
 			if ((int)button < 3000)
 				return CurrentState.Contains(button);
-			else
-			{
-				if (GamepadConnected(gamepad))
-					return (GamepadCurrentStates[gamepad - 1].Contains(button));
-				else
-					return false;
-			}
+
+			if (GamepadConnected(gamepad))
+				return (GamepadCurrentStates[gamepad - 1].Contains(button));
+
+			return false;
 		}
 		/// <summary>
 		/// Returns true when the specified button is released (one step only).
@@ -80,14 +77,12 @@ namespace HatlessEngine
 		public static bool IsReleased(Button button, int gamepad = 1)
 		{
 			if ((int)button < 3000)
-				return (!CurrentState.Contains(button) && PreviousState.Contains(button));
-			else 
-			{
-				if (GamepadConnected(gamepad))
-					return (!GamepadCurrentStates[gamepad - 1].Contains(button) && GamepadPreviousStates[gamepad - 1].Contains(button));
-				else
-					return false;
-			}
+				return (!CurrentState.Contains(button) && _previousState.Contains(button));
+
+			if (GamepadConnected(gamepad))
+				return (!GamepadCurrentStates[gamepad - 1].Contains(button) && GamepadPreviousStates[gamepad - 1].Contains(button));
+			
+			return false;
 		}
 
 		/// <summary>
@@ -117,22 +112,20 @@ namespace HatlessEngine
 		/// </summary>
 		public static Point GetGamepadStickPosition(int gamepad, bool leftStick = true, bool respectDeadZone = true)
 		{
-			if (GamepadConnected(gamepad))
-			{
-				Point position = Point.Zero;
-				byte startAxis = 0;
-				if (!leftStick)
-					startAxis = 2;
+			if (!GamepadConnected(gamepad)) 
+				return Point.Zero;
 
-				if (!respectDeadZone || GamepadAxisValues[gamepad - 1, startAxis] <= -GamepadDeadZone || GamepadAxisValues[gamepad - 1, startAxis] >= GamepadDeadZone)
-					position.X = GamepadAxisValues[gamepad - 1, startAxis];
-				if (!respectDeadZone || GamepadAxisValues[gamepad - 1, startAxis + 1] <= -GamepadDeadZone || GamepadAxisValues[gamepad - 1, startAxis + 1] >= GamepadDeadZone)
-					position.Y = GamepadAxisValues[gamepad - 1, startAxis + 1];
+			Point position = Point.Zero;
+			byte startAxis = 0;
+			if (!leftStick)
+				startAxis = 2;
 
-				return position;
-			}
+			if (!respectDeadZone || GamepadAxisValues[gamepad - 1, startAxis] <= -GamepadDeadZone || GamepadAxisValues[gamepad - 1, startAxis] >= GamepadDeadZone)
+				position.X = GamepadAxisValues[gamepad - 1, startAxis];
+			if (!respectDeadZone || GamepadAxisValues[gamepad - 1, startAxis + 1] <= -GamepadDeadZone || GamepadAxisValues[gamepad - 1, startAxis + 1] >= GamepadDeadZone)
+				position.Y = GamepadAxisValues[gamepad - 1, startAxis + 1];
 
-			return Point.Zero;
+			return position;
 		}
 
 		/// <summary>
@@ -140,15 +133,15 @@ namespace HatlessEngine
 		/// </summary>
 		public static float GetTriggerValue(int gamepad, bool leftTrigger = true, bool respectDeadZone = true)
 		{
-			if (GamepadConnected(gamepad))
-			{
-				byte axis = 4;
-				if (!leftTrigger)
-					axis = 5;
+			if (!GamepadConnected(gamepad)) 
+				return 0f;
 
-				if (!respectDeadZone || GamepadAxisValues[gamepad - 1, axis] >= GamepadDeadZone)
-					return GamepadAxisValues[gamepad - 1, axis];
-			}
+			byte axis = 4;
+			if (!leftTrigger)
+				axis = 5;
+
+			if (!respectDeadZone || GamepadAxisValues[gamepad - 1, axis] >= GamepadDeadZone)
+				return GamepadAxisValues[gamepad - 1, axis];
 
 			return 0f;
 		}
@@ -182,7 +175,7 @@ namespace HatlessEngine
 				b == Button.MousewheelRight
 			));
 
-			PreviousState = new List<Button>(CurrentState);
+			_previousState = new List<Button>(CurrentState);
 
 			for (int i = 0; i < 8; i++)
 			{
@@ -288,14 +281,14 @@ namespace HatlessEngine
 				case SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED:
 				{
 					//get first free gamepad slot
-					int newGamepadID = -1;
-					while (GamepadHandles[++newGamepadID] != IntPtr.Zero) ;
-					GamepadHandles[newGamepadID] = SDL.SDL_GameControllerOpen(e.cdevice.which);
+					int newGamepadId = -1;
+					while (GamepadHandles[++newGamepadId] != IntPtr.Zero) { }
+					GamepadHandles[newGamepadId] = SDL.SDL_GameControllerOpen(e.cdevice.which);
 
-					IntPtr joystick = SDL.SDL_GameControllerGetJoystick(GamepadHandles[newGamepadID]);
-					GamepadInstanceIDs.Add(SDL.SDL_JoystickInstanceID(joystick), newGamepadID);
-					GamepadCurrentStates[newGamepadID] = new List<Button>();
-					GamepadPreviousStates[newGamepadID] = new List<Button>();
+					IntPtr joystick = SDL.SDL_GameControllerGetJoystick(GamepadHandles[newGamepadId]);
+					GamepadInstanceIDs.Add(SDL.SDL_JoystickInstanceID(joystick), newGamepadId);
+					GamepadCurrentStates[newGamepadId] = new List<Button>();
+					GamepadPreviousStates[newGamepadId] = new List<Button>();
 
 					//init rumble if supported
 					if (SDL.SDL_JoystickIsHaptic(joystick) == 1)
@@ -304,7 +297,7 @@ namespace HatlessEngine
 						if (SDL.SDL_HapticRumbleSupported(hapticHandle) == 1)
 						{
 							SDL.SDL_HapticRumbleInit(hapticHandle);
-							GamepadHapticHandles[newGamepadID] = hapticHandle;
+							GamepadHapticHandles[newGamepadId] = hapticHandle;
 						}
 						else
 							SDL.SDL_HapticClose(hapticHandle);
@@ -314,15 +307,15 @@ namespace HatlessEngine
 
 				case SDL.SDL_EventType.SDL_CONTROLLERDEVICEREMOVED:
 				{
-					int gamepadID = GamepadInstanceIDs[e.cdevice.which];
-					SDL.SDL_GameControllerClose(GamepadHandles[gamepadID]);
-					GamepadHandles[gamepadID] = IntPtr.Zero;
+					int gamepadId = GamepadInstanceIDs[e.cdevice.which];
+					SDL.SDL_GameControllerClose(GamepadHandles[gamepadId]);
+					GamepadHandles[gamepadId] = IntPtr.Zero;
 					GamepadInstanceIDs.Remove(e.cdevice.which);
 
-					if (GamepadHapticHandles[gamepadID] != IntPtr.Zero)
+					if (GamepadHapticHandles[gamepadId] != IntPtr.Zero)
 					{
-						SDL.SDL_HapticClose(GamepadHapticHandles[gamepadID]);
-						GamepadHapticHandles[gamepadID] = IntPtr.Zero;
+						SDL.SDL_HapticClose(GamepadHapticHandles[gamepadId]);
+						GamepadHapticHandles[gamepadId] = IntPtr.Zero;
 					}
 					break;
 				}
@@ -385,12 +378,12 @@ namespace HatlessEngine
 				Rectangle absoluteGameArea = view.GetAbsoluteGameArea();
 				Rectangle absoluteViewport = view.GetAbsoluteViewport();
 
-				if (absoluteViewport.IntersectsWith(UntranslatedMousePosition))
-				{
-					//calculate mouse position in gamespace
-					MousePosition = absoluteGameArea.Position + (UntranslatedMousePosition - absoluteViewport.Position) / absoluteViewport.Size * absoluteGameArea.Size;
-					break; //found it! let's ditch this dump
-				}
+				if (!absoluteViewport.IntersectsWith(UntranslatedMousePosition)) 
+					continue;
+
+				//found it! let's calculate and ditch this place
+				MousePosition = absoluteGameArea.Position + (UntranslatedMousePosition - absoluteViewport.Position) / absoluteViewport.Size * absoluteGameArea.Size;
+				break;
 			}
 		}
 
@@ -485,10 +478,8 @@ namespace HatlessEngine
 			string str = "Pressed buttons: ";
 			if (CurrentState.Count > 0)
 			{
-				foreach(Button button in CurrentState)
-				{
-					str += button.ToString() + ", ";
-				}
+				str = CurrentState.Aggregate(str, 
+					(current, button) => current + button + ", ");
 
 				str = str.Substring(0, str.Length - 2);
 			}
@@ -496,20 +487,18 @@ namespace HatlessEngine
 			//gamepad info
 			for(byte i = 0; i < 8; i++)
 			{
-				if (GamepadHandles[i] != IntPtr.Zero)
-				{
-					str += "\nGamepad " + (i + 1).ToString() + ": ";
+				if (GamepadHandles[i] == IntPtr.Zero) 
+					continue;
 
-					if (GamepadCurrentStates[i].Count > 0)
-					{
-						foreach(Button button in GamepadCurrentStates[i])
-						{
-							str += button.ToString() + ", ";
-						}
+				str += "\nGamepad " + (i + 1) + ": ";
 
-						str = str.Substring(0, str.Length - 2);
-					}
-				}
+				if (GamepadCurrentStates[i].Count <= 0) 
+					continue;
+
+				str = GamepadCurrentStates[i].Aggregate(str, 
+					(current, button) => current + button + ", ");
+
+				str = str.Substring(0, str.Length - 2);
 			}
 				
 			return str;
@@ -522,17 +511,17 @@ namespace HatlessEngine
 		{
 			for (int i = 0; i < 8; i++)
 			{
-				if (GamepadHandles[i] != IntPtr.Zero)
-				{
-					SDL.SDL_GameControllerClose(GamepadHandles[i]);
-					GamepadHandles[i] = IntPtr.Zero;
+				if (GamepadHandles[i] == IntPtr.Zero) 
+					continue;
 
-					if (GamepadHapticHandles[i] != IntPtr.Zero)
-					{
-						SDL.SDL_HapticClose(GamepadHapticHandles[i]);
-						GamepadHapticHandles[i] = IntPtr.Zero;
-					}
-				}				
+				SDL.SDL_GameControllerClose(GamepadHandles[i]);
+				GamepadHandles[i] = IntPtr.Zero;
+
+				if (GamepadHapticHandles[i] == IntPtr.Zero) 
+					continue;
+
+				SDL.SDL_HapticClose(GamepadHapticHandles[i]);
+				GamepadHapticHandles[i] = IntPtr.Zero;
 			}
 			GamepadInstanceIDs.Clear();
 		}

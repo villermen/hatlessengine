@@ -7,7 +7,7 @@ namespace HatlessEngine.GUI
 	/// </summary>
 	public abstract class Scrollbar
 	{
-		public Scrollbar()
+		protected Scrollbar()
 		{
 			throw new NotImplementedException();
 		}

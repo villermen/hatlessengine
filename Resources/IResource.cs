@@ -2,7 +2,7 @@
 {
 	public interface IResource
 	{
-		string ID { get; }
+		string Id { get; }
 
 		/// <summary>
 		/// Disposes/Unloads any memory resources from this resource and removes this resource from Resources.

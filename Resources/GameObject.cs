@@ -8,7 +8,7 @@
 	{
 		public bool Destroyed { get; private set; }
 
-		public GameObject()
+		protected GameObject()
 		{
 			//add object to Resource's objectlist
 			Resources.AddObjects.Add(this);

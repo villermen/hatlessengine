@@ -17,12 +17,10 @@ namespace HatlessEngine
 
 		internal static bool RenderframeReady = false;
 
-		private static bool Running = false;
+		private static bool _running = false;
 
-		private static int TicksPerStep;
-		private static int TicksPerDraw;
-		private static int _ActualSPS;
-		private static int _ActualFPS;
+		private static int _ticksPerStep;
+		private static int _ticksPerDraw;
 
 		/// <summary>
 		/// If true the game will force to run steps at max frequency until it has caught up with the required speed.
@@ -35,13 +33,13 @@ namespace HatlessEngine
 		/// </summary>
 		public static float StepsPerSecond
 		{
-			get { return Stopwatch.Frequency / TicksPerStep; }
+			get { return Stopwatch.Frequency / _ticksPerStep; }
 			set 
 			{
 				if (value > 0)
-					TicksPerStep = (int)(Stopwatch.Frequency / value);
+					_ticksPerStep = (int)(Stopwatch.Frequency / value);
 				else
-					throw new ArgumentOutOfRangeException("StepsPerSecond", "StepsPerSecond must be positive and nonzero. (" + value.ToString() + " given)");
+					throw new ArgumentOutOfRangeException("StepsPerSecond", "StepsPerSecond must be positive and nonzero. (" + value + " given)");
 			}
 		}
 
@@ -53,39 +51,34 @@ namespace HatlessEngine
 		{
 			get 
 			{
-				if (TicksPerDraw == 0)
+				if (_ticksPerDraw == 0)
 					return 0;
-				return Stopwatch.Frequency / TicksPerDraw; 
+				return Stopwatch.Frequency / _ticksPerDraw; 
 			}
 			set
 			{
 				if (value > 0)
-					TicksPerDraw = (int)(Stopwatch.Frequency / value);
-				else if (value == 0)
-					TicksPerDraw = 0;
+					_ticksPerDraw = (int)(Stopwatch.Frequency / value);
+				else if (value == 0f)
+					_ticksPerDraw = 0;
 				else
-					throw new ArgumentOutOfRangeException("FPSLimit", "FPSLimit must be positive or zero. (" + value.ToString() + " given)");
+					throw new ArgumentOutOfRangeException("FPSLimit", "FpsLimit must be positive or zero. (" + value + " given)");
 			}
 		}
 
 		/// <summary>
 		/// Returns the actual number of Steps Per Second, calculated from one step interval.
 		/// </summary>
-		public static int ActualSPS
-		{
-			get { return _ActualSPS; }
-		}
+		public static int ActualStepsPerSecond { get; private set; }
+
 		/// <summary>
 		/// Returns the actual number of Frames Per Second, calculated from one draw interval.
 		/// </summary>
-		public static int ActualFPS
-		{
-			get { return _ActualFPS; }
-		}
+		public static int ActualFramesPerSecond { get; private set; }
 
 		static Game()
 		{
-			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandler);
+			AppDomain.CurrentDomain.UnhandledException += ExceptionHandler;
 		}
 
 		/// <summary>
@@ -124,13 +117,13 @@ namespace HatlessEngine
 			//initialize audio system and let Resources handle sound expiration
 			SDL_mixer.Mix_OpenAudio(44100, SDL.AUDIO_S16SYS, 2, 4096);
 			SDL_mixer.Mix_AllocateChannels((int)(speed * 2)); //might want to dynamically create and remove channels during runtime
-			SDL_mixer.Mix_ChannelFinished(new SDL_mixer.ChannelFinishedDelegate(Resources.SoundChannelFinished));
-			SDL_mixer.Mix_HookMusicFinished(new SDL_mixer.MusicFinishedDelegate(Resources.MusicFinished));
+			SDL_mixer.Mix_ChannelFinished(Resources.SoundChannelFinished);
+			SDL_mixer.Mix_HookMusicFinished(Resources.MusicFinished);
 
 			//initialize loop
 			StepsPerSecond = speed;
 
-			Running = true;			
+			_running = true;			
 
 			if (Started != null)
 				Started(null, EventArgs.Empty);
@@ -146,28 +139,28 @@ namespace HatlessEngine
 			long lastStepTime = 0;
 			long lastDrawTime = 0;
 
-			while (Running)
+			while (_running)
 			{
 				//perform step when needed
-				if (stopWatch.ElapsedTicks >= lastStepTick + TicksPerStep)
+				if (stopWatch.ElapsedTicks >= lastStepTick + _ticksPerStep)
 				{
 					if (CatchUpSteps)
-						lastStepTick = lastStepTick + TicksPerStep;
+						lastStepTick = lastStepTick + _ticksPerStep;
 					else
 						lastStepTick = stopWatch.ElapsedTicks;
 					Step();
 
-					_ActualSPS = (int)(Stopwatch.Frequency / (stopWatch.ElapsedTicks - lastStepTime));
+					ActualStepsPerSecond = (int)(Stopwatch.Frequency / (stopWatch.ElapsedTicks - lastStepTime));
 					lastStepTime = stopWatch.ElapsedTicks;
 				}
 
 				//perform draw when ready for a new one
-				if (!RenderframeReady && Running && stopWatch.ElapsedTicks >= lastDrawTick + TicksPerDraw)
+				if (!RenderframeReady && _running && stopWatch.ElapsedTicks >= lastDrawTick + _ticksPerDraw)
 				{
-					lastDrawTick = lastDrawTick + TicksPerDraw;
+					lastDrawTick = lastDrawTick + _ticksPerDraw;
 					Draw();
 
-					_ActualFPS = (int)(Stopwatch.Frequency / (stopWatch.ElapsedTicks - lastDrawTime));
+					ActualFramesPerSecond = (int)(Stopwatch.Frequency / (stopWatch.ElapsedTicks - lastDrawTime));
 					lastDrawTime = stopWatch.ElapsedTicks;
 				}
 			}
@@ -312,7 +305,7 @@ namespace HatlessEngine
 					obj.Draw();
 			}
 
-			DrawX.DrawJobs.OrderBy((job) => job.Depth);
+			DrawX.DrawJobs.OrderBy(job => job.Depth);
 
 			SDL.SDL_SetRenderDrawColor(RendererHandle, DrawX.BackgroundColor.R, DrawX.BackgroundColor.G, DrawX.BackgroundColor.B, DrawX.BackgroundColor.A);
 			SDL.SDL_RenderClear(RendererHandle);
@@ -360,7 +353,7 @@ namespace HatlessEngine
 						LineDrawJob lineDrawJob = (LineDrawJob)job;
 
 						//transform all points according to view and cast em
-						SDL.SDL_Point[] sdlPoints = Array.ConvertAll<Point, SDL.SDL_Point>(lineDrawJob.Points, point => (SDL.SDL_Point)(point - absoluteGameArea.Position));
+						SDL.SDL_Point[] sdlPoints = Array.ConvertAll(lineDrawJob.Points, point => (SDL.SDL_Point)(point - absoluteGameArea.Position));
 
 						SDL.SDL_SetRenderDrawColor(RendererHandle, lineDrawJob.Color.R, lineDrawJob.Color.G, lineDrawJob.Color.B, lineDrawJob.Color.A);
 						SDL.SDL_RenderDrawLines(RendererHandle, sdlPoints, lineDrawJob.PointCount);
@@ -381,7 +374,7 @@ namespace HatlessEngine
 
 			//threadpool should take care of actually swapping the frames (RenderPresent may wait for things like Fraps or VSync)
 			RenderframeReady = true;
-			ThreadPool.QueueUserWorkItem(new WaitCallback(PresentRender));
+			ThreadPool.QueueUserWorkItem(PresentRender);
 		}
 
 		/// <summary>
@@ -389,7 +382,7 @@ namespace HatlessEngine
 		/// </summary>
 		public static void Exit()
 		{
-			Running = false;
+			_running = false;
 		}
 		
 		public static event EventHandler Started;

@@ -23,10 +23,7 @@ namespace HatlessEngine
 		public static bool Chance(int values, int chance = 1)
 		{
 			int result = new Random().Next(values);
-			if (result < chance)
-				return true;
-			else
-				return false;
+			return result < chance;
 		}
 
 		/// <summary>
