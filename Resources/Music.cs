@@ -123,9 +123,19 @@ namespace HatlessEngine
 			return Resources.Music[str];
 		}
 
+		/// <summary>
+		/// Pretty much an alias for Destroy(), here just to implement IDisposable as this object uses unmanaged resources.
+		/// </summary>
 		public void Dispose()
 		{
-			Unload();
+			Destroy();
+
+			//do not suppress finalization as the resource could be loaded after this point
+		}
+
+		~Music()
+		{
+			Dispose();
 		}
 	}
 }

@@ -243,9 +243,25 @@ namespace HatlessEngine
 			return Resources.Fonts[str];
 		}
 
+		protected virtual void Dispose(bool disposing)
+		{
+			//destroy either way, this overload is just for convention
+			Destroy();
+		}
+
+		/// <summary>
+		/// Pretty much an alias for Destroy(), here just to implement IDisposable as this object uses unmanaged resources.
+		/// </summary>
 		public void Dispose()
 		{
-			Unload();
+			Dispose(true);
+
+			//do not suppress finalization as the resource could be loaded after this point
+		}
+
+		~Font()
+		{
+			Dispose(false);
 		}
 	}
 
