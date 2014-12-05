@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CollisionRule.cs" />
-    <Compile Include="Cursor.cs" />
+    <Compile Include="Resources\Cursor.cs" />
     <Compile Include="DrawJobs\FilledRectDrawJob.cs" />
     <Compile Include="DrawJobs\LineDrawJob.cs" />
     <Compile Include="DrawJobs\TextureDrawJob.cs" />
