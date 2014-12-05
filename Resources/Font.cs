@@ -222,12 +222,12 @@ namespace HatlessEngine
 
 		public void Unload()
 		{
-			if (Loaded)
-			{
-				SDL_ttf.TTF_CloseFont(Handle);
-				Handle = IntPtr.Zero;
-				Loaded = false;
-			}
+			if (!Loaded) 
+				return;
+
+			SDL_ttf.TTF_CloseFont(Handle);
+			Handle = IntPtr.Zero;
+			Loaded = false;
 		}
 
 		public void Destroy()
@@ -241,6 +241,11 @@ namespace HatlessEngine
 		public static implicit operator Font(string str)
 		{
 			return Resources.Fonts[str];
+		}
+
+		public void Dispose()
+		{
+			Unload();
 		}
 	}
 

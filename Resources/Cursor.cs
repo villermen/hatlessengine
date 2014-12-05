@@ -92,6 +92,11 @@ namespace HatlessEngine
 			Resources.Cursors.Remove(ID);
 			Resources.ExternalResources.Remove(this);
 		}
+
+		public void Dispose()
+		{
+			Unload();
+		}
 	}
 
 	public enum SystemCursor

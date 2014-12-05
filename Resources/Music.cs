@@ -122,5 +122,10 @@ namespace HatlessEngine
 		{
 			return Resources.Music[str];
 		}
+
+		public void Dispose()
+		{
+			Unload();
+		}
 	}
 }

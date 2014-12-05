@@ -1,8 +1,9 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 
 namespace HatlessEngine
 {
-	public interface IExternalResource : IResource
+	public interface IExternalResource : IResource, IDisposable
 	{
 		string Filename { get; }
 		Assembly FileAssembly { get; }

@@ -108,12 +108,12 @@ namespace HatlessEngine
 
 		public void Unload()
 		{
-			if (Loaded)
-			{
-				SDL.SDL_DestroyTexture(TextureHandle);
-				TextureHandle = IntPtr.Zero;
-				Loaded = false;
-			}
+			if (!Loaded) 
+				return;
+
+			SDL.SDL_DestroyTexture(TextureHandle);
+			TextureHandle = IntPtr.Zero;
+			Loaded = false;
 		}
 
 		public void Destroy()
@@ -127,6 +127,11 @@ namespace HatlessEngine
 		public static implicit operator Sprite(string str)
 		{
 			return Resources.Sprites[str];
+		}
+
+		public void Dispose()
+		{
+			Unload();
 		}
 	}
 }

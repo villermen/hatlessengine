@@ -85,5 +85,10 @@ namespace HatlessEngine
 		{
 			return Resources.Sounds[str];
 		}
+
+		public void Dispose()
+		{
+			Unload();
+		}
 	}
 }
