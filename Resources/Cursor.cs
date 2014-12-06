@@ -118,7 +118,7 @@ namespace HatlessEngine
 	public enum SystemCursor
 	{
 		Arrow = 0,
-		IBeam = 1,
+		Beam = 1,
 		Wait = 2,
 		Crosshair = 3,
 		WaitArrow = 4,

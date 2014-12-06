@@ -8,11 +8,11 @@ namespace HatlessEngine
 	/// </summary>
 	public static class Window
 	{
-		private static Point _Size = new Point(800f, 600f);
+		private static Point _size = new Point(800f, 600f);
 
 		public static Point Size
 		{
-			get { return _Size; }
+			get { return _size; }
 		}
 
 		public static void SetSize(Point size)
@@ -54,8 +54,10 @@ namespace HatlessEngine
 			SDL.SDL_WindowFlags flags = (SDL.SDL_WindowFlags)SDL.SDL_GetWindowFlags(Game.WindowHandle);
 			if (flags.HasFlag(SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN))
 				return ScreenMode.Fullscreen;
-			else if (flags.HasFlag(SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP))
+			
+			if (flags.HasFlag(SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP))
 				return ScreenMode.FakeFullscreen;
+
 			return ScreenMode.Windowed;
 		}
 		public static void SetScreenMode(ScreenMode mode)
@@ -158,9 +160,9 @@ namespace HatlessEngine
 		{
 			cursor.Set();
 		}
-		public static void SetCursor(string cursorID)
+		public static void SetCursor(string cursorId)
 		{
-			SetCursor(Resources.Cursors[cursorID]);
+			SetCursor(Resources.Cursors[cursorId]);
 		}
 
 		//left to do: maximizing/minimizing
@@ -173,7 +175,7 @@ namespace HatlessEngine
 			switch (e.window.windowEvent)
 			{
 				case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED:
-					_Size = new Point(e.window.data1, e.window.data2);
+					_size = new Point(e.window.data1, e.window.data2);
 					break;
 			}
 		}

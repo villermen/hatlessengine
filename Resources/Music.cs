@@ -28,6 +28,8 @@ namespace HatlessEngine
 
 			Resources.Music.Add(Id, this);
 			Resources.ExternalResources.Add(this);
+
+			FileAssembly = Assembly.GetCallingAssembly();
 		}
 
 		/// <summary>

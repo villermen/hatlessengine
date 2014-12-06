@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HatlessEngine
 {
@@ -209,83 +210,82 @@ namespace HatlessEngine
 
 				return true;
 			}
-			else //other shapes
+
+			//other shapes
+			touchingAtSpeedFraction = float.PositiveInfinity;
+
+			Point[] shape1Points = GetPoints();
+			Point[] shape2Points = shape.GetPoints();
+
+			List<Point> allAxes = new List<Point>(GetPerpAxes());
+			allAxes.AddRange(shape.GetPerpAxes());
+
+			foreach (Point axis in allAxes)
 			{
-				touchingAtSpeedFraction = float.PositiveInfinity;
+				float shape1ScalarMin = float.PositiveInfinity;
+				float shape1ScalarMax = float.NegativeInfinity;
+				float shape2ScalarMin = float.PositiveInfinity;
+				float shape2ScalarMax = float.NegativeInfinity;
 
-				Point[] shape1Points = GetPoints();
-				Point[] shape2Points = shape.GetPoints();
-
-				List<Point> allAxes = new List<Point>(GetPerpAxes());
-				allAxes.AddRange(shape.GetPerpAxes());
-
-				foreach (Point axis in allAxes)
+				//cast shape1's points to the axis
+				foreach (Point point in shape1Points)
 				{
-					float shape1ScalarMin = float.PositiveInfinity;
-					float shape1ScalarMax = float.NegativeInfinity;
-					float shape2ScalarMin = float.PositiveInfinity;
-					float shape2ScalarMax = float.NegativeInfinity;
+					float multiplier = (float)((point.X * axis.X + point.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
+					float scalar = multiplier * axis.X * axis.X + multiplier * axis.Y * axis.Y;
 
-					//cast shape1's points to the axis
-					foreach (Point point in shape1Points)
-					{
-						float multiplier = (float)((point.X * axis.X + point.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
-						float scalar = multiplier * axis.X * axis.X + multiplier * axis.Y * axis.Y;
-
-						if (scalar < shape1ScalarMin)
-							shape1ScalarMin = scalar;
-						if (scalar > shape1ScalarMax)
-							shape1ScalarMax = scalar;
-					}
-
-					//cast shape2's points to the axis
-					foreach (Point point in shape2Points)
-					{
-						float multiplier = (float)((point.X * axis.X + point.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
-						float scalar = multiplier * axis.X * axis.X + multiplier * axis.Y * axis.Y;
-
-						if (scalar < shape2ScalarMin)
-							shape2ScalarMin = scalar;
-						if (scalar > shape2ScalarMax)
-							shape2ScalarMax = scalar;
-					}
-
-					//cast speed to axis
-					float speedMultiplier = (float)((relativeSpeed.X * axis.X + relativeSpeed.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
-					float speedScalar = speedMultiplier * axis.X * axis.X + speedMultiplier * axis.Y * axis.Y;
-
-					float thisTouchingAtSpeedFraction;
-					if (speedScalar >= 0)
-					{
-						if (shape1ScalarMax + speedScalar < shape2ScalarMin || shape1ScalarMin > shape2ScalarMax)
-							return false;
-
-						thisTouchingAtSpeedFraction = (shape2ScalarMin - shape1ScalarMax) / speedScalar;
-					}
-					else
-					{
-						if (shape1ScalarMin + speedScalar > shape2ScalarMax || shape1ScalarMax < shape2ScalarMin)
-							return false;
-
-						thisTouchingAtSpeedFraction = (shape2ScalarMax - shape1ScalarMin) / speedScalar;
-					}
-
-					if (thisTouchingAtSpeedFraction >= 0f
-						&& thisTouchingAtSpeedFraction <= 1f
-						&& thisTouchingAtSpeedFraction < touchingAtSpeedFraction)
-					{
-						touchingAtSpeedFraction = thisTouchingAtSpeedFraction;
-						intersectionAxis = axis;
-					}
+					if (scalar < shape1ScalarMin)
+						shape1ScalarMin = scalar;
+					if (scalar > shape1ScalarMax)
+						shape1ScalarMax = scalar;
 				}
 
-				if (intersectionAxis == Point.Zero)
-					touchingAtSpeedFraction = -1f;
-				else //this axis is still a perpendicular axis, revert!
-					intersectionAxis = new Point(intersectionAxis.Y, -intersectionAxis.X);
+				//cast shape2's points to the axis
+				foreach (Point point in shape2Points)
+				{
+					float multiplier = (float)((point.X * axis.X + point.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
+					float scalar = multiplier * axis.X * axis.X + multiplier * axis.Y * axis.Y;
 
-				return true;
+					if (scalar < shape2ScalarMin)
+						shape2ScalarMin = scalar;
+					if (scalar > shape2ScalarMax)
+						shape2ScalarMax = scalar;
+				}
+
+				//cast speed to axis
+				float speedMultiplier = (float)((relativeSpeed.X * axis.X + relativeSpeed.Y * axis.Y) / (axis.X * axis.X + axis.Y * axis.Y));
+				float speedScalar = speedMultiplier * axis.X * axis.X + speedMultiplier * axis.Y * axis.Y;
+
+				float thisTouchingAtSpeedFraction;
+				if (speedScalar >= 0)
+				{
+					if (shape1ScalarMax + speedScalar < shape2ScalarMin || shape1ScalarMin > shape2ScalarMax)
+						return false;
+
+					thisTouchingAtSpeedFraction = (shape2ScalarMin - shape1ScalarMax) / speedScalar;
+				}
+				else
+				{
+					if (shape1ScalarMin + speedScalar > shape2ScalarMax || shape1ScalarMax < shape2ScalarMin)
+						return false;
+
+					thisTouchingAtSpeedFraction = (shape2ScalarMax - shape1ScalarMin) / speedScalar;
+				}
+
+				if (thisTouchingAtSpeedFraction >= 0f
+				    && thisTouchingAtSpeedFraction <= 1f
+				    && thisTouchingAtSpeedFraction < touchingAtSpeedFraction)
+				{
+					touchingAtSpeedFraction = thisTouchingAtSpeedFraction;
+					intersectionAxis = axis;
+				}
 			}
+
+			if (intersectionAxis == Point.Zero)
+				touchingAtSpeedFraction = -1f;
+			else //this axis is still a perpendicular axis, revert!
+				intersectionAxis = new Point(intersectionAxis.Y, -intersectionAxis.X);
+
+			return true;
 		}
 		/// <summary>
 		/// Returns whether this shape overlaps with another somewhere if it moves by relativeSpeed.
@@ -311,11 +311,7 @@ namespace HatlessEngine
 			if (Changed)
 				Recalculate();
 
-			string str = "";
-			foreach (Point point in Points)
-				str += point.ToString();
-
-			return str;
+			return Points.Aggregate("", (current, point) => current + point.ToString());
 		}
 	}
 }

@@ -58,7 +58,7 @@ namespace HatlessEngine
 				new Line(Points[0], Points[1]),
 				new Line(Points[1], Points[2]),
 				new Line(Points[2], Points[3]),
-				new Line(Points[3], Points[0]),
+				new Line(Points[3], Points[0])
 			};
 
 			Changed = false;
@@ -80,6 +80,7 @@ namespace HatlessEngine
 			Rectangle rect = (Rectangle)obj;
 			return this == rect;
 		}
+
 		public override int GetHashCode()
 		{
 			return base.GetHashCode();

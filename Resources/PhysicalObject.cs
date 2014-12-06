@@ -325,7 +325,7 @@ namespace HatlessEngine
 			Resources.PhysicalObjects.Remove(this);
 
 			//remove from physicalobjectsbytype
-			for (Type currentType = this.GetType(); currentType != typeof(GameObject); currentType = currentType.BaseType)
+			for (Type currentType = GetType(); currentType != typeof(GameObject); currentType = currentType.BaseType)
 			{
 				Resources.PhysicalObjectsByType[currentType].Remove(this);
 			}
