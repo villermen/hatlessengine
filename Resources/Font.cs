@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using MoreLinq;
 using SDL2;
 
 namespace HatlessEngine
@@ -38,7 +39,7 @@ namespace HatlessEngine
 			Resources.ExternalResources.Add(this);
 		}
 
-		public void Draw(string str, Point pos, Color color, Alignment alignment = Alignment.TopLeft, int depth = 0)
+		public void Draw(string str, Point pos, Color color, CombinedAlignment alignment = CombinedAlignment.TopLeft, int depth = 0)
 		{
 			if (!Loaded)
 				throw new NotLoadedException();
@@ -84,17 +85,17 @@ namespace HatlessEngine
 				float verticalOffset = 0f;
 
 				//horizontal alignment
-				if (alignment.HasFlag(Alignment.Center))
+				if (alignment.HasFlag((CombinedAlignment)HorizontalAlignment.Center))
 					horizontalOffset = -w / 2f;
-				if (alignment.HasFlag(Alignment.Right))
+				if (alignment.HasFlag((CombinedAlignment)HorizontalAlignment.Right))
 					horizontalOffset = -w;
 
 				//vertical alignment
-				if (alignment.HasFlag(Alignment.Top))
+				if (alignment.HasFlag((CombinedAlignment)VerticalAlignment.Top))
 					verticalOffset = i * LineHeight;
-				if (alignment.HasFlag(Alignment.Middle))
+				if (alignment.HasFlag((CombinedAlignment)VerticalAlignment.Middle))
 					verticalOffset = -rows.Length * LineHeight / 2f + i * LineHeight;
-				if (alignment.HasFlag(Alignment.Bottom))
+				if (alignment.HasFlag((CombinedAlignment)VerticalAlignment.Bottom))
 					verticalOffset = -rows.Length * LineHeight + i * LineHeight;
 
 				Point texturePos = pos + new Point(horizontalOffset, verticalOffset);
@@ -263,23 +264,5 @@ namespace HatlessEngine
 		{
 			Dispose(false);
 		}
-	}
-
-	[Flags]
-	public enum Alignment
-	{
-		None = 0,
-
-		Left = 1,
-		Center = 2,
-		Right = 4,
-
-		Top = 8,
-		Middle = 16,
-		Bottom = 32,
-
-		TopLeft = Top | Left,
-		BottomRight = Bottom | Right,
-		CenterMiddle = Center | Middle
 	}
 }

@@ -39,6 +39,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alignment.cs" />
     <Compile Include="CollisionRule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Cursor.cs" />

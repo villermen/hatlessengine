@@ -12,7 +12,7 @@ namespace HatlessEngine.GUI
 
 		public string Text;
 		public Font TextFont;
-		public Alignment TextAlignment;
+		public CombinedAlignment TextAlignment;
 		public Color TextColor;
 
 		public int Depth;
@@ -28,7 +28,7 @@ namespace HatlessEngine.GUI
 		/// </summary>
 		public event EventHandler Clicked;
 
-		protected TextButton(Rectangle bounds, string text, Font textFont, Color textColor, Alignment textAlignment, int depth = 0)
+		protected TextButton(Rectangle bounds, string text, Font textFont, Color textColor, CombinedAlignment textAlignment, int depth = 0)
 		{
 			Bounds = bounds;
 
@@ -70,16 +70,16 @@ namespace HatlessEngine.GUI
 
 			if (!String.IsNullOrEmpty(Text))
 			{
-				if (TextAlignment.HasFlag(Alignment.Right))
+				if (TextAlignment.HasFlag((CombinedAlignment)HorizontalAlignment.Right))
 					_textPos.X = Bounds.Position2.X;
-				else if (TextAlignment.HasFlag(Alignment.Center))
+				else if (TextAlignment.HasFlag((CombinedAlignment)HorizontalAlignment.Center))
 					_textPos.X = Bounds.Center.X;
 				else
 					_textPos.X = Bounds.Position.X;
 
-				if (TextAlignment.HasFlag(Alignment.Bottom))
+				if (TextAlignment.HasFlag((CombinedAlignment)VerticalAlignment.Bottom))
 					_textPos.Y = Bounds.Position2.Y;
-				else if (TextAlignment.HasFlag(Alignment.Middle))
+				else if (TextAlignment.HasFlag((CombinedAlignment)VerticalAlignment.Middle))
 					_textPos.Y = Bounds.Center.Y;
 				else
 					_textPos.Y = Bounds.Position.Y;

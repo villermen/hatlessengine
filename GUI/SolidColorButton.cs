@@ -11,17 +11,17 @@
 
 		private Color _currentColor;
 
-		public SolidColorButton(Rectangle bounds, string text, Font textFont, Color textColor, Color defaultColor, Color mouseoverColor, Color mousedownColor, Alignment textAlignment = Alignment.CenterMiddle, int depth = 0)
+		public SolidColorButton(Rectangle bounds, string text, Font textFont, Color textColor, Color defaultColor, Color mouseoverColor, Color mousedownColor, CombinedAlignment textAlignment = CombinedAlignment.MiddleCenter, int depth = 0)
 			: base(bounds, text, textFont, textColor, textAlignment, depth)
 		{
 			DefaultColor = defaultColor;
 			MouseoverColor = mouseoverColor;
 			MousedownColor = mousedownColor;
 		}
-		public SolidColorButton(Rectangle bounds, string text, Font textFont, Alignment textAlignment = Alignment.CenterMiddle, int depth = 0)
+		public SolidColorButton(Rectangle bounds, string text, Font textFont, CombinedAlignment textAlignment = CombinedAlignment.MiddleCenter, int depth = 0)
 			: this(bounds, text, textFont, Color.Black, Color.Silver, Color.Gray, Color.Lime, textAlignment, depth) { }
 		public SolidColorButton(Rectangle bounds, int depth = 0)
-			: this(bounds, null, null, Color.Black, Color.Silver, Color.Gray, Color.Lime, Alignment.CenterMiddle, depth) { }
+			: this(bounds, null, null, Color.Black, Color.Silver, Color.Gray, Color.Lime, CombinedAlignment.MiddleCenter, depth) { }
 
 		public override void Step()
 		{

@@ -20,7 +20,7 @@ namespace HatlessEngine
 		{
 			DrawJobs.Add(new LineDrawJob(depth, line.GetEnclosingRectangle(), line.GetPoints(), color));
 		}
-		public static void Draw(string str, Font font, Point pos, Color color, Alignment alignment = Alignment.Top | Alignment.Left, int depth = 0)
+		public static void Draw(string str, Font font, Point pos, Color color, CombinedAlignment alignment = CombinedAlignment.TopLeft, int depth = 0)
 		{
 			font.Draw(str, pos, color, alignment, depth);
 		}

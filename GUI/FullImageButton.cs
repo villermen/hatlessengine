@@ -11,17 +11,17 @@
 		/// </summary>
 		public Sprite Sprite;
 
-		public FullImageButton(Rectangle bounds, Sprite sprite, string text, Font textFont, Color textColor, Alignment textAlignment = Alignment.CenterMiddle, int depth = 0)
+		public FullImageButton(Rectangle bounds, Sprite sprite, string text, Font textFont, Color textColor, CombinedAlignment textAlignment = CombinedAlignment.MiddleCenter, int depth = 0)
 			: base(bounds, text, textFont, textColor, textAlignment, depth)
 		{
 			Sprite = sprite;		
 		}
-		public FullImageButton(Point position, Sprite sprite, string text, Font textFont, Color textColor, Alignment textAlignment = Alignment.CenterMiddle, int depth = 0)
+		public FullImageButton(Point position, Sprite sprite, string text, Font textFont, Color textColor, CombinedAlignment textAlignment = CombinedAlignment.MiddleCenter, int depth = 0)
 			: this(new Rectangle(position, sprite.FrameSize), sprite, text, textFont, textColor, textAlignment, depth) { }
 		public FullImageButton(Rectangle bounds, Sprite sprite, int depth = 0)
-			: this(bounds, sprite, null, null, Color.Black, Alignment.CenterMiddle, depth) { }
+			: this(bounds, sprite, null, null, Color.Black, CombinedAlignment.MiddleCenter, depth) { }
 		public FullImageButton(Point position, Sprite sprite, int depth = 0)
-			: this(new Rectangle(position, sprite.FrameSize), sprite, null, null, Color.Black, Alignment.CenterMiddle, depth) { }
+			: this(new Rectangle(position, sprite.FrameSize), sprite, null, null, Color.Black, CombinedAlignment.MiddleCenter, depth) { }
 
 		public override void Draw()
 		{

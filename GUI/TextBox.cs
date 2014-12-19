@@ -137,7 +137,7 @@ namespace HatlessEngine.GUI
 			DrawX.DrawFilledRect(_area, BackGroundColor);
 			if (_hasFocus)
 				DrawX.DrawShapeOutline(_area, BorderColor);
-			Font.Draw(_drawString, Position + 1f, TextColor, Alignment.TopLeft, -5);
+			Font.Draw(_drawString, Position + 1f, TextColor, CombinedAlignment.TopLeft, -5);
 		}
 	}
 }
