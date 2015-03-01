@@ -126,8 +126,6 @@ namespace HatlessEngine
 
 			long lastStepTick = 0;
 			long lastDrawTick = 0;
-			long lastStepTime = 0;
-			long lastDrawTime = 0;
 
 			while (_running)
 			{

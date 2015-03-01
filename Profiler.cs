@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using MoreLinq;
 
 namespace HatlessEngine
 {
@@ -10,7 +11,7 @@ namespace HatlessEngine
 		private static Stopwatch _stopwatch = new Stopwatch();
 		private static long _lastSecond;
 
-		private static Dictionary<string, ProfilerItem> _previousState;
+		private static Dictionary<string, ProfilerItem> _previousState = new Dictionary<string, ProfilerItem>();
 		private static Dictionary<string, ProfilerItem> _currentState = new Dictionary<string, ProfilerItem>();
 
 		static Profiler()
@@ -43,17 +44,15 @@ namespace HatlessEngine
 				_currentState[itemId].StopMeasurement();
 		}
 
-		private static void EnsureUpdatedState()
+		/// <summary>
+		/// Get a specific item from the last completed state.
+		/// </summary>
+		public static ProfilerItem GetItem(string itemId)
 		{
-			long elapsedSeconds = _stopwatch.ElapsedTicks / Stopwatch.Frequency;
-			if (elapsedSeconds > _lastSecond)
-			{
-				//do that update thing
-				_previousState = _currentState;
-				_currentState = new Dictionary<string, ProfilerItem>();
+			if (_previousState != null && _previousState.ContainsKey(itemId))
+				return _previousState[itemId];
 
-				_lastSecond = elapsedSeconds;
-			}
+			return null;
 		}
 
 		/// <summary>
@@ -73,10 +72,30 @@ namespace HatlessEngine
 				string id = idAndItem.Key;
 				ProfilerItem item = idAndItem.Value;
 
-				result += String.Format("{0}: {1}/s {2}ms/s {3}ms/m {4}%\n", id, item.TimesCompleted, item.GetTotalDuration(true), item.GetAverageDuration(true), item.GetPercentageOfParent());
+				result += String.Format("{0}: {1}/s {2}ms/s ~{3}ms/r {4}%\n", id, item.TimesCompleted, item.GetTotalDuration(true), item.GetAverageDuration(true), item.PercentageOfParent);
 			}
 
 			return result;
+		}
+
+		private static void EnsureUpdatedState()
+		{
+			long elapsedSeconds = _stopwatch.ElapsedTicks / Stopwatch.Frequency;
+			if (elapsedSeconds > _lastSecond)
+			{
+				//do that update thing
+				UpdateState();
+
+				_lastSecond = elapsedSeconds;
+			}
+		}
+
+		private static void UpdateState()
+		{
+			//move currentstate to previousstate, and create a new state with new items
+			_previousState = _currentState;
+			_currentState = new Dictionary<string, ProfilerItem>();
+			_previousState.ForEach(previousPair => _currentState.Add(previousPair.Key, new ProfilerItem(previousPair.Value)));
 		}
 	}
 }
