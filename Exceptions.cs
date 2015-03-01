@@ -12,7 +12,6 @@ namespace HatlessEngine
 	public class ProtocolMismatchException : Exception 
 	{
 		public ProtocolMismatchException() { }
-
 		public ProtocolMismatchException(string message) : base(message) { }
 	}
 
@@ -20,10 +19,16 @@ namespace HatlessEngine
 	public class InvalidObjectTypeException : Exception
 	{
 		public InvalidObjectTypeException() { }
-
 		public InvalidObjectTypeException(string message) : base(message) { }
 	}
 
 	[Serializable]
 	public class NonConvexShapeDesignException : Exception { }
+
+	[Serializable]
+	public class ProfilerException : Exception
+	{
+		public ProfilerException() { }
+		public ProfilerException(string message) : base(message) { }
+	}
 }

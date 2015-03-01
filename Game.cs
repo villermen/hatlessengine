@@ -15,9 +15,9 @@ namespace HatlessEngine
 		internal static IntPtr RendererHandle;
 		internal static QuadTree QuadTree;
 
-		internal static bool RenderframeReady = false;
+		internal static bool RenderframeReady;
 
-		private static bool _running = false;
+		private static bool _running;
 
 		private static int _ticksPerStep;
 		private static int _ticksPerDraw;
@@ -26,7 +26,7 @@ namespace HatlessEngine
 		/// If true the game will force to run steps at max frequency until it has caught up with the required speed.
 		/// If not it will just keep going at regular speed after it goes out of sync.
 		/// </summary>
-		public static bool CatchUpSteps = false;
+		public static bool CatchUpSteps;
 
 		/// <summary>
 		/// Gets or sets the desired amount of steps per second.
@@ -65,16 +65,6 @@ namespace HatlessEngine
 					throw new ArgumentOutOfRangeException("FPSLimit", "FpsLimit must be positive or zero. (" + value + " given)");
 			}
 		}
-
-		/// <summary>
-		/// Returns the actual number of Steps Per Second, calculated from one step interval.
-		/// </summary>
-		public static int ActualStepsPerSecond { get; private set; }
-
-		/// <summary>
-		/// Returns the actual number of Frames Per Second, calculated from one draw interval.
-		/// </summary>
-		public static int ActualFramesPerSecond { get; private set; }
 
 		static Game()
 		{
@@ -144,24 +134,28 @@ namespace HatlessEngine
 				//perform step when needed
 				if (stopWatch.ElapsedTicks >= lastStepTick + _ticksPerStep)
 				{
+					Profiler.StartMeasurement("step");
+
 					if (CatchUpSteps)
 						lastStepTick = lastStepTick + _ticksPerStep;
 					else
 						lastStepTick = stopWatch.ElapsedTicks;
+
 					Step();
 
-					ActualStepsPerSecond = (int)(Stopwatch.Frequency / (stopWatch.ElapsedTicks - lastStepTime));
-					lastStepTime = stopWatch.ElapsedTicks;
+					Profiler.StopMeasurement("step");
 				}
 
 				//perform draw when ready for a new one
 				if (!RenderframeReady && _running && stopWatch.ElapsedTicks >= lastDrawTick + _ticksPerDraw)
 				{
+					Profiler.StartMeasurement("draw");
+
 					lastDrawTick = lastDrawTick + _ticksPerDraw;
+
 					Draw();
 
-					ActualFramesPerSecond = (int)(Stopwatch.Frequency / (stopWatch.ElapsedTicks - lastDrawTime));
-					lastDrawTime = stopWatch.ElapsedTicks;
+					Profiler.StopMeasurement("draw");
 				}
 			}
 

@@ -41,6 +41,8 @@
   <ItemGroup>
     <Compile Include="Alignment.cs" />
     <Compile Include="CollisionRule.cs" />
+    <Compile Include="Profiler.cs" />
+    <Compile Include="ProfilerItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Cursor.cs" />
     <Compile Include="DrawJobs\FilledRectDrawJob.cs" />
