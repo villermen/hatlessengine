@@ -26,8 +26,7 @@ namespace HatlessEngine
 			if (!_currentState.ContainsKey(itemId))
 			{
 				//create a new item
-				ProfilerItem parent = _currentState.ContainsKey(parentId) ? _currentState[parentId] : null;
-				ProfilerItem newItem = new ProfilerItem(_stopwatch, parent);
+				ProfilerItem newItem = new ProfilerItem(_stopwatch, parentId);
 				_currentState.Add(itemId, newItem);
 			}
 
@@ -95,7 +94,7 @@ namespace HatlessEngine
 			//move currentstate to previousstate, and create a new state with new items
 			_previousState = _currentState;
 			_currentState = new Dictionary<string, ProfilerItem>();
-			_previousState.ForEach(previousPair => _currentState.Add(previousPair.Key, new ProfilerItem(previousPair.Value)));
+			_previousState.ForEach(previousPair => _currentState.Add(previousPair.Key, new ProfilerItem(_stopwatch, previousPair.Value.ParentId)));
 		}
 	}
 }

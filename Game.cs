@@ -227,6 +227,8 @@ namespace HatlessEngine
 			}
 
 			//collision time!
+			Profiler.StartMeasurement("collision", "step");
+
 			float minX = float.PositiveInfinity;
 			float minY = float.PositiveInfinity;
 			float maxX = float.NegativeInfinity;
@@ -283,6 +285,8 @@ namespace HatlessEngine
 						influencedObj.CalculateClosestCollision();
 				}
 			}
+
+			Profiler.StopMeasurement("collision");
 
 			Resources.ObjectAdditionAndRemoval();
 			Resources.CleanupFontTextures();

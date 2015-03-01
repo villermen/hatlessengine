@@ -10,7 +10,7 @@ namespace HatlessEngine
 	{
 		private long _startTick;
 		private readonly Stopwatch _stopwatch;
-		private readonly ProfilerItem _parent;
+		internal readonly string ParentId;
 		private long _totalDuration;
 
 		public int TimesCompleted { get; private set; }
@@ -19,24 +19,18 @@ namespace HatlessEngine
 		{
 			get
 			{
-				if (_parent == null)
+				if (ParentId == "")
 					return 100f;
 
-				return 100f / _parent._totalDuration * _totalDuration;
+				return (float)Math.Round(100f / Profiler.GetItem(ParentId)._totalDuration * _totalDuration, 2);
 			}
 		}
 
-		internal ProfilerItem(Stopwatch stopwatch, ProfilerItem parent = null)
+		internal ProfilerItem(Stopwatch stopwatch, string parentId = "")
 		{
 			_stopwatch = stopwatch;
-			_parent = parent;
+			ParentId = parentId;
 		}
-
-		/// <summary>
-		/// Copy contructor.
-		/// </summary>
-		internal ProfilerItem(ProfilerItem item)
-			: this(item._stopwatch, item._parent) { }
 
 		public float GetTotalDuration(bool inMs = false)
 		{
