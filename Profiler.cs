@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using MoreLinq;
 
 namespace HatlessEngine
 {
@@ -14,17 +13,24 @@ namespace HatlessEngine
 		private static Dictionary<string, ProfilerItem> _previousState = new Dictionary<string, ProfilerItem>();
 		private static Dictionary<string, ProfilerItem> _currentState = new Dictionary<string, ProfilerItem>();
 
+		/// <summary>
+		/// Used for determining parent id.
+		/// </summary>
+		private static Stack<string> _activeMeasurements = new Stack<string>();
+
 		static Profiler()
 		{
 			_stopwatch.Start();
 		}
 
-		public static void StartMeasurement(string itemId, string parentId = "")
+		public static void Start(string itemId)
 		{
 			EnsureUpdatedState();
 
 			if (!_currentState.ContainsKey(itemId))
 			{
+				string parentId = _activeMeasurements.Count > 0 ? _activeMeasurements.Peek() : "";
+
 				//create a new item
 				ProfilerItem newItem = new ProfilerItem(_stopwatch, parentId);
 				_currentState.Add(itemId, newItem);
@@ -32,15 +38,23 @@ namespace HatlessEngine
 
 			//start measurement on item
 			_currentState[itemId].StartMeasurement();
+
+			//add it to the active measurements tree
+			_activeMeasurements.Push(itemId);
 		}
 
-		public static void StopMeasurement(string itemId)
+		/// <summary>
+		/// Stops the most recently initiated measurement.
+		/// </summary>
+		public static void Stop()
 		{
 			EnsureUpdatedState();
 
-			//do not do anything if key is not present (it has been removed by changing states)
-			if (_currentState.ContainsKey(itemId))
-				_currentState[itemId].StopMeasurement();
+			if (_activeMeasurements.Count <= 0) 
+				return;
+
+			string itemId = _activeMeasurements.Pop();
+			_currentState[itemId].StopMeasurement();
 		}
 
 		/// <summary>
@@ -48,10 +62,7 @@ namespace HatlessEngine
 		/// </summary>
 		public static ProfilerItem GetItem(string itemId)
 		{
-			if (_previousState != null && _previousState.ContainsKey(itemId))
-				return _previousState[itemId];
-
-			return null;
+			return _previousState.ContainsKey(itemId) ? _previousState[itemId] : null;
 		}
 
 		/// <summary>
@@ -80,13 +91,13 @@ namespace HatlessEngine
 		private static void EnsureUpdatedState()
 		{
 			long elapsedSeconds = _stopwatch.ElapsedTicks / Stopwatch.Frequency;
-			if (elapsedSeconds > _lastSecond)
-			{
-				//do that update thing
-				UpdateState();
+			if (elapsedSeconds <= _lastSecond) 
+				return;
 
-				_lastSecond = elapsedSeconds;
-			}
+			//do that update thing
+			UpdateState();
+
+			_lastSecond = elapsedSeconds;
 		}
 
 		private static void UpdateState()
@@ -94,7 +105,8 @@ namespace HatlessEngine
 			//move currentstate to previousstate, and create a new state with new items
 			_previousState = _currentState;
 			_currentState = new Dictionary<string, ProfilerItem>();
-			_previousState.ForEach(previousPair => _currentState.Add(previousPair.Key, new ProfilerItem(_stopwatch, previousPair.Value.ParentId)));
+
+			_activeMeasurements.Clear();
 		}
 	}
 }

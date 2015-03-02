@@ -132,7 +132,7 @@ namespace HatlessEngine
 				//perform step when needed
 				if (stopWatch.ElapsedTicks >= lastStepTick + _ticksPerStep)
 				{
-					Profiler.StartMeasurement("step");
+					Profiler.Start("step");
 
 					if (CatchUpSteps)
 						lastStepTick = lastStepTick + _ticksPerStep;
@@ -141,19 +141,19 @@ namespace HatlessEngine
 
 					Step();
 
-					Profiler.StopMeasurement("step");
+					Profiler.Stop();
 				}
 
 				//perform draw when ready for a new one
 				if (!RenderframeReady && _running && stopWatch.ElapsedTicks >= lastDrawTick + _ticksPerDraw)
 				{
-					Profiler.StartMeasurement("draw");
+					Profiler.Start("draw");
 
 					lastDrawTick = lastDrawTick + _ticksPerDraw;
 
 					Draw();
 
-					Profiler.StopMeasurement("draw");
+					Profiler.Stop();
 				}
 			}
 
@@ -227,7 +227,7 @@ namespace HatlessEngine
 			}
 
 			//collision time!
-			Profiler.StartMeasurement("collision", "step");
+			Profiler.Start("collision");
 
 			float minX = float.PositiveInfinity;
 			float minY = float.PositiveInfinity;
@@ -286,7 +286,9 @@ namespace HatlessEngine
 				}
 			}
 
-			Profiler.StopMeasurement("collision");
+			Profiler.Stop();
+			Profiler.Start("collision");
+			Profiler.Stop();
 
 			Resources.ObjectAdditionAndRemoval();
 			Resources.CleanupFontTextures();
