@@ -121,9 +121,6 @@ namespace HatlessEngine
 			Stopwatch stopWatch = new Stopwatch();
 			stopWatch.Start();
 
-			//do a step before the first draw can occur
-			Step();
-
 			long lastStepTick = 0;
 			long lastDrawTick = 0;
 
@@ -286,8 +283,6 @@ namespace HatlessEngine
 				}
 			}
 
-			Profiler.Stop();
-			Profiler.Start("collision");
 			Profiler.Stop();
 
 			Resources.ObjectAdditionAndRemoval();

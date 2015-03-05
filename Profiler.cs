@@ -1,22 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
 namespace HatlessEngine
 {
+	/// <summary>
+	/// Profiling works on a current state (changes every second), while retrieving data works on the most recently finished state.
+	/// </summary>
 	public static class Profiler
 	{
 		private static Stopwatch _stopwatch = new Stopwatch();
 		private static long _lastSecond;
 
-		private static Dictionary<string, ProfilerItem> _previousState = new Dictionary<string, ProfilerItem>();
-		private static Dictionary<string, ProfilerItem> _currentState = new Dictionary<string, ProfilerItem>();
+		private static List<ProfilerItem> _previousState = new List<ProfilerItem>();
+		private static List<ProfilerItem> _currentState = new List<ProfilerItem>();
 
-		/// <summary>
-		/// Used for determining parent id.
-		/// </summary>
-		private static Stack<string> _activeMeasurements = new Stack<string>();
+		private static ProfilerItem _currentlyMeasuringItem;
 
 		static Profiler()
 		{
@@ -27,20 +26,30 @@ namespace HatlessEngine
 		{
 			EnsureUpdatedState();
 
-			if (!_currentState.ContainsKey(itemId))
-			{
-				string parentId = _activeMeasurements.Count > 0 ? _activeMeasurements.Peek() : "";
+			//obtain a list of items to check in/add to
+			List<ProfilerItem> lookupList = _currentlyMeasuringItem == null ? _currentState : _currentlyMeasuringItem.Children;
 
+			//get an existing item
+			ProfilerItem item = lookupList.Find(lookupItem => lookupItem.Id == itemId);
+
+			//the collection does not yet contain this item -> create it
+			if (item == null)
+			{
 				//create a new item
-				ProfilerItem newItem = new ProfilerItem(_stopwatch, parentId);
-				_currentState.Add(itemId, newItem);
+				item = new ProfilerItem(itemId, _stopwatch, _currentlyMeasuringItem);
+
+				//add reference to newly created child to parent (or state)
+				if (_currentlyMeasuringItem == null)
+					_currentState.Add(item);
+				else
+					_currentlyMeasuringItem.Children.Add(item);
 			}
 
 			//start measurement on item
-			_currentState[itemId].StartMeasurement();
+			item.Start();
 
-			//add it to the active measurements tree
-			_activeMeasurements.Push(itemId);
+			//set is at last started measurement
+			_currentlyMeasuringItem = item;
 		}
 
 		/// <summary>
@@ -49,20 +58,34 @@ namespace HatlessEngine
 		public static void Stop()
 		{
 			EnsureUpdatedState();
-
-			if (_activeMeasurements.Count <= 0) 
-				return;
-
-			string itemId = _activeMeasurements.Pop();
-			_currentState[itemId].StopMeasurement();
+			
+			//stop the currently measuring item and ascend it (or set to null if top)
+			if (_currentlyMeasuringItem != null)
+			{
+				_currentlyMeasuringItem.Stop();
+				_currentlyMeasuringItem = _currentlyMeasuringItem.Parent;
+			}
 		}
 
 		/// <summary>
-		/// Get a specific item from the last completed state.
+		/// Will try to get an item from the most recently completed state (searches the state recursively).
 		/// </summary>
 		public static ProfilerItem GetItem(string itemId)
 		{
-			return _previousState.ContainsKey(itemId) ? _previousState[itemId] : null;
+			ProfilerItem directMatch = _previousState.Find(item => item.Id == itemId);
+
+			if (directMatch != null)
+				return directMatch;
+
+			//search recursively
+			foreach (ProfilerItem item in _previousState)
+			{
+				ProfilerItem indirectMatch = item.GetChildById(itemId, true);
+				if (indirectMatch != null)
+					return indirectMatch;
+			}
+
+			return null;
 		}
 
 		/// <summary>
@@ -70,20 +93,31 @@ namespace HatlessEngine
 		/// </summary>
 		public static string GetStateString()
 		{
-			if (_previousState == null)
-				return "";
+			//order by total duration (base profileritems)
+			_previousState = _previousState.OrderByDescending(item => item.GetTotalDuration()).ToList();
 
-			var orderedState = _previousState.OrderByDescending(pair => pair.Value.GetTotalDuration());
+			//start off with the previousstate profilers and the children will be rendered accordingly
+			return GetItemsString(_previousState, 0);
+		}
 
+		/// <summary>
+		/// Draw a part of the state string
+		/// </summary>
+		private static string GetItemsString(List<ProfilerItem> items, int depth)
+		{
 			string result = "";
 
-			foreach (var idAndItem in orderedState)
+			items.ForEach(item =>
 			{
-				string id = idAndItem.Key;
-				ProfilerItem item = idAndItem.Value;
+				//indent by depth
+				for (int i = 0; i < depth; i++)
+					result += "\t";
 
-				result += String.Format("{0}: {1}/s {2}ms/s ~{3}ms/r {4}%\n", id, item.TimesCompleted, item.GetTotalDuration(true), item.GetAverageDuration(true), item.PercentageOfParent);
-			}
+				result += item + "\n";
+
+				//draw children below this one with a depth level down
+				result += GetItemsString(item.Children, depth + 1);
+			});
 
 			return result;
 		}
@@ -104,9 +138,7 @@ namespace HatlessEngine
 		{
 			//move currentstate to previousstate, and create a new state with new items
 			_previousState = _currentState;
-			_currentState = new Dictionary<string, ProfilerItem>();
-
-			_activeMeasurements.Clear();
+			_currentState = new List<ProfilerItem>();
 		}
 	}
 }

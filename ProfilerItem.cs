@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace HatlessEngine
@@ -8,40 +9,48 @@ namespace HatlessEngine
 	/// </summary>
 	public class ProfilerItem
 	{
-		private long _startTick;
+		/// <summary>
+		/// Starting tick of measurement, also used to check if measurement is running (if -1L).
+		/// </summary>
+		private long _startTick = -1L;
 		private readonly Stopwatch _stopwatch;
-		internal readonly string ParentId;
+
+		public readonly string Id;
+
+		public readonly ProfilerItem Parent;
+		public readonly List<ProfilerItem> Children = new List<ProfilerItem>();
+		
 		private long _totalDuration;
 
 		public int TimesCompleted { get; private set; }
-
+		
 		public float PercentageOfParent
 		{
 			get
 			{
-				if (ParentId == "")
+				if (Parent == null)
 					return 100f;
 
-				return (float)Math.Round(100f / Profiler.GetItem(ParentId)._totalDuration * _totalDuration, 2);
+				return (float)Math.Round(100f / Parent._totalDuration * _totalDuration, 2);
 			}
 		}
 
-		internal ProfilerItem(Stopwatch stopwatch, string parentId = "")
+		internal ProfilerItem(string id, Stopwatch stopwatch, ProfilerItem parent = null)
 		{
+			Id = id;
 			_stopwatch = stopwatch;
-			ParentId = parentId;
+			Parent = parent;
 		}
 
 		public float GetTotalDuration(bool inMs = false)
 		{
 			float result = _totalDuration;
 
-			if (inMs)
-			{
-				result /= Stopwatch.Frequency / 1000f;
-				result = (float)Math.Round(result, 2);
-			}
+			if (!inMs) 
+				return result;
 
+			result /= Stopwatch.Frequency / 1000f;
+			result = (float)Math.Round(result, 2);
 			return result;
 		}
 
@@ -52,22 +61,20 @@ namespace HatlessEngine
 
 			float result = _totalDuration / TimesCompleted;
 
-			if (inMs)
-			{
-				result /= Stopwatch.Frequency / 1000f;
-				result = (float)Math.Round(result, 2);
-			}
+			if (!inMs) 
+				return result;
 
+			result /= Stopwatch.Frequency / 1000f;
+			result = (float)Math.Round(result, 2);
 			return result;
 		}
 
 		/// <summary>
-		/// Starts a measurement. Only works if none is currently running.
+		/// Starts a measurement. Will stop a previous measurement if in progress.
 		/// </summary>
-		internal void StartMeasurement()
+		internal void Start()
 		{
-			if (_startTick != 0L)
-				throw new ProfilerException("A measurement on this item is already in progress.");
+			Stop();
 
 			_startTick = _stopwatch.ElapsedTicks;
 		}
@@ -75,11 +82,43 @@ namespace HatlessEngine
 		/// <summary>
 		/// Completes a measurement, setting lastDuration.
 		/// </summary>
-		internal void StopMeasurement()
+		internal void Stop()
 		{
+			if (_startTick == -1L) 
+				return;
+
 			_totalDuration += _stopwatch.ElapsedTicks - _startTick;
 			TimesCompleted++;
-			_startTick = 0L;
+			_startTick = -1L;
+		}
+
+		/// <summary>
+		/// Returns the child if it exists, or null if not.
+		/// </summary>
+		public ProfilerItem GetChildById(string childId, bool recursively)
+		{
+			ProfilerItem directMatch = Children.Find(child => child.Id == childId);
+
+			if (directMatch != null)
+				return directMatch;
+			
+			if (!recursively) 
+				return null;
+
+			//search recursively if still not found
+			foreach (ProfilerItem child in Children)
+			{
+				ProfilerItem indirectMatch = child.GetChildById(childId, true);
+				if (indirectMatch != null)
+					return indirectMatch;
+			}
+
+			return null;
+		}
+
+		public override string ToString()
+		{
+			return String.Format("{0}: {1}/s {2}ms/s ~{3}ms/r {4}%", Id, TimesCompleted, GetTotalDuration(true), GetAverageDuration(true), PercentageOfParent);
 		}
 	}
 }
