@@ -1,35 +1,25 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using SDL2;
 
 namespace HatlessEngine
 {
-	public sealed class Music : IExternalResource
+	/// <summary>
+	/// Represents a music file that can be stream-played.
+	/// </summary>
+	public sealed class Music : ExternalResource
 	{
-		public string Id { get; private set; }
-		public string Filename { get; private set; }
-		public Assembly FileAssembly { get; private set; }
-		public bool Loaded { get; private set; }
-
 		public float BaseVolume { get; private set; }
 		public bool Paused { get; private set; }
 
 		private IntPtr _musicHandle;
 
-		public Music(string id, string filename, float baseVolume = 1f)
+		public Music(string id, string file, float baseVolume = 1f)
+			: base(id, file)
 		{
-			Id = id;
-			Filename = filename;
 			Loaded = false;
-
 			BaseVolume = baseVolume;
 			Paused = false;
-
-			Resources.Music.Add(Id, this);
-			Resources.ExternalResources.Add(this);
-
-			FileAssembly = Assembly.GetCallingAssembly();
 		}
 
 		/// <summary>
@@ -79,15 +69,15 @@ namespace HatlessEngine
 
 		public bool IsPlaying()
 		{
-			return (Resources.CurrentlyPlayingMusic == this);
+			return Resources.CurrentlyPlayingMusic == this;
 		}
 
-		public void Load()
+		public override void Load()
 		{
 			if (Loaded)
 				return;
 
-			_musicHandle = SDL_mixer.Mix_LoadMUS(Filename);
+			_musicHandle = SDL_mixer.Mix_LoadMUS(File);
 
 			if (_musicHandle != IntPtr.Zero)
 				Loaded = true;
@@ -95,7 +85,7 @@ namespace HatlessEngine
 				throw new FileLoadException();
 		}
 
-		public void Unload()
+		public override void Unload()
 		{
 			if (!Loaded)
 				return;
@@ -112,32 +102,9 @@ namespace HatlessEngine
 				Stopped(this, EventArgs.Empty);
 		}
 
-		public void Destroy()
+		public static implicit operator Music(string id)
 		{
-			Unload();
-
-			Resources.Music.Remove(Id);
-			Resources.ExternalResources.Remove(this);
-		}
-
-		public static implicit operator Music(string str)
-		{
-			return Resources.Music[str];
-		}
-
-		/// <summary>
-		/// Pretty much an alias for Destroy(), here just to implement IDisposable as this object uses unmanaged resources.
-		/// </summary>
-		public void Dispose()
-		{
-			Destroy();
-
-			//do not suppress finalization as the resource could be loaded after this point
-		}
-
-		~Music()
-		{
-			Dispose();
+			return Resources.Get<Music>(id);
 		}
 	}
 }

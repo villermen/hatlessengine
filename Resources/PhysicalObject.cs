@@ -211,7 +211,7 @@ namespace HatlessEngine
 						break;
 
 					case CollisionRuleType.Objectmap:
-						foreach (PhysicalObject obj in ((Objectmap)cRule.Target).ActivePhysicalObjects)
+						foreach (PhysicalObject obj in ((GameObjectCollection)cRule.Target).ActivePhysicalObjects)
 						{
 							//whether the object should be checked if the filter is enabled
 							if (!cRule.FilterEnabled || cRule.ObjectmapFilter.Contains(obj.GetType())) //account for inheritance
@@ -228,26 +228,6 @@ namespace HatlessEngine
 								_closestCollisionRule = cRule;
 								_closestCollisionMethodArg = obj;
 								_closestCollisionRelativeSpeed = Speed - obj.Speed;
-							}
-						}
-						break;
-
-					case CollisionRuleType.Spritemap:
-						foreach (ManagedSprite sprite in ((Spritemap)cRule.Target).ManagedSprites)
-						{
-							//whether the object should be checked if the filter is enabled
-							if (!cRule.FilterEnabled || cRule.SpritemapFilter.Contains(sprite.TargetSprite)) //account for inheritance
-							{
-								if (!Bounds.IntersectsWith(sprite, Speed, out touchingSpeedLeftFraction, out intersectionAxis) ||
-								    !(touchingSpeedLeftFraction > 0f) || !(touchingSpeedLeftFraction <= SpeedLeft) ||
-								    !(touchingSpeedLeftFraction < ClosestCollisionSpeedFraction))
-									continue;
-								
-								ClosestCollisionSpeedFraction = touchingSpeedLeftFraction;
-								_closestCollisionTouchingAxis = intersectionAxis;
-								_closestCollisionRule = cRule;
-								_closestCollisionMethodArg = sprite;
-								_closestCollisionRelativeSpeed = Speed;
 							}
 						}
 						break;

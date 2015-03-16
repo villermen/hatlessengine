@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using SDL2;
 
@@ -20,22 +21,37 @@ namespace HatlessEngine
 		/// </summary>
 		public static string RootDirectory = "";
 
-		//external
-		internal static List<IExternalResource> ExternalResources = new List<IExternalResource>();
-		public static Dictionary<string, Cursor> Cursors = new Dictionary<string, Cursor>();
-		public static Dictionary<string, Font> Fonts = new Dictionary<string, Font>();
-		public static Dictionary<string, Music> Music = new Dictionary<string, Music>();
-		public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
-		public static Dictionary<string, Sprite> Sprites = new Dictionary<string, Sprite>();
+		/// <summary>
+		/// Contains all created resources by type and id.
+		/// </summary>
+		internal static Dictionary<Type, Dictionary<string, Resource>> Collection = new Dictionary<Type, Dictionary<string, Resource>>();
 
-		//logical
-		public static Dictionary<string, View> Views = new Dictionary<string, View>();
+		/// <summary>
+		/// Returns the resource with the specified type and id, or null if it doesn't exist.
+		/// </summary>
+		public static TResource Get<TResource>(string id) where TResource : Resource
+		{
+			//check for existence
+			if (!Collection.ContainsKey(typeof(TResource)) || !Collection[typeof(TResource)].ContainsKey(id))
+				throw new ResourceNotFoundException(String.Format("A resource of type {0} with id '{1}' does not exist.", typeof(TResource).Name, id));
 
-		//collections
-		public static Dictionary<string, Objectmap> Objectmaps = new Dictionary<string, Objectmap>();
-		public static Dictionary<string, Spritemap> Spritemaps = new Dictionary<string, Spritemap>();
+			return Collection[typeof(TResource)][id] as TResource;
+		}
 
-		//objects
+		/// <summary>
+		/// Returns all resources of the specified type.
+		/// </summary>
+		public static List<TResource> Get<TResource>() where TResource : Resource
+		{
+			//return empty list if type does not exist
+			if (!Collection.ContainsKey(typeof(TResource)))
+				return new List<TResource>();
+
+			return Collection[typeof(TResource)].Values.Cast<TResource>().ToList();
+		}
+
+		internal static List<ExternalResource> ExternalResources = new List<ExternalResource>();
+
 		public static List<GameObject> Objects = new List<GameObject>();
 		public static List<PhysicalObject> PhysicalObjects = new List<PhysicalObject>();
 		public static Dictionary<Type, List<PhysicalObject>> PhysicalObjectsByType = new Dictionary<Type, List<PhysicalObject>>();
@@ -43,8 +59,6 @@ namespace HatlessEngine
 		//addition/removal (has to be done after looping)
 		internal static List<GameObject> AddObjects = new List<GameObject>();
 		internal static List<GameObject> RemoveObjects = new List<GameObject>();
-
-		internal static List<WeakReference> ManagedSprites = new List<WeakReference>();
 
 		//audio helpers
 		internal static Dictionary<int, SoundControl> SoundControls = new Dictionary<int, SoundControl>();
@@ -108,12 +122,12 @@ namespace HatlessEngine
 
 		public static void LoadAllExternalResources()
 		{
-			foreach (IExternalResource resource in ExternalResources)
+			foreach (ExternalResource resource in ExternalResources)
 				resource.Load();
 		}
 		public static void UnloadAllExternalResources()
 		{
-			foreach (IExternalResource resource in ExternalResources)
+			foreach (ExternalResource resource in ExternalResources)
 				resource.Unload();
 		}
 
@@ -157,30 +171,9 @@ namespace HatlessEngine
 			tempCurrentlyPlayingMusic.PerformStopped();
 		}
 
-		internal static void UpdateManagedSprites()
-		{
-			List<WeakReference> removeManagedSprites = new List<WeakReference>();
-			foreach(WeakReference managedSprite in ManagedSprites)
-			{
-				//check if alive and add to remove list if not
-				if (managedSprite.IsAlive)
-				{
-					//perform step
-					((ManagedSprite)managedSprite.Target).Step();
-				}
-				else
-					removeManagedSprites.Add(managedSprite);
-			}
-
-			foreach(WeakReference managedSprite in removeManagedSprites)
-			{
-				ManagedSprites.Remove(managedSprite);
-			}
-		}
-
 		internal static void CleanupFontTextures()
 		{
-			foreach (Font font in Fonts.Values)
+			foreach (Font font in Get<Font>())
 			{
 				List<Tuple<string, Color>> removeTextures = new List<Tuple<string, Color>>();
 

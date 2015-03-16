@@ -214,9 +214,6 @@ namespace HatlessEngine
 			Input.UpdateMousePosition();
 			Input.ApplyButtonMaps();
 
-			//update the weakreferences if they still exist
-			Resources.UpdateManagedSprites();
-
 			foreach (GameObject obj in Resources.Objects)
 			{
 				if (!obj.Destroyed)
@@ -298,12 +295,12 @@ namespace HatlessEngine
 					obj.Draw();
 			}
 
-			DrawX.DrawJobs.OrderBy(job => job.Depth);
+			DrawX.DrawJobs = DrawX.DrawJobs.OrderBy(job => job.Depth).ToList();
 
 			SDL.SDL_SetRenderDrawColor(RendererHandle, DrawX.BackgroundColor.R, DrawX.BackgroundColor.G, DrawX.BackgroundColor.B, DrawX.BackgroundColor.A);
 			SDL.SDL_RenderClear(RendererHandle);
 
-			foreach (View view in Resources.Views.Values)
+			foreach (View view in Resources.Get<View>())
 			{
 				if (!view.Active)
 					continue;

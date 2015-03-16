@@ -371,10 +371,12 @@ namespace HatlessEngine
 		/// </summary>
 		internal static void UpdateMousePosition()
 		{
+			List<View> views = Resources.Get<View>();
+
 			//decide on which viewport the mouse currently is. backwards because the last view created will be in front of the one before it (if they overlap)
-			for (int i = Resources.Views.Count - 1; i >= 0; i--)
+			for (int i = views.Count - 1; i >= 0; i--)
 			{
-				View view = Resources.Views.Values.ElementAt(i);
+				View view = views.ElementAt(i);
 				Rectangle absoluteGameArea = view.GetAbsoluteGameArea();
 				Rectangle absoluteViewport = view.GetAbsoluteViewport();
 

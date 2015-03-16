@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using SDL2;
 
 namespace HatlessEngine
 {
-	public class Font : IExternalResource
+	public class Font : ExternalResource
 	{
-		public string Id { get; private set; }
-		public string Filename { get; private set; }
-		public Assembly FileAssembly { get; private set; }
-		public bool Loaded { get; private set; }
-
 		internal IntPtr Handle;
 
 		public int LineHeight;
@@ -22,20 +16,13 @@ namespace HatlessEngine
 		internal Dictionary<Tuple<string, Color>, IntPtr> Textures = new Dictionary<Tuple<string, Color>, IntPtr>();
 		internal Dictionary<Tuple<string, Color>, int> TexturesDrawsUnused = new Dictionary<Tuple<string, Color>, int>();
 
-		public Font(string id, string filename, int pointSize)
+		public Font(string id, string file, int pointSize)
+			: base(id, file)
 		{
 			if (pointSize < 1)
 				throw new ArgumentOutOfRangeException("pointSize", "pointSize must be bigger than zero.");
 
-			Id = id;
-			Filename = filename;
-			FileAssembly = Assembly.GetCallingAssembly();
-			Loaded = false;
-
 			PointSize = pointSize;
-
-			Resources.Fonts.Add(Id, this);
-			Resources.ExternalResources.Add(this);
 		}
 
 		public void Draw(string str, Point pos, Color color, CombinedAlignment alignment = CombinedAlignment.TopLeft, int depth = 0)
@@ -206,12 +193,12 @@ namespace HatlessEngine
 			return WrapString(str, maxWidth, maxLines, out charsTrimmed);
 		}
 
-		public void Load()
+		public override void Load()
 		{
 			if (Loaded) 
 				return;
 
-			Handle = SDL_ttf.TTF_OpenFontRW(Resources.CreateRWFromFile(Filename, FileAssembly), 1, PointSize);
+			Handle = SDL_ttf.TTF_OpenFontRW(Resources.CreateRWFromFile(File, FileAssembly), 1, PointSize);
 
 			if (Handle == IntPtr.Zero)
 				throw new FileLoadException(SDL.SDL_GetError());
@@ -220,7 +207,7 @@ namespace HatlessEngine
 			Loaded = true;
 		}
 
-		public void Unload()
+		public override void Unload()
 		{
 			if (!Loaded) 
 				return;
@@ -230,38 +217,9 @@ namespace HatlessEngine
 			Loaded = false;
 		}
 
-		public void Destroy()
+		public static implicit operator Font(string id)
 		{
-			Unload();
-
-			Resources.Fonts.Remove(Id);
-			Resources.ExternalResources.Remove(this);
-		}
-
-		public static implicit operator Font(string str)
-		{
-			return Resources.Fonts[str];
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			//destroy either way, this overload is just for convention
-			Destroy();
-		}
-
-		/// <summary>
-		/// Pretty much an alias for Destroy(), here just to implement IDisposable as this object uses unmanaged resources.
-		/// </summary>
-		public void Dispose()
-		{
-			Dispose(true);
-
-			//do not suppress finalization as the resource could be loaded after this point
-		}
-
-		~Font()
-		{
-			Dispose(false);
+			return Resources.Get<Font>(id);
 		}
 	}
 }

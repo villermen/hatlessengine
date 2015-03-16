@@ -7,13 +7,11 @@ using System.Runtime.Serialization.Formatters.Binary;
 namespace HatlessEngine
 {
 	/// <summary>
-	/// Stores a list of objects, that can be mass-created and removed.
+	/// Stores a list of object blueprints, that can be mass-created and removed.
 	/// Convenient way of creating levels or maps in general.
 	/// </summary>
-	public class Objectmap : IResource
+	public class GameObjectCollection : Resource
 	{
-		public string Id { get; private set; }
-
 		/// <summary>
 		/// protocol version changes on changes to ObjectBlueprint.
 		/// </summary>
@@ -23,25 +21,19 @@ namespace HatlessEngine
 		public List<GameObject> ActiveObjects = new List<GameObject>();
 		internal List<PhysicalObject> ActivePhysicalObjects = new List<PhysicalObject>();
 
-		private Objectmap(string id)
-		{
-			Id = id;
-			Resources.Objectmaps.Add(Id, this);
-		}
-
-		public Objectmap(string id, params ObjectBlueprint[] blueprints)
-			: this(id)
+		public GameObjectCollection(string id, params ObjectBlueprint[] blueprints)
+			: base(id)
 		{
 			Blueprints = new List<ObjectBlueprint>(blueprints);
 		}
 			
-		public Objectmap(string id, string filename)
-			: this(id)
+		public GameObjectCollection(string id, string filename)
+			: base(id)
 		{
 			BinaryReader reader = Resources.GetStream(filename);
 
-			if (new String(reader.ReadChars(4)) != "HEOm")
-				throw new ProtocolMismatchException("The file's magic number is not 'HEOm' (HatlessEngine Objectmap)");
+			if (new String(reader.ReadChars(4)) != "HEOC")
+				throw new ProtocolMismatchException("The file's magic number is not 'HEOC' (HatlessEngine Object Collection)");
 
 			if (reader.ReadUInt16() != ProtocolVersion)
 				throw new ProtocolMismatchException("The file's protocol version is not equal to the required one (" + ProtocolVersion + ")");
@@ -70,7 +62,7 @@ namespace HatlessEngine
 		public void WriteToFile(string filename)
 		{
 			BinaryWriter writer = new BinaryWriter(new FileStream(filename, FileMode.Truncate, FileAccess.Write, FileShare.None));
-			writer.Write("HEOm".ToCharArray());
+			writer.Write("HEOC".ToCharArray());
 			writer.Write(ProtocolVersion);
 
 			BinaryFormatter formatter = new BinaryFormatter
@@ -91,16 +83,6 @@ namespace HatlessEngine
 			}
 			ActiveObjects.Clear();
 			ActivePhysicalObjects.Clear();
-		}
-
-		public void Destroy()
-		{
-			Resources.Objectmaps.Remove(Id);
-		}
-
-		public static implicit operator Objectmap(string str)
-		{
-			return Resources.Objectmaps[str];
 		}
 	}
 }

@@ -13,7 +13,6 @@ namespace HatlessEngine
 
 		internal object Target;
 		internal bool FilterEnabled;
-		internal List<Sprite> SpritemapFilter;
 		internal List<Type> ObjectmapFilter;
 
 		#region Constructors
@@ -43,7 +42,7 @@ namespace HatlessEngine
 			Action = action;
 			Method = method;
 		}
-		public CollisionRule(Objectmap objMap, CollisionAction action, Type[] objFilter = null, Action<PhysicalObject> method = null)
+		public CollisionRule(GameObjectCollection objMap, CollisionAction action, Type[] objFilter = null, Action<PhysicalObject> method = null)
 		{
 			Type = CollisionRuleType.Objectmap;
 			Target = objMap;
@@ -66,35 +65,6 @@ namespace HatlessEngine
 			}
 			else
 				FilterEnabled = false;
-		}
-		public CollisionRule(Spritemap spritemap, CollisionAction action, IEnumerable<Sprite> spriteFilter = null, Action<PhysicalObject> method = null)
-		{
-			Type = CollisionRuleType.Spritemap;
-			Target = spritemap;
-			if (spriteFilter != null)
-			{
-				SpritemapFilter = new List<Sprite>(spriteFilter);
-				FilterEnabled = true;
-			}
-			else
-				FilterEnabled = false;
-			Action = action;
-			Method = method;
-		}
-		public CollisionRule(string spritemapId, CollisionAction action, IList<string> spriteIdFilter = null, Action<PhysicalObject> method = null)
-			: this(Resources.Spritemaps[spritemapId], action, ProcessSpriteIDs(spriteIdFilter), method) { }
-
-		private static IEnumerable<Sprite> ProcessSpriteIDs(IList<string> spriteIDs)
-		{
-			if (spriteIDs == null)
-				return null;
-			
-			Sprite[] sprites = new Sprite[spriteIDs.Count];
-			for (int i = 0; i < spriteIDs.Count; i++)
-			{
-				sprites[i] = Resources.Sprites[spriteIDs[i]];
-			}
-			return sprites;
 		}
 
 		#endregion

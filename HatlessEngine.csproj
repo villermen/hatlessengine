@@ -55,7 +55,7 @@
     <Compile Include="GUI\SolidColorButton.cs" />
     <Compile Include="GUI\VerticalScrollbar.cs" />
     <Compile Include="GUI\TextBox.cs" />
-    <Compile Include="Resources\IResource.cs" />
+    <Compile Include="Resources\Resource.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="QuadTree.cs" />
     <Compile Include="Shapes\IConvexShape.cs" />
@@ -68,19 +68,17 @@
     <Compile Include="Resources\Sprite.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="Button.cs" />
-    <Compile Include="Resources\Spritemap.cs" />
     <Compile Include="Resources\Music.cs" />
-    <Compile Include="Resources\Objectmap.cs" />
+    <Compile Include="Resources\GameObjectCollection.cs" />
     <Compile Include="Misc.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Resources\Sound.cs" />
     <Compile Include="Resources\SoundControl.cs" />
     <Compile Include="Resources\Font.cs" />
     <Compile Include="GUI\FullImageButton.cs" />
-    <Compile Include="Resources\ManagedSprite.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="EventArgs.cs" />
-    <Compile Include="Resources\IExternalResource.cs" />
+    <Compile Include="Resources\ExternalResource.cs" />
     <Compile Include="Shapes\ComplexRectangle.cs" />
     <Compile Include="Shapes\Point.cs" />
     <Compile Include="DrawX.cs" />
@@ -94,6 +92,7 @@
     <EmbeddedResource Include="defaultwindowicon.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

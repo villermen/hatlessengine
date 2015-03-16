@@ -1,0 +1,444 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="HatlessEngine.CollisionRule" Collapsed="true">
+    <Position X="19.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAIABAAAAAAAAgACAAAAAAAAAgAQAAAAAAALQ=</HashCode>
+      <FileName>CollisionRule.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.DrawX" Collapsed="true">
+    <Position X="21" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAAABRAAgAAAAAAAAAACAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DrawX.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.SliderMovedEventArgs" Collapsed="true">
+    <Position X="24.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAgAAAAA=</HashCode>
+      <FileName>EventArgs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.TextChangedEventArgs" Collapsed="true">
+    <Position X="19.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>EventArgs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.NotLoadedException" Collapsed="true">
+    <Position X="19.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Exceptions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.InvalidDeviceException" Collapsed="true">
+    <Position X="19.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Exceptions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.ProtocolMismatchException" Collapsed="true">
+    <Position X="26.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Exceptions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.InvalidObjectTypeException" Collapsed="true">
+    <Position X="21" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Exceptions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.NonConvexShapeDesignException" Collapsed="true">
+    <Position X="26.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Exceptions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.ProfilerException" Collapsed="true">
+    <Position X="22.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Exceptions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Game" Collapsed="true">
+    <Position X="22.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAoAAAAAIBAgAIAAAAAAAAAAIAQAAEJAAACAAAAQI=</HashCode>
+      <FileName>Game.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Input" Collapsed="true">
+    <Position X="26.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gIAwIAgAAAAUAAAkAECCgCiAIAAAAAAAAgEKAAICAAg=</HashCode>
+      <FileName>Input.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Log" Collapsed="true">
+    <Position X="22.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAMAAAAAAAAAAgAAAQEACBEAABAAAAAAAIAAAAAA=</HashCode>
+      <FileName>Log.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Misc" Collapsed="true">
+    <Position X="24.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAAAAAAQAAAAACQAAAAAAAAAAAA=</HashCode>
+      <FileName>Misc.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Profiler" Collapsed="true">
+    <Position X="21" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAgACAAAEAEAAAAAAAAAAAABAAAYABABAAgABA=</HashCode>
+      <FileName>Profiler.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.ProfilerItem" Collapsed="true">
+    <Position X="24.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAKgAAAAEAQAEQAAAAAAAhAAAIAAABAAgAQA=</HashCode>
+      <FileName>ProfilerItem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.QuadTree" Collapsed="true">
+    <Position X="19.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAAQBAAgAAAAAAAAAEAAAAAAAAAAQAAAEAAAA=</HashCode>
+      <FileName>QuadTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Cursor" Collapsed="true">
+    <Position X="13" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgCgAKABCEARAAAAAAAAAAAAABAAAAABAAAAAgAAAA=</HashCode>
+      <FileName>Resources\Cursor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.ExternalResource" Collapsed="true">
+    <Position X="8.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAgACAACEAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Resources\ExternalResource.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="HatlessEngine.Font" Collapsed="true">
+    <Position X="4" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgCgACAACEAQwBEAAAAAAAAAABAAAIAAAgAAAEAAAQ=</HashCode>
+      <FileName>Resources\Font.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.GameObject" Collapsed="true">
+    <Position X="11.25" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAAgAAAAAAAAAAAABAAAAAIAAAAAAAAIA=</HashCode>
+      <FileName>Resources\GameObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.ManagedSprite" Collapsed="true">
+    <Position X="7.25" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIABABARAAAAgAAAAgAAAAAAAAAAAAgIAAgAAAAABg=</HashCode>
+      <FileName>Resources\ManagedSprite.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Music" Collapsed="true">
+    <Position X="8.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AggigACAACMQQAAAAAAAAABAAARCAAAAoAAAAAgAAAA=</HashCode>
+      <FileName>Resources\Music.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Objectmap" Collapsed="true">
+    <Position X="3.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQCAAgDAAAAAAAAAAgAAAAAAABAAAAEAAICAAAAAAA=</HashCode>
+      <FileName>Resources\GameObjectCollection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.PhysicalObject" Collapsed="true">
+    <Position X="13.5" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>UiAIAEAACAQIAAAgAAAAAAIBAABAAgAAAAABAAgAAgw=</HashCode>
+      <FileName>Resources\PhysicalObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Resource" Collapsed="true">
+    <Position X="6" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Resources\Resource.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Resources" Collapsed="true">
+    <Position X="21" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AhAAEAEIAABAQBBgAAAAIAIEAIAGDREABIEQAQEAAgA=</HashCode>
+      <FileName>Resources\Resources.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Sound" Collapsed="true">
+    <Position X="6.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgCgACAACEAQAAAAAAAAABAAABAAgAAgAAAEAAAAAA=</HashCode>
+      <FileName>Resources\Sound.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.SoundControl" Collapsed="true">
+    <Position X="26.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEBgAAAAAAIAAAAAAAAAAAAAAABAAAAAIAAAAAgAAAA=</HashCode>
+      <FileName>Resources\SoundControl.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Sprite" Collapsed="true">
+    <Position X="10.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACgACAAAAAAwAAAAAKAAAAAAAAAAACAAAAAAAAAAA=</HashCode>
+      <FileName>Resources\Sprite.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.View" Collapsed="true">
+    <Position X="5.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAEAAAEAAAAAAAAQABAAAAgIAAAAAgIAAA=</HashCode>
+      <FileName>Resources\View.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.ComplexRectangle" Collapsed="true">
+    <Position X="7.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAAAAAAAAAAAAAAAQAAAAEAAAAAAAgAAAA=</HashCode>
+      <FileName>Shapes\ComplexRectangle.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Line" Collapsed="true">
+    <Position X="0.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAABAAAAAAAEAAAAAACAAAAA=</HashCode>
+      <FileName>Shapes\Line.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Polygon" Collapsed="true">
+    <Position X="2.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAAAAAAAAAAAAAAAAEAAAAAAAAAAAA=</HashCode>
+      <FileName>Shapes\Polygon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Rectangle" Collapsed="true">
+    <Position X="5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAACAAIAk4AUAAAAAAQAACIEAAAAAAAAIAiA=</HashCode>
+      <FileName>Shapes\Rectangle.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.Shape" Collapsed="true">
+    <Position X="3.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIEAAAABQgIAkBAAAgAIgAAAQQAEEAAAAAAAgAAA=</HashCode>
+      <FileName>Shapes\Shape.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="HatlessEngine.Window" Collapsed="true">
+    <Position X="21" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQIAAAAEQCAIgEBABIAMAEAIAIAAAgAAAIEAAAIAICA=</HashCode>
+      <FileName>Window.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.GUI.FullImageButton" Collapsed="true">
+    <Position X="11.25" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAQAAAAAAAAAAA=</HashCode>
+      <FileName>GUI\FullImageButton.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.GUI.HorizontalScrollbar" Collapsed="true">
+    <Position X="24.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GUI\HorizontalScrollbar.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.GUI.Scrollbar" Collapsed="true">
+    <Position X="22.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GUI\Scrollbar.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.GUI.SolidColorButton" Collapsed="true">
+    <Position X="9" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgQAAAAAAAAAgAAAICAAAAAAAAAAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>GUI\SolidColorButton.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.GUI.TextBox" Collapsed="true">
+    <Position X="6.75" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AKAAAACAAAAQwhAoIAAAAEACAABAAAkiIQAACAACAAE=</HashCode>
+      <FileName>GUI\TextBox.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.GUI.TextButton" Collapsed="true">
+    <Position X="10.25" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAIEAAAAAAAAAAAACAgIAAADAAEAgA=</HashCode>
+      <FileName>GUI\TextButton.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HatlessEngine.GUI.VerticalScrollbar" Collapsed="true">
+    <Position X="15.75" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAIAAAACBAAgAgYAIAAEBACAAAAFAgpAEABAIAAAA=</HashCode>
+      <FileName>GUI\VerticalScrollbar.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="HatlessEngine.Color" Collapsed="true">
+    <Position X="19.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAOAEBAAAIAAoAEAIEAQEAABAAAAAAACBAAKDEBAQA=</HashCode>
+      <FileName>Color.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="HatlessEngine.FilledRectDrawJob" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="21" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAgQAAAAA=</HashCode>
+      <FileName>DrawJobs\FilledRectDrawJob.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="HatlessEngine.LineDrawJob" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="22.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAAAAgAgAAAAgQAAAAA=</HashCode>
+      <FileName>DrawJobs\LineDrawJob.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="HatlessEngine.TextureDrawJob" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="19.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAIAAQAAEAA=</HashCode>
+      <FileName>DrawJobs\TextureDrawJob.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="HatlessEngine.ObjectBlueprint" Collapsed="true">
+    <Position X="24.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIQAAAAAAAAA=</HashCode>
+      <FileName>Resources\ObjectBlueprint.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="HatlessEngine.Point" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="26.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIEAAgAAAAACE4AUAAQAAAQBQAIAAABAACIAAYiA=</HashCode>
+      <FileName>Shapes\Point.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Interface Name="HatlessEngine.IDrawJob" Collapsed="true">
+    <Position X="21" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAQAAAAA=</HashCode>
+      <FileName>DrawJobs\IDrawJob.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HatlessEngine.IConvexShape" Collapsed="true">
+    <Position X="19.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIEAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Shapes\IConvexShape.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="HatlessEngine.HorizontalAlignment" Collapsed="true">
+    <Position X="19.25" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACACAAAAIAAA=</HashCode>
+      <FileName>Alignment.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="HatlessEngine.VerticalAlignment" Collapsed="true">
+    <Position X="26.25" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAQAAAAAAAIAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Alignment.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="HatlessEngine.CombinedAlignment" Collapsed="true">
+    <Position X="26.25" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAgAIAAAAABAAACAAAQAAAAAAAAAAAAAACAgAAEA=</HashCode>
+      <FileName>Alignment.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="HatlessEngine.Button" Collapsed="true">
+    <Position X="19.25" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>Tc3VWpfdnq8/u05QS0qV/3+zP2Dy2Ql2dDiROxcRruM=</HashCode>
+      <FileName>Button.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="HatlessEngine.CollisionRuleType" Collapsed="true">
+    <Position X="24.5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEACAAAAAAAAAgAAAAAAAAAAAAAAAAAIAAAABAAAA=</HashCode>
+      <FileName>CollisionRule.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="HatlessEngine.CollisionAction" Collapsed="true">
+    <Position X="22.75" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>CollisionRule.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="HatlessEngine.LogLevel" Collapsed="true">
+    <Position X="21" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAAAIAAAAAAABCAAAAAAAAAAAAAAAEEAAA=</HashCode>
+      <FileName>Log.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="HatlessEngine.SystemCursor" Collapsed="true">
+    <Position X="24.5" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAEAIECAAAAAAAAAAAIEAQAQAAAAAAAgAAAAAAEQ=</HashCode>
+      <FileName>Resources\Cursor.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="HatlessEngine.ScreenMode" Collapsed="true">
+    <Position X="22.75" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAQAAAAAAABAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Window.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="HatlessEngine.GUI.ButtonState" Collapsed="true">
+    <Position X="21" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAEAAAA=</HashCode>
+      <FileName>GUI\TextButton.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

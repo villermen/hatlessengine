@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using SDL2;
 
 namespace HatlessEngine
@@ -9,28 +8,16 @@ namespace HatlessEngine
 	/// A sound effect that can be played multiple times simultaneously and is loaded into memory in it's entirity.
 	/// Supports the following file formats taken from SDL.SDL_SDL_mixer.Mix_r: WAVE, AIFF, RIFF, OGG, and VOC.
 	/// </summary>
-	public class Sound : IExternalResource
+	public class Sound : ExternalResource
 	{
-		public string Id { get; private set; }
-		public string Filename { get; private set; }
-		public Assembly FileAssembly { get; private set; }
-		public bool Loaded { get; private set; }
-
 		public float BaseVolume { get; private set; }
 
 		private IntPtr _chunkHandle;
 
-		public Sound(string id, string filename, float baseVolume = 1f)
+		public Sound(string id, string file, float baseVolume = 1f)
+			: base(id, file)
 		{
-			Id = id;
-			Filename = filename;
-			FileAssembly = Assembly.GetCallingAssembly();
-			Loaded = false;
-
 			BaseVolume = baseVolume;
-
-			Resources.Sounds.Add(Id, this);
-			Resources.ExternalResources.Add(this);
 		}
 
 		public SoundControl Play(float volume = 1f, float balance = 0f)
@@ -46,12 +33,12 @@ namespace HatlessEngine
 			return new SoundControl(channel);
 		}
 
-		public void Load()
+		public override void Load()
 		{
 			if (Loaded)
 				return;
 
-			_chunkHandle = SDL_mixer.Mix_LoadWAV_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1);
+			_chunkHandle = SDL_mixer.Mix_LoadWAV_RW(Resources.CreateRWFromFile(File, FileAssembly), 1);
 
 			if (_chunkHandle != IntPtr.Zero)
 			{
@@ -62,7 +49,7 @@ namespace HatlessEngine
 				throw new FileLoadException();
 		}
 
-		public void Unload()
+		public override void Unload()
 		{
 			if (!Loaded)
 				return;
@@ -73,38 +60,9 @@ namespace HatlessEngine
 			Loaded = false;
 		}
 
-		public void Destroy()
+		public static implicit operator Sound(string id)
 		{
-			Unload();
-
-			Resources.Sounds.Remove(Id);
-			Resources.ExternalResources.Remove(this);
-		}
-
-		public static implicit operator Sound(string str)
-		{
-			return Resources.Sounds[str];
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			//destroy either way, this overload is just for convention
-			Destroy();
-		}
-
-		/// <summary>
-		/// Pretty much an alias for Destroy(), here just to implement IDisposable as this object uses unmanaged resources.
-		/// </summary>
-		public void Dispose()
-		{
-			Dispose(true);
-
-			//do not suppress finalization as the resource could be loaded after this point
-		}
-
-		~Sound()
-		{
-			Dispose(false);
+			return Resources.Get<Sound>(id);
 		}
 	}
 }

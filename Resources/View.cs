@@ -3,10 +3,8 @@
 namespace HatlessEngine
 {
 	[Serializable]
-	public class View : IResource
+	public class View : Resource
 	{
-		public string Id { get; private set; }
-
 		/// <summary>
 		/// Whether this View is drawn to the window.
 		/// </summary>
@@ -21,6 +19,7 @@ namespace HatlessEngine
 		/// <para>You can use negative values for the size to specify the factor of the area that the window has left (-2f = (window width - viewport x) * 2f)</para>
 		/// </summary>
 		public Rectangle GameArea;
+
 		/// <summary>
 		/// <para>The Window-area covered by this view.</para>
 		/// <para>Everything inside GameArea will be scaled to fit in this area.</para>
@@ -34,13 +33,11 @@ namespace HatlessEngine
 		/// See individual fields for explanation on what they are and how to use them.
 		/// </summary>
 		public View(string id, Rectangle area, Rectangle viewport, bool active = true)
+			: base(id)
 		{
-			Id = id;
 			GameArea = area;
 			Viewport = viewport;
 			Active = active;
-
-			Resources.Views.Add(Id, this);
 		}
 
 		/// <summary>
@@ -110,14 +107,9 @@ namespace HatlessEngine
 			return GetAbsoluteViewport().Size / GetAbsoluteGameArea().Size;
 		}
 
-		public void Destroy()
+		public static implicit operator View(string id)
 		{
-			Resources.Views.Remove(Id);
-		}
-
-		public static implicit operator View(string str)
-		{
-			return Resources.Views[str];
+			return Resources.Get<View>(id);
 		}
 	}
 }

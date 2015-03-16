@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using SDL2;
 
 namespace HatlessEngine
@@ -8,43 +7,33 @@ namespace HatlessEngine
 	/// <summary>
 	/// Class containing a cursor image and an origin offset that will be clicked at.
 	/// </summary>
-	public class Cursor : IExternalResource
+	public class Cursor : ExternalResource
 	{
-		public string Id { get; private set; }
-		public string Filename { get; private set; }
-		public Assembly FileAssembly { get; private set; }
-		public bool Loaded { get; private set; }
-
 		private readonly bool _isSystemCursor;
 		private readonly SystemCursor _systemCursor;
 		private IntPtr _cursorHandle;
 
 		public Point Origin;
 
-		private Cursor(string id)
-		{
-			Id = id;
-			Loaded = false;
+		//TODO: filename is discarded here, improve on this
+		private Cursor(string id, string file)
+			: base(id, file) { }
 
-			Resources.Cursors.Add(Id, this);
-			Resources.ExternalResources.Add(this);
-		}
 		/// <summary>
 		/// Creates a cursor from an image file.
 		/// </summary>
-		public Cursor(string id, string filename, Point origin)
-			: this(id)
+		public Cursor(string id, string file, Point origin)
+			: this(id, file)
 		{
-			Filename = filename;
-			FileAssembly = Assembly.GetCallingAssembly();
 			Origin = origin;
 			_isSystemCursor = false;	
 		}
+
 		/// <summary>
 		/// Creates a system cursor.
 		/// </summary>
 		public Cursor(string id, SystemCursor cursor)
-			: this(id)
+			: this(id, "")
 		{
 			_isSystemCursor = true;
 			_systemCursor = cursor;
@@ -58,7 +47,7 @@ namespace HatlessEngine
 				throw new NotLoadedException();
 		}
 
-		public void Load()
+		public override void Load()
 		{
 			if (Loaded)
 				return;
@@ -66,7 +55,7 @@ namespace HatlessEngine
 			if (_isSystemCursor)
 				_cursorHandle = SDL.SDL_CreateSystemCursor((SDL.SDL_SystemCursor)_systemCursor);
 			else
-				_cursorHandle = SDL.SDL_CreateColorCursor(SDL_image.IMG_Load_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1), (int)Origin.X, (int)Origin.Y);
+				_cursorHandle = SDL.SDL_CreateColorCursor(SDL_image.IMG_Load_RW(Resources.CreateRWFromFile(File, FileAssembly), 1), (int)Origin.X, (int)Origin.Y);
 			
 			if (_cursorHandle != IntPtr.Zero)
 				Loaded = true;
@@ -74,7 +63,7 @@ namespace HatlessEngine
 				throw new FileLoadException();
 		}
 
-		public void Unload()
+		public override void Unload()
 		{
 			if (!Loaded)
 				return;
@@ -82,36 +71,11 @@ namespace HatlessEngine
 			SDL.SDL_FreeCursor(_cursorHandle);
 			_cursorHandle = IntPtr.Zero;
 			Loaded = false;
-
 		}
 
-		public void Destroy()
+		public static implicit operator Cursor(string id)
 		{
-			Unload();
-
-			Resources.Cursors.Remove(Id);
-			Resources.ExternalResources.Remove(this);
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			//destroy either way, this overload is just for convention
-			Destroy();
-		}
-
-		/// <summary>
-		/// Pretty much an alias for Destroy(), here just to implement IDisposable as this object uses unmanaged resources.
-		/// </summary>
-		public void Dispose()
-		{
-			Dispose(true);
-
-			//do not suppress finalization as the resource could be loaded after this point
-		}
-
-		~Cursor()
-		{
-			Dispose(false);
+			return Resources.Get<Cursor>(id);
 		}
 	}
 

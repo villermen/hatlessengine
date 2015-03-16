@@ -92,7 +92,7 @@ namespace HatlessEngine
 			SDL.SDL_GetWindowMinimumSize(Game.WindowHandle, out minX, out minY);
 			SDL.SDL_GetWindowMaximumSize(Game.WindowHandle, out maxX, out maxY);
 
-			return new Point[] { new Point(minX, minY), new Point(maxX, maxY) };
+			return new [] { new Point(minX, minY), new Point(maxX, maxY) };
 		}
 		public static void SetResizeLimits(Point minSize, Point maxSize)
 		{
@@ -159,10 +159,6 @@ namespace HatlessEngine
 		public static void SetCursor(Cursor cursor)
 		{
 			cursor.Set();
-		}
-		public static void SetCursor(string cursorId)
-		{
-			SetCursor(Resources.Cursors[cursorId]);
 		}
 
 		//left to do: maximizing/minimizing

@@ -31,4 +31,14 @@ namespace HatlessEngine
 		public ProfilerException() { }
 		public ProfilerException(string message) : base(message) { }
 	}
+
+	[Serializable]
+	public class NotEnoughCoffeeException : Exception { }
+
+	[Serializable]
+	public class ResourceNotFoundException : Exception
+	{
+		public ResourceNotFoundException() { }
+		public ResourceNotFoundException(string message) : base(message) { }
+	}
 }

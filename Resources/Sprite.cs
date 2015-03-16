@@ -1,51 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using SDL2;
 
 namespace HatlessEngine
 {
-	public class Sprite : IExternalResource
+	public class Sprite : ExternalResource
 	{   
-		public string Filename { get; private set; }
-		public Assembly FileAssembly { get; private set; }
-		public string Id { get; private set; }
-		public bool Loaded { get; private set; }
-
 		internal IntPtr TextureHandle;
 
-		/// <summary>
-		/// Every entry is an animation.
-		/// An identifier and an array of any amount of frames in the order you desire.
-		/// </summary>
-		public Dictionary<string, int[]> Animations = new Dictionary<string, int[]>();
-
-		private readonly bool _autoSize = false;
+		public readonly bool AutoSize;
 		public Point FrameSize { get; private set; }
 		public Point IndexSize { get; private set; }
-		
-		public Sprite(string id, string filename) 
-			: this(id, filename, new Point(1f, 1f))
-		{
-			_autoSize = true;
-			FileAssembly = Assembly.GetCallingAssembly();
-		}
-		public Sprite(string id, string filename, Point frameSize)
-		{
-			Id = id;
-			Filename = filename;
-			FileAssembly = Assembly.GetCallingAssembly();
-			
-			Loaded = false;
 
+		/// <summary>
+		/// Create the sprite as a full image sprite (framesize 1,1).
+		/// </summary>
+		public Sprite(string id, string file) 
+			: this(id, file, new Point(1f, 1f))
+		{
+			AutoSize = true;
+		}
+
+		/// <summary>
+		/// Create the sprite with a custom frame size.
+		/// </summary>
+		public Sprite(string id, string file, Point frameSize)
+			: base(id, file)
+		{
 			FrameSize = frameSize;
 			IndexSize = new Point(1f, 1f);
-
-			Resources.Sprites.Add(Id, this);
-			Resources.ExternalResources.Add(this);
 		}
 
+		/// <summary>
+		/// Draw the sprite projected on a rectangle.
+		/// </summary>
 		public void Draw(ComplexRectangle rect, int frameIndex = 0, int depth = 0)
 		{
 			if (!Loaded)
@@ -72,12 +60,12 @@ namespace HatlessEngine
 			return new Point(Misc.Modulus(frameIndex, (int)IndexSize.X) * FrameSize.X, Misc.Modulus((int)(frameIndex / IndexSize.X), (int)IndexSize.Y) * FrameSize.Y);
 		}
 
-		public void Load()
+		public override void Load()
 		{
 			if (Loaded)
 				return;
 
-			IntPtr surface = SDL_image.IMG_Load_RW(Resources.CreateRWFromFile(Filename, FileAssembly), 1);
+			IntPtr surface = SDL_image.IMG_Load_RW(Resources.CreateRWFromFile(File, FileAssembly), 1);
 			if (surface != IntPtr.Zero)
 			{
 				TextureHandle = SDL.SDL_CreateTextureFromSurface(Game.RendererHandle, surface);
@@ -89,7 +77,7 @@ namespace HatlessEngine
 					int access, w, h;
 					SDL.SDL_QueryTexture(TextureHandle, out format, out access, out w, out h);
 
-					if (_autoSize)
+					if (AutoSize)
 					{
 						FrameSize = new Point(w, h);
 						IndexSize = new Point(1, 1);
@@ -106,7 +94,7 @@ namespace HatlessEngine
 				throw new FileLoadException(SDL.SDL_GetError());
 		}
 
-		public void Unload()
+		public override void Unload()
 		{
 			if (!Loaded) 
 				return;
@@ -116,38 +104,9 @@ namespace HatlessEngine
 			Loaded = false;
 		}
 
-		public void Destroy()
+		public static implicit operator Sprite(string id)
 		{
-			Unload();
-
-			Resources.Sprites.Remove(Id);
-			Resources.ExternalResources.Remove(this);
-		}
-
-		public static implicit operator Sprite(string str)
-		{
-			return Resources.Sprites[str];
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			//destroy either way, this overload is just for convention
-			Destroy();
-		}
-
-		/// <summary>
-		/// Pretty much an alias for Destroy(), here just to implement IDisposable as this object uses unmanaged resources.
-		/// </summary>
-		public void Dispose()
-		{
-			Dispose(true);
-
-			//do not suppress finalization as the resource could be loaded after this point
-		}
-
-		~Sprite()
-		{
-			Dispose(false);
+			return Resources.Get<Sprite>(id);
 		}
 	}
 }
