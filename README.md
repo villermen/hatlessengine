@@ -1,6 +1,7 @@
-# HatlessEngine - An easy to use 2D game engine written in C# 
+# HatlessEngine
+An easy to use 2D game engine written in C# 
 
-## Decription
+## Description
 HatlessEngine is a simple and easy to use 2D engine for C#.
 I designed it with ease of use and flexibility in mind.
 The reasons for making this engine are that I prefer coding abstract/complicated things over visual masterpieces, and I like to find out what comes into play when making something on the backend side of things.
