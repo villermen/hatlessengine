@@ -1,12 +1,12 @@
-#HatlessEngine - An easy to use 2D game engine written in C# 
+# HatlessEngine - An easy to use 2D game engine written in C# 
 
-##Decription
+## Decription
 HatlessEngine is a simple and easy to use 2D engine for C#.
 I designed it with ease of use and flexibility in mind.
 The reasons for making this engine are that I prefer coding abstract/complicated things over visual masterpieces, and I like to find out what comes into play when making something on the backend side of things.
 I've put it on github to have a backup and an easy way to show it to the people that care =)
 
-##Features
+## Features
  - Easy object and resource management.
  - Logging to file and/or console.
  - Built-in collision support.
@@ -17,11 +17,11 @@ I've put it on github to have a backup and an easy way to show it to the people 
  - Viewports.
  - Nothing more than 'using HatlessEngine' required to get started on a game.
 
-##Dependencies
+## Dependencies
 HatlessEngine makes use of the following libraries:
  - [SDL2#](https://github.com/flibitijibibo/SDL2-CS) (A C# binding of the popular multimedia library [SDL](https://www.libsdl.org/index.php)).
 
-##Getting started
+## Getting started
 To use HatlessEngine for your project grab the binary from the latest release (coming soon?), or build it yourself from the source.
 Add the dll to the references in your project and add `using HatlessEngine;` to any project file that needs to tap into the sweet Hatless juices.
 
